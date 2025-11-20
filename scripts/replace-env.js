@@ -1,4 +1,3 @@
-cat > scripts/replace-env.js << 'EOF'
 const fs = require('fs');
 const path = require('path');
 
@@ -20,4 +19,3 @@ if (process.env.NODE_ENV === 'production') {
     console.error('❌ Error injecting environment variables:', error.message);
   }
 }
-EOF
