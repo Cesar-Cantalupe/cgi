@@ -1,0 +1,62 @@
+<div class="bg-white rounded-2xl shadow-xl border border-gray-200 w-full max-w-md mx-auto mt-20 my-4">
+  <!-- Login Header -->
+  <div class="text-center px-8 pt-8 pb-6">
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ 'LOGIN.TITLE' | translate }}</h1>
+    <p class="text-gray-600 text-sm">{{ 'LOGIN.SUBTITLE' | translate }}</p>
+  </div>
+
+  <!-- Form -->
+  <form class="px-8 pb-8" (submit)="onLoginSubmit($event)">
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="bg-red-50 text-red-700 px-4 py-3 rounded-lg border border-red-200 text-sm text-center mb-4">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Email Field con icono de sobre -->
+    <div class="mb-4 relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <input 
+        type="email" 
+        [placeholder]="'LOGIN.EMAIL_PLACEHOLDER' | translate" 
+        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+        [(ngModel)]="email"
+        name="email"
+        required>
+    </div>
+
+    <!-- Password Field con icono de candado -->
+    <div class="mb-6 relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <input 
+        type="password" 
+        [placeholder]="'LOGIN.PASSWORD_PLACEHOLDER' | translate" 
+        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+        [(ngModel)]="password"
+        name="password"
+        required>
+    </div>
+
+    <!-- Login Button -->
+    <button 
+      type="submit" 
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 mb-6">
+      {{ 'LOGIN.LOGIN_BUTTON' | translate }}
+    </button>
+
+    <!-- Sign Up Link -->
+    <div class="text-center text-sm text-gray-600">
+      {{ 'LOGIN.SIGNUP_TEXT' | translate }}
+      <a href="#" class="text-blue-600 font-semibold hover:underline ml-1">
+        {{ 'LOGIN.SIGNUP_LINK' | translate }}
+      </a>
+    </div>
+  </form>
+</div>

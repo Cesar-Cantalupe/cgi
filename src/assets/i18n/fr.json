@@ -1,0 +1,120 @@
+{
+  "HEADER": {
+    "LOGOUT": "SE DÉCONNECTER"
+  },
+  "LANGUAGES": {
+    "EN": "EN",
+    "ES": "ES",
+    "FR": "FR",
+    "CA": "CA",
+    "DE": "DE",
+    "EL": "EL"
+  },
+  "CHAT": {
+    "INPUT_PLACEHOLDER": "Votre message",
+    "DISCLAIMER": "Ce contenu est à but éducatif uniquement. Pour des conseils ou diagnostics médicaux, consultez un professionnel.",
+    "TOGGLE_SIDEBAR": "Basculer la barre latérale",
+    "OPEN_MENU": "Ouvrir le menu",
+    "CONNECTED": "Connecté",
+    "DISCONNECTED": "Déconnecté",
+    "CONNECTED_HTTP": "Connecté via HTTP",
+    "BACKEND_AVAILABLE": "Backend disponible",
+    "CONNECTION_ERROR": "Erreur de connexion",
+    "BACKEND_CONNECTION_ERROR": "❌ Impossible de se connecter au backend. Veuillez réessayer plus tard.",
+    "PROCESSING_QUERY": "⏳ Traitement de la requête...",
+    "EMPTY_RESPONSE": "❌ Réponse vide du serveur",
+    "AUTH_ERROR": "❌ Erreur d'authentification - Clé API invalide",
+    "ENDPOINT_NOT_FOUND": "❌ Point de terminaison /query non trouvé",
+    "SERVER_ERROR": "❌ Erreur interne du serveur",
+    "HISTORY_CLEARED": "🗑️ Historique effacé",
+    "QUESTION_HISTORY_CLEARED": "🗑️ Historique des questions effacé",
+    "TESTING_CONNECTION": "🧪 Test de connexion...",
+    "WEBSOCKET_MODE": "🔧 Mode changé à : WebSocket",
+    "HTTP_MODE": "🔧 Mode changé à : HTTP",
+    "CONNECTED_WEBSOCKET": "Connecté via WebSocket",
+    "WEBSOCKET_CONNECTED": "🔌 WebSocket connecté",
+    "WEBSOCKET_ACTIVE": "📡 WebSocket actif - Implémentation en attente",
+    "WEBSOCKET_DISCONNECTED": "🔌 WebSocket déconnecté",
+    "WEBSOCKET_ERROR": "Erreur WebSocket",
+    "WEBSOCKET_FALLBACK": "❌ Erreur WebSocket, utilisation de HTTP",
+    "SOURCE_DEFAULT_TITLE": "Source {{number}}",
+    "REFERENCE": "Référence"
+  },
+  "FOOTER": {
+    "TERMS": "Conditions",
+    "PRIVACY": "Confidentialité",
+    "COOKIES": "Politique des cookies",
+    "GRANT_NUMBER": "CGI-Clinics GA No.101057509.",
+    "CGI_CLINICS": "CGI-Clinics",
+    "CANCER_GENOME_INTERPRETER": "Interpréteur du Génome du Cancer",
+    "COPYRIGHT": "© 2025 | Interpréteur du Génome du Cancer Clinics | Tous droits réservés",
+    "GRANT_INFO_TITLE": "Informations sur le financement",
+    "GRANT_INFO_TEXT": "Financé par l'Union européenne. Les opinions exprimées n'engagent que leur(s) auteur(s) et ne reflètent pas nécessairement celles de l'Union européenne ou de l'Agence exécutive européenne pour la santé et le numérique (HADEA). Ni l'Union européenne ni l'autorité subventionnaire ne peuvent en être tenues pour responsables.",
+    "TERMS_TEXT": "En envoyant des messages à eduCGI, vous acceptez nos",
+    "AND_READ": "et avez lu notre",
+    "AND": "et"
+  },
+  "SUGGESTIONS": {
+    "CANCER_MUTATIONS": "Parlez-moi des mutations cancéreuses",
+    "TREATMENT_OPTIONS": "Quelles sont les options de traitement ?",
+    "GENOMIC_SEQUENCING": "Expliquez le séquençage génomique",
+    "IMMUNOTHERAPY_WORK": "Comment fonctionne l'immunothérapie ?",
+    "WHAT_IS_CANCER": "Qu'est-ce que le cancer ?",
+    "CANCER_MUTATION": "Qu'est-ce qu'une mutation cancéreuse ?",
+    "GENOMIC_SEQUENCING_DIAGNOSIS": "Comment le séquençage génomique aide-t-il au diagnostic du cancer ?",
+    "SOMATIC_GERMLINE_DIFFERENCE": "Expliquez la différence entre les mutations somatiques et germinales."
+  },
+  "SOURCES": {
+    "TITLE": "Source"
+  },
+  "FEEDBACK": {
+    "ADDITIONAL_FEEDBACK": "Retour supplémentaire",
+    "TELL_US_MORE": "Dites-nous en plus sur votre expérience...",
+    "CANCEL": "Annuler",
+    "SUBMIT": "Soumettre"
+  },
+  "SIDEBAR": {
+    "NEW_CHAT": "Nouvelle conversation",
+    "CHAT_HISTORY": "Historique des conversations",
+    "SEARCH_PLACEHOLDER": "Rechercher...",
+    "CLEAR_HISTORY": "Effacer l'historique",
+    "HEALTH_PROFILE": "Mon profil de santé",
+    "KNOW_MORE": "En savoir plus",
+    "ABOUT_US": "À propos de nous",
+    "FAQS": "FAQ",
+    "SOURCES": "Sources",
+    "NO_RECENT_CONVERSATIONS": "Aucune conversation récente",
+    "NO_MATCHING_QUESTIONS": "Aucune question correspondante trouvée"
+  },
+  "WELCOME": {
+    "HELLO": "Bonjour",
+    "HELP_TODAY": "Comment puis-je vous aider aujourd'hui ?",
+    "SUGGESTED_QUESTIONS": "Questions suggérées"
+  },
+  "HOME": {
+    "WELCOME_TITLE": "Bienvenue sur eduCGI !",
+    "DESCRIPTION_1": "En tant que <strong>chatbot IA</strong>, je suis ici pour vous aider à comprendre le monde complexe du cancer au niveau moléculaire. Mon objectif est de rendre les informations scientifiques plus accessibles, en fournissant des explications claires basées sur des sources fiables.",
+    "DESCRIPTION_2": "<strong>Veuillez noter : je suis une IA, pas un professionnel de santé.</strong> Les informations que je partage sont à but éducatif uniquement et ne doivent jamais être utilisées pour l'autodiagnostic ou pour prendre des décisions médicales. Consultez toujours un professionnel de santé qualifié pour des conseils et traitements médicaux personnalisés.",
+    "AGREEMENT_TEXT": "Pour plus d'informations, voir",
+    "AGREEMENT_LINK": "accord CGI-Clinics 101057509",
+    "START_BUTTON": "COMMENCER",
+    "AGREEMENT_TITLE": "Accord CGI-Clinics 101057509",
+    "AGREEMENT_CONTENT": "Financé par l'Union européenne. Les opinions exprimées n'engagent que leur(s) auteur(s) et ne reflètent pas nécessairement celles de l'Union européenne ou de l'Agence exécutive européenne pour la santé et le numérique (HADEA). Ni l'Union européenne ni l'autorité subventionnaire ne peuvent en être tenues pour responsables.",
+    "CLOSE_BUTTON": "Fermer"
+  },
+  "LOGIN": {
+    "TITLE": "Connectez-vous pour continuer",
+    "SUBTITLE": "Veuillez vous connecter pour commencer votre conversation",
+    "EMAIL_PLACEHOLDER": "Entrez votre email",
+    "PASSWORD_PLACEHOLDER": "Entrez votre mot de passe",
+    "LOGIN_BUTTON": "Se connecter",
+    "SIGNUP_TEXT": "Vous n'avez pas de compte ?",
+    "SIGNUP_LINK": "S'inscrire",
+    "ERROR_REQUIRED_FIELDS": "Veuillez remplir tous les champs correctement",
+    "ERROR_INVALID_CREDENTIALS": "Identifiants invalides. Utilisez : test@gmail.com / 20432043",
+    "EMAIL_REQUIRED": "L'email est requis",
+    "EMAIL_INVALID": "Veuillez entrer un email valide",
+    "PASSWORD_REQUIRED": "Le mot de passe est requis",
+    "PASSWORD_LENGTH": "Le mot de passe doit contenir au moins 6 caractères"
+  }
+}

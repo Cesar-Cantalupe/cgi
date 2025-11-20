@@ -1,0 +1,120 @@
+{
+  "HEADER": {
+    "LOGOUT": "ABMELDEN"
+  },
+  "LANGUAGES": {
+    "EN": "EN",
+    "ES": "ES",
+    "FR": "FR",
+    "CA": "CA",
+    "DE": "DE",
+    "EL": "EL"
+  },
+  "CHAT": {
+    "INPUT_PLACEHOLDER": "Ihre Nachricht",
+    "DISCLAIMER": "Dieser Inhalt dient nur Bildungszwecken. Für medizinische Beratung oder Diagnose konsultieren Sie einen Fachmann.",
+    "TOGGLE_SIDEBAR": "Seitenleiste umschalten",
+    "OPEN_MENU": "Menü öffnen",
+    "CONNECTED": "Verbunden",
+    "DISCONNECTED": "Getrennt",
+    "CONNECTED_HTTP": "Verbunden via HTTP",
+    "BACKEND_AVAILABLE": "Backend verfügbar",
+    "CONNECTION_ERROR": "Verbindungsfehler",
+    "BACKEND_CONNECTION_ERROR": "❌ Verbindung zum Backend fehlgeschlagen. Bitte versuchen Sie es später erneut.",
+    "PROCESSING_QUERY": "⏳ Anfrage wird verarbeitet...",
+    "EMPTY_RESPONSE": "❌ Leere Antwort vom Server",
+    "AUTH_ERROR": "❌ Authentifizierungsfehler - Ungültiger API-Schlüssel",
+    "ENDPOINT_NOT_FOUND": "❌ Endpunkt /query nicht gefunden",
+    "SERVER_ERROR": "❌ Serverinterner Fehler",
+    "HISTORY_CLEARED": "🗑️ Verlauf gelöscht",
+    "QUESTION_HISTORY_CLEARED": "🗑️ Fragenverlauf gelöscht",
+    "TESTING_CONNECTION": "🧪 Verbindung wird getestet...",
+    "WEBSOCKET_MODE": "🔧 Modus geändert zu: WebSocket",
+    "HTTP_MODE": "🔧 Modus geändert zu: HTTP",
+    "CONNECTED_WEBSOCKET": "Verbunden via WebSocket",
+    "WEBSOCKET_CONNECTED": "🔌 WebSocket verbunden",
+    "WEBSOCKET_ACTIVE": "📡 WebSocket aktiv - Implementierung ausstehend",
+    "WEBSOCKET_DISCONNECTED": "🔌 WebSocket getrennt",
+    "WEBSOCKET_ERROR": "WebSocket-Fehler",
+    "WEBSOCKET_FALLBACK": "❌ WebSocket-Fehler, verwende HTTP",
+    "SOURCE_DEFAULT_TITLE": "Quelle {{number}}",
+    "REFERENCE": "Referenz"
+  },
+  "FOOTER": {
+    "TERMS": "Nutzungsbedingungen",
+    "PRIVACY": "Datenschutz",
+    "COOKIES": "Cookie-Richtlinie",
+    "GRANT_NUMBER": "CGI-Clinics GA No.101057509.",
+    "CGI_CLINICS": "CGI-Clinics",
+    "CANCER_GENOME_INTERPRETER": "Cancer Genome Interpreter",
+    "COPYRIGHT": "© 2025 | Cancer Genome Interpreter Clinics | Alle Rechte vorbehalten",
+    "GRANT_INFO_TITLE": "Förderinformationen",
+    "GRANT_INFO_TEXT": "Finanziert von der Europäischen Union. Die geäußerten Ansichten und Meinungen sind jedoch ausschließlich die des/der Autor(en) und spiegeln nicht unbedingt die der Europäischen Union oder der Europäischen Exekutivagentur für Gesundheit und Digitales (HADEA) wider. Weder die Europäische Union noch die Bewilligungsbehörde können für diese haftbar gemacht werden.",
+    "TERMS_TEXT": "Durch das Senden von Nachrichten an eduCGI stimmen Sie unseren",
+    "AND_READ": "zu und haben unsere",
+    "AND": "und"
+  },
+  "SUGGESTIONS": {
+    "CANCER_MUTATIONS": "Erzählen Sie mir mehr über Krebsmutationen",
+    "TREATMENT_OPTIONS": "Was sind die Behandlungsoptionen?",
+    "GENOMIC_SEQUENCING": "Erklären Sie genomische Sequenzierung",
+    "IMMUNOTHERAPY_WORK": "Wie funktioniert Immuntherapie?",
+    "WHAT_IS_CANCER": "Was ist Krebs?",
+    "CANCER_MUTATION": "Was ist eine Krebsmutation?",
+    "GENOMIC_SEQUENCING_DIAGNOSIS": "Wie hilft genomische Sequenzierung bei der Krebsdiagnose?",
+    "SOMATIC_GERMLINE_DIFFERENCE": "Erklären Sie den Unterschied zwischen somatischen und Keimbahnmutationen."
+  },
+  "SOURCES": {
+    "TITLE": "Quelle"
+  },
+  "FEEDBACK": {
+    "ADDITIONAL_FEEDBACK": "Zusätzliches Feedback",
+    "TELL_US_MORE": "Erzählen Sie uns mehr über Ihre Erfahrung...",
+    "CANCEL": "Abbrechen",
+    "SUBMIT": "Absenden"
+  },
+  "SIDEBAR": {
+    "NEW_CHAT": "Neuer Chat",
+    "CHAT_HISTORY": "Chat-Verlauf",
+    "SEARCH_PLACEHOLDER": "Suchen...",
+    "CLEAR_HISTORY": "Verlauf löschen",
+    "HEALTH_PROFILE": "Mein Gesundheitsprofil",
+    "KNOW_MORE": "Mehr erfahren",
+    "ABOUT_US": "Über uns",
+    "FAQS": "FAQs",
+    "SOURCES": "Quellen",
+    "NO_RECENT_CONVERSATIONS": "Keine aktuellen Gespräche",
+    "NO_MATCHING_QUESTIONS": "Keine passenden Fragen gefunden"
+  },
+  "WELCOME": {
+    "HELLO": "Hallo",
+    "HELP_TODAY": "Wie kann ich Ihnen heute helfen?",
+    "SUGGESTED_QUESTIONS": "Vorgeschlagene Fragen"
+  },
+  "HOME": {
+    "WELCOME_TITLE": "Willkommen bei eduCGI!",
+    "DESCRIPTION_1": "Als <strong>KI-Chatbot</strong> bin ich hier, um Ihnen zu helfen, die komplexe Welt des Krebses auf molekularer Ebene zu verstehen. Mein Ziel ist es, wissenschaftliche Informationen zugänglicher zu machen und klare Erklärungen auf der Grundlage zuverlässiger Quellen zu liefern.",
+    "DESCRIPTION_2": "<strong>Bitte beachten Sie: Ich bin eine KI, kein medizinischer Fachmann.</strong> Die von mir geteilten Informationen dienen nur Bildungszwecken und sollten niemals zur Selbstdiagnose oder für medizinische Entscheidungen verwendet werden. Konsultieren Sie immer einen qualifizierten Arzt für persönliche medizinische Beratung und Behandlung.",
+    "AGREEMENT_TEXT": "Weitere Informationen finden Sie unter",
+    "AGREEMENT_LINK": "Vereinbarung CGI-Clinics 101057509",
+    "START_BUTTON": "STARTEN",
+    "AGREEMENT_TITLE": "Vereinbarung CGI-Clinics 101057509",
+    "AGREEMENT_CONTENT": "Finanziert von der Europäischen Union. Die geäußerten Ansichten und Meinungen sind jedoch ausschließlich die des/der Autor(en) und spiegeln nicht unbedingt die der Europäischen Union oder der Europäischen Exekutivagentur für Gesundheit und Digitales (HADEA) wider. Weder die Europäische Union noch die Bewilligungsbehörde können für diese haftbar gemacht werden.",
+    "CLOSE_BUTTON": "Schließen"
+  },
+  "LOGIN": {
+    "TITLE": "Melden Sie sich an, um fortzufahren",
+    "SUBTITLE": "Bitte melden Sie sich an, um Ihren Chat zu starten",
+    "EMAIL_PLACEHOLDER": "Geben Sie Ihre E-Mail ein",
+    "PASSWORD_PLACEHOLDER": "Geben Sie Ihr Passwort ein",
+    "LOGIN_BUTTON": "Anmelden",
+    "SIGNUP_TEXT": "Noch kein Konto?",
+    "SIGNUP_LINK": "Registrieren",
+    "ERROR_REQUIRED_FIELDS": "Bitte füllen Sie alle Felder korrekt aus",
+    "ERROR_INVALID_CREDENTIALS": "Ungültige Anmeldedaten. Verwenden Sie: test@gmail.com / 20432043",
+    "EMAIL_REQUIRED": "E-Mail ist erforderlich",
+    "EMAIL_INVALID": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "PASSWORD_REQUIRED": "Passwort ist erforderlich",
+    "PASSWORD_LENGTH": "Passwort muss mindestens 6 Zeichen lang sein"
+  }
+}

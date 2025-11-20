@@ -1,0 +1,125 @@
+{
+  "HEADER": {
+    "LOGOUT": "LOG OUT"
+  },
+  "LANGUAGES": {
+    "EN": "EN",
+    "ES": "ES", 
+    "FR": "FR",
+    "CA": "CA",
+    "DE": "DE",
+    "EL": "EL"
+  },
+  "CHAT": {
+    "INPUT_PLACEHOLDER": "Your message",
+    "DISCLAIMER": "This content is for educational purposes only. For medical advice or diagnosis, consult a professional.",
+    "TOGGLE_SIDEBAR": "Toggle Sidebar",
+    "OPEN_MENU": "Open Menu",
+    "CONNECTED": "Connected",
+    "DISCONNECTED": "Disconnected",
+    "CONNECTED_HTTP": "Connected via HTTP",
+    "BACKEND_AVAILABLE": "Backend available",
+    "CONNECTION_ERROR": "Connection error",
+    "BACKEND_CONNECTION_ERROR": "❌ Could not connect to backend. Please try again later.",
+    "PROCESSING_QUERY": "⏳ Processing query...",
+    "EMPTY_RESPONSE": "❌ Empty response from server",
+    "AUTH_ERROR": "❌ Authentication error - Invalid API key",
+    "ENDPOINT_NOT_FOUND": "❌ Endpoint /query not found",
+    "SERVER_ERROR": "❌ Server internal error",
+    "HISTORY_CLEARED": "🗑️ History cleared",
+    "QUESTION_HISTORY_CLEARED": "🗑️ Question history cleared",
+    "TESTING_CONNECTION": "🧪 Testing connection...",
+    "WEBSOCKET_MODE": "🔧 Mode changed to: WebSocket",
+    "HTTP_MODE": "🔧 Mode changed to: HTTP",
+    "CONNECTED_WEBSOCKET": "Connected via WebSocket",
+    "WEBSOCKET_CONNECTED": "🔌 WebSocket connected",
+    "WEBSOCKET_ACTIVE": "📡 WebSocket active - Implementation pending",
+    "WEBSOCKET_DISCONNECTED": "🔌 WebSocket disconnected",
+    "WEBSOCKET_ERROR": "WebSocket error",
+    "WEBSOCKET_FALLBACK": "❌ WebSocket error, using HTTP",
+    "SOURCE_DEFAULT_TITLE": "Source {{number}}",
+    "REFERENCE": "Reference",
+    "CONVERSATION_LOADED": "Conversation loaded from history",
+    "PREVIOUS_CONVERSATION": "Previous conversation",
+    "TYPING": "typing..."
+  },
+  "FOOTER": {
+    "TERMS": "Terms",
+    "PRIVACY": "Privacy",
+    "COOKIES": "Cookies Policy",
+    "GRANT_NUMBER": "CGI-Clinics GA No.101057509.",
+    "CGI_CLINICS": "CGI-Clinics",
+    "CANCER_GENOME_INTERPRETER": "Cancer Genome Interpreter",
+    "COPYRIGHT": "© 2025 | Cancer Genome Interpreter Clinics | All Rights Reserved",
+    "GRANT_INFO_TITLE": "Grant Information",
+    "GRANT_INFO_TEXT": "Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Health and Digital Executive Agency (HADEA). Neither the European Union nor the granting authority can be held responsible for them.",
+    "TERMS_TEXT": "By messaging eduCGI, you agree to our",
+    "AND_READ": "and have read our",
+    "AND": "and"
+  },
+  "SUGGESTIONS": {
+    "CANCER_MUTATIONS": "Tell me more about cancer mutations",
+    "TREATMENT_OPTIONS": "What are the treatment options?",
+    "GENOMIC_SEQUENCING": "Explain genomic sequencing",
+    "IMMUNOTHERAPY_WORK": "How does immunotherapy work?",
+    "WHAT_IS_CANCER": "What is cancer?",
+    "CANCER_MUTATION": "What is a cancer mutation?",
+    "GENOMIC_SEQUENCING_DIAGNOSIS": "How does genomic sequencing help in cancer diagnosis?",
+    "SOMATIC_GERMLINE_DIFFERENCE": "Explain the difference between somatic and germline mutations."
+  },
+  "SOURCES": {
+    "TITLE": "Source",
+    "REFERENCES": "References"
+  },
+  "FEEDBACK": {
+    "ADDITIONAL_FEEDBACK": "Additional feedback",
+    "TELL_US_MORE": "Tell us more about your experience...",
+    "CANCEL": "Cancel",
+    "SUBMIT": "Submit"
+  },
+  "SIDEBAR": {
+    "NEW_CHAT": "New chat",
+    "CHAT_HISTORY": "Chat history",
+    "SEARCH_PLACEHOLDER": "Search...",
+    "CLEAR_HISTORY": "Clear history",
+    "HEALTH_PROFILE": "My health profile",
+    "KNOW_MORE": "Know more",
+    "ABOUT_US": "About us",
+    "FAQS": "FAQs",
+    "SOURCES": "Sources",
+    "NO_RECENT_CONVERSATIONS": "No recent conversations",
+    "NO_MATCHING_QUESTIONS": "No questions found matching",
+    "YOUR_CONVERSATIONS": "Your conversations..."
+  },
+  "WELCOME": {
+    "HELLO": "Hello",
+    "HELP_TODAY": "How may I help you today?",
+    "SUGGESTED_QUESTIONS": "Suggested questions"
+  },
+  "HOME": {
+    "WELCOME_TITLE": "Welcome to eduCGI!",
+    "DESCRIPTION_1": "As an <strong>AI chatbot</strong>, I'm here to help you understand the complex world of cancer on a molecular level. My goal is to make scientific information more accessible, providing clear explanations based on reliable sources.",
+    "DESCRIPTION_2": "<strong>Please remember: I am an AI, not a medical professional.</strong> The information I share is for educational purposes only and should never be used for self-diagnosis or to make medical decisions. Always consult with a qualified healthcare provider for personalized medical advice and treatment.",
+    "AGREEMENT_TEXT": "For more information, see",
+    "AGREEMENT_LINK": "agreement CGI-Clinics 101057509",
+    "START_BUTTON": "START",
+    "AGREEMENT_TITLE": "Agreement CGI-Clinics 101057509",
+    "AGREEMENT_CONTENT": "Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Health and Digital Executive Agency (HADEA). Neither the European Union nor the granting authority can be held responsible for them.",
+    "CLOSE_BUTTON": "Close"
+  },   
+  "LOGIN": {
+    "TITLE": "Log in to continue",
+    "SUBTITLE": "Please log in to start your chat",
+    "EMAIL_PLACEHOLDER": "Enter your email",
+    "PASSWORD_PLACEHOLDER": "Enter your password",
+    "LOGIN_BUTTON": "Log in",
+    "SIGNUP_TEXT": "Don't have an account?",
+    "SIGNUP_LINK": "Join",
+    "ERROR_REQUIRED_FIELDS": "Please fill all fields correctly",
+    "ERROR_INVALID_CREDENTIALS": "Invalid credentials. Use: test@gmail.com / 20432043",
+    "EMAIL_REQUIRED": "Email is required",
+    "EMAIL_INVALID": "Please enter a valid email",
+    "PASSWORD_REQUIRED": "Password is required",
+    "PASSWORD_LENGTH": "Password must be at least 6 characters"
+  }
+}

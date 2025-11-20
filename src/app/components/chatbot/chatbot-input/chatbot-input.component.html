@@ -1,0 +1,32 @@
+<!-- Message Input Area -->
+<div class="bg-white border-t border-gray-100 relative z-20 flex-shrink-0 sticky bottom-0 left-0">
+    
+  <!-- Input Area -->
+  <div class="flex items-center justify-center mb-2 px-4 pb-4">
+    <div class="flex items-center space-x-3 w-full max-w-4xl">
+      <input type="text" 
+             [value]="newMessage"
+             (input)="onInputChange($event)"
+             (keydown)="onKeyPress($event)"
+             [placeholder]="'CHAT.INPUT_PLACEHOLDER' | translate" 
+             class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-[#37AAC4] focus:ring-1 focus:ring-[#37AAC4] text-sm bg-white">
+      <button (click)="onSend()"
+              [disabled]="!newMessage.trim()"
+              class="w-12 h-12 border-2 border-[#37AAC4] text-[#37AAC4] rounded-full flex items-center justify-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors bg-white disabled:border-gray-300 disabled:text-gray-300 disabled:cursor-not-allowed">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Disclaimer -->
+  <div class="text-center pb-4 px-4">
+    <p class="text-xs text-gray-500 mb-1">{{ 'CHAT.DISCLAIMER' | translate }}</p>
+    <p class="text-xs mb-1" style="color: #46A8C6;">
+      <a href="#" class="hover:text-[#CE3262] transition-colors">{{ 'FOOTER.TERMS' | translate }}</a>, 
+      <a href="#" class="hover:text-[#CE3262] transition-colors">{{ 'FOOTER.PRIVACY' | translate }}</a> and 
+      <a href="#" class="hover:text-[#CE3262] transition-colors">{{ 'FOOTER.COOKIES' | translate }}</a>
+    </p>
+  </div>
+</div>

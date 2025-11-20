@@ -1,0 +1,114 @@
+<div class="px-4 py-6">
+  <div class="max-w-4xl mx-auto space-y-6">
+    
+    <div #chatMessage
+         *ngFor="let message of messages; let i = index; trackBy: trackByMessage" 
+         class="flex" 
+         [class.justify-end]="getMessageSender(message) === 'user'">
+         
+      <div *ngIf="getMessageSender(message) === 'user'" class="bg-[#37AAC4] text-white rounded-2xl px-4 py-3 max-w-2xl">
+        <p class="text-sm md:text-base">{{ getMessageText(message) }}</p>
+      </div>
+
+      <div *ngIf="getMessageSender(message) === 'bot'" class="flex flex-col max-w-2xl w-full">
+        <div class="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm relative">
+          <p class="text-sm md:text-base text-gray-800 whitespace-pre-line">
+            {{ getDisplayedContent(message) }}
+            
+            <span *ngIf="message.sources && message.sources.length > 0 && !message.isStreaming" 
+                  class="relative inline-block">
+              <span (mouseenter)="showSourcesPopoverFor(i)"
+                    (mouseleave)="hideSourcesPopoverFor(i)"
+                    (click)="toggleSourcesPopover(i)"
+                    class="text-[#37AAC4] hover:text-[#CE3262] cursor-pointer font-medium transition-colors ml-1">
+                [{{ message.sources.length }}]
+              </span>
+              
+              <div *ngIf="isSourcesPopoverVisible(i)"
+                   (mouseenter)="showSourcesPopoverFor(i)"
+                   (mouseleave)="hideSourcesPopoverFor(i)"
+                   class="absolute left-0 top-full mt-2 z-50 w-80 bg-white rounded-lg shadow-xl border-2 border-[#CE3262] p-4">
+                <div class="absolute -top-2 left-4 w-4 h-4 bg-white border-l-2 border-t-2 border-[#CE3262] transform rotate-45"></div>
+                
+                <div class="relative">
+                  <h3 class="text-sm font-bold mb-3" style="color: #CE3262;">{{ 'SOURCES.TITLE' | translate }}</h3>
+                  <div class="space-y-2">
+                    <div *ngFor="let source of message.sources; trackBy: trackBySource" 
+                         class="flex items-start gap-2">
+                      <span class="text-[#CE3262] font-bold flex-shrink-0">{{ source.id }}</span>
+                      <div class="flex-1 min-w-0">
+                        <a [href]="source.url" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="text-[#37AAC4] hover:text-[#CE3262] text-xs break-all transition-colors block">
+                          {{ source.url }}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </span>
+          </p>
+
+          <div *ngIf="message.isStreaming" class="flex items-center gap-2 mt-3 text-gray-500">
+            <div class="flex gap-1">
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+            <span class="text-xs italic">{{ 'CHAT.TYPING' | translate }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="!message.isStreaming" class="flex items-center gap-2 mt-2 ml-2">
+          <button (click)="setFeedback(message, 'like')" 
+                  class="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  [class.bg-green-100]="message.feedback === 'like'">
+            <svg class="w-4 h-4" [class.text-green-600]="message.feedback === 'like'" 
+                 [class.text-gray-500]="message.feedback !== 'like'" 
+                 fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
+            </svg>
+          </button>
+
+          <button (click)="setFeedback(message, 'dislike')" 
+                  class="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  [class.bg-red-100]="message.feedback === 'dislike'">
+            <svg class="w-4 h-4" [class.text-red-600]="message.feedback === 'dislike'" 
+                 [class.text-gray-500]="message.feedback !== 'dislike'" 
+                 fill="currentColor" viewBox="0 0 20 20">
+              <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v-6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z"></path>
+            </svg>
+          </button>
+
+          <button (click)="toggleFeedbackBox(message)" 
+                  class="text-xs text-gray-500 hover:text-[#37AAC4] ml-2 transition-colors">
+            {{ 'FEEDBACK.ADDITIONAL_FEEDBACK' | translate }}
+          </button>
+        </div>
+
+        <div *ngIf="message.showFeedbackBox && !message.isStreaming" class="mt-3 ml-2">
+          <textarea [(ngModel)]="message.feedbackText" 
+                    [placeholder]="'FEEDBACK.TELL_US_MORE' | translate"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#37AAC4] focus:ring-1 focus:ring-[#37AAC4] resize-none"
+                    rows="3"></textarea>
+          <div class="flex justify-end mt-2 gap-2">
+            <button (click)="toggleFeedbackBox(message)" 
+                    class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 transition-colors">
+              {{ 'FEEDBACK.CANCEL' | translate }}
+            </button>
+            <button (click)="submitFeedback(message)" 
+                    class="px-3 py-1 text-sm bg-[#37AAC4] text-white rounded-lg hover:bg-[#2a8a9f] transition-colors">
+              {{ 'FEEDBACK.SUBMIT' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="getMessageSender(message) === 'system'" class="bg-yellow-100 border border-yellow-300 rounded-2xl px-4 py-3 max-w-2xl">
+        <p class="text-sm md:text-base text-yellow-800">{{ getMessageText(message) }}</p>
+      </div>
+    </div>
+  </div>
+</div>

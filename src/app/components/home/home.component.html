@@ -1,0 +1,69 @@
+<!-- Welcome Page - Altura optimizada -->
+<div class="flex flex-col relative overflow-hidden min-h-[75vh]">
+  <!-- Background Image -->
+  <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('assets/home/background.png');">
+    <!-- Overlay for better text readability -->
+    <div class="absolute inset-0 bg-white/20"></div>
+  </div>
+
+  <!-- Main Content - Más padding vertical para ocupar espacio -->
+  <div class="relative z-10 flex-1 flex items-center justify-center px-8 py-12">
+    <div class="w-full max-w-2xl">
+      <!-- Welcome Card - Más alta con más contenido interno -->
+      <div class="bg-white rounded-2xl border-2 border-blue-200 shadow-xl p-8 md:p-10">
+        <!-- Title -->
+        <div class="mb-6 py-2 rounded-lg">
+          <h1 class="text-3xl md:text-4xl font-bold text-start bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
+            {{ 'HOME.WELCOME_TITLE' | translate }}
+          </h1>
+        </div>
+        
+        <!-- Description - Más espaciado -->
+        <div class="text-gray-700 text-base md:text-lg leading-relaxed space-y-4 mb-8">
+          <p [innerHTML]="'HOME.DESCRIPTION_1' | translate"></p>
+          <p [innerHTML]="'HOME.DESCRIPTION_2' | translate"></p>
+          <p class="text-sm mt-6">
+            {{ 'HOME.AGREEMENT_TEXT' | translate }}
+            <button (click)="openAgreementPopup()" class="text-blue-600 hover:text-blue-800 underline font-medium">
+              {{ 'HOME.AGREEMENT_LINK' | translate }}
+            </button>.
+          </p>
+        </div>
+        
+        <!-- Start Button - Más grande -->
+        <div class="text-center mt-6">
+          <button (click)="startChatbot()" class="text-white font-bold py-3 px-12 rounded-lg text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300" style="background-color: #46A8C6;">
+            {{ 'HOME.START_BUTTON' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agreement Popup -->
+  <div *ngIf="showAgreementPopup" class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black bg-opacity-50" (click)="closeAgreementPopup()">
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full relative" (click)="$event.stopPropagation()">
+      <!-- Close Button -->
+      <button (click)="closeAgreementPopup()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <!-- Popup Content -->
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ 'HOME.AGREEMENT_TITLE' | translate }}</h2>
+      <div class="text-gray-700 leading-relaxed">
+        <p>
+          {{ 'HOME.AGREEMENT_CONTENT' | translate }}
+        </p>
+      </div>
+
+      <!-- Close Button at Bottom -->
+      <div class="mt-6 flex justify-end">
+        <button (click)="closeAgreementPopup()" class="px-6 py-2 rounded-lg font-semibold text-white transition-all duration-300 shadow-md hover:shadow-lg" style="background-color: #46A8C6;">
+          {{ 'HOME.CLOSE_BUTTON' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

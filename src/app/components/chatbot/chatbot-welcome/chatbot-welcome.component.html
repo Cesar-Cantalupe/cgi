@@ -1,0 +1,63 @@
+<div class="flex-1 overflow-y-auto" #chatScrollContainer>  
+  <div class="flex flex-col gap-6 w-full max-w-3xl mx-auto px-4 py-10 md:py-12">
+   
+    <div class="text-left w-full">
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-medium mb-3" 
+          style="background: linear-gradient(to right, #CE3262 0%, #CE3262 20%, #37AAC4 60%, #37AAC4 100%); 
+                 -webkit-background-clip: text;
+                 -webkit-text-fill-color: transparent;
+                 background-clip: text;
+                 color: transparent;
+                 display: inline-block;">
+        {{ 'WELCOME.HELLO' | translate }}
+      </h1>
+      <p class="text-lg md:text-xl lg:text-2xl text-gray-600 font-light">{{ 'WELCOME.HELP_TODAY' | translate }}</p>
+    </div>
+   
+    <div class="bg-white border-2 border-[#37AAC4] rounded-3xl p-6 w-full shadow-sm">
+      <h3 class="text-lg font-medium text-gray-700 mb-4">{{ 'WELCOME.SUGGESTED_QUESTIONS' | translate }}</h3>
+      
+      <div class="divide-y divide-[#37AAC4]">        
+        <div class="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer transition-colors group"
+             (click)="onSuggestedQuestionClick('SUGGESTIONS.WHAT_IS_CANCER')">
+          <span class="text-gray-700 text-xs md:text-sm">{{ 'SUGGESTIONS.WHAT_IS_CANCER' | translate }}</span>
+          <div class="w-6 h-6 rounded-full border-2 border-[#CE3262] flex items-center justify-center flex-shrink-0 ml-4 group-hover:bg-[#CE3262] transition-colors">
+            <svg class="w-3 h-3 text-[#CE3262] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer transition-colors group"
+             (click)="onSuggestedQuestionClick('SUGGESTIONS.CANCER_MUTATION')">
+          <span class="text-gray-700 text-xs md:text-sm">{{ 'SUGGESTIONS.CANCER_MUTATION' | translate }}</span>
+          <div class="w-6 h-6 rounded-full border-2 border-[#37AAC4] flex items-center justify-center flex-shrink-0 ml-4 group-hover:bg-[#CE3262] group-hover:border-[#CE3262] transition-colors">
+            <svg class="w-3 h-3 text-[#37AAC4] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer transition-colors group"
+             (click)="onSuggestedQuestionClick('SUGGESTIONS.GENOMIC_SEQUENCING_DIAGNOSIS')">
+          <span class="text-gray-700 text-xs md:text-sm">{{ 'SUGGESTIONS.GENOMIC_SEQUENCING_DIAGNOSIS' | translate }}</span>
+          <div class="w-6 h-6 rounded-full border-2 border-[#37AAC4] flex items-center justify-center flex-shrink-0 ml-4 group-hover:bg-[#CE3262] group-hover:border-[#CE3262] transition-colors">
+            <svg class="w-3 h-3 text-[#37AAC4] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3 hover:bg-gray-50 cursor-pointer transition-colors group"
+             (click)="onSuggestedQuestionClick('SUGGESTIONS.SOMATIC_GERMLINE_DIFFERENCE')">
+          <span class="text-gray-700 text-xs md:text-sm">{{ 'SUGGESTIONS.SOMATIC_GERMLINE_DIFFERENCE' | translate }}</span>
+          <div class="w-6 h-6 rounded-full border-2 border-[#37AAC4] flex items-center justify-center flex-shrink-0 ml-4 group-hover:bg-[#CE3262] group-hover:border-[#CE3262] transition-colors">
+            <svg class="w-3 h-3 text-[#37AAC4] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

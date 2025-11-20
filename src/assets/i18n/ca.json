@@ -1,0 +1,120 @@
+{
+  "HEADER": {
+    "LOGOUT": "TANCA DE SESSIÓ"
+  },
+  "LANGUAGES": {
+    "EN": "EN",
+    "ES": "ES",
+    "FR": "FR",
+    "CA": "CA",
+    "DE": "DE",
+    "EL": "EL"
+  },
+  "CHAT": {
+    "INPUT_PLACEHOLDER": "El teu missatge",
+    "DISCLAIMER": "Aquest contingut és només amb finalitats educatives. Per a assessorament mèdic o diagnòstic, consulteu un professional.",
+    "TOGGLE_SIDEBAR": "Commuta la barra lateral",
+    "OPEN_MENU": "Obre el menú",
+    "CONNECTED": "Connectat",
+    "DISCONNECTED": "Desconnectat",
+    "CONNECTED_HTTP": "Connectat via HTTP",
+    "BACKEND_AVAILABLE": "Backend disponible",
+    "CONNECTION_ERROR": "Error de connexió",
+    "BACKEND_CONNECTION_ERROR": "❌ No s'ha pogut connectar amb el backend. Torneu-ho a provar més tard.",
+    "PROCESSING_QUERY": "⏳ Processant la consulta...",
+    "EMPTY_RESPONSE": "❌ Resposta buida del servidor",
+    "AUTH_ERROR": "❌ Error d'autenticació - Clau API invàlida",
+    "ENDPOINT_NOT_FOUND": "❌ No s'ha trobat l'endpoint /query",
+    "SERVER_ERROR": "❌ Error intern del servidor",
+    "HISTORY_CLEARED": "🗑️ Historial esborrat",
+    "QUESTION_HISTORY_CLEARED": "🗑️ Historial de preguntes esborrat",
+    "TESTING_CONNECTION": "🧪 Provant connexió...",
+    "WEBSOCKET_MODE": "🔧 Mode canviat a: WebSocket",
+    "HTTP_MODE": "🔧 Mode canviat a: HTTP",
+    "CONNECTED_WEBSOCKET": "Connectat via WebSocket",
+    "WEBSOCKET_CONNECTED": "🔌 WebSocket connectat",
+    "WEBSOCKET_ACTIVE": "📡 WebSocket actiu - Implementació pendent",
+    "WEBSOCKET_DISCONNECTED": "🔌 WebSocket desconnectat",
+    "WEBSOCKET_ERROR": "Error de WebSocket",
+    "WEBSOCKET_FALLBACK": "❌ Error de WebSocket, utilitzant HTTP",
+    "SOURCE_DEFAULT_TITLE": "Font {{number}}",
+    "REFERENCE": "Referència"
+  },
+  "FOOTER": {
+    "TERMS": "Termes",
+    "PRIVACY": "Privadesa",
+    "COOKIES": "Política de Cookies",
+    "GRANT_NUMBER": "CGI-Clinics GA No.101057509.",
+    "CGI_CLINICS": "CGI-Clinics",
+    "CANCER_GENOME_INTERPRETER": "Intèrpret del Genoma del Càncer",
+    "COPYRIGHT": "© 2025 | Clíniques de l'Intèrpret del Genoma del Càncer | Tots els drets reservats",
+    "GRANT_INFO_TITLE": "Informació de la Subvenció",
+    "GRANT_INFO_TEXT": "Finançat per la Unió Europea. Les opinions i punts de vista expressats són, però, els de l'autor o autors només i no reflecteixen necessàriament els de la Unió Europea o l'Agència Executiva de Salut i Digital (HADEA). Ni la Unió Europea ni l'autoritat concedent poden ser considerades responsables d'ells.",
+    "TERMS_TEXT": "En enviar missatges a eduCGI, acceptes els nostres",
+    "AND_READ": "i has llegit la nostra",
+    "AND": "i"
+  },
+  "SUGGESTIONS": {
+    "CANCER_MUTATIONS": "Explica'm més sobre les mutacions cancerígenes",
+    "TREATMENT_OPTIONS": "Quines són les opcions de tractament?",
+    "GENOMIC_SEQUENCING": "Explica el seqüenciament genòmic",
+    "IMMUNOTHERAPY_WORK": "Com funciona la immunoteràpia?",
+    "WHAT_IS_CANCER": "Què és el càncer?",
+    "CANCER_MUTATION": "Què és una mutació cancerígena?",
+    "GENOMIC_SEQUENCING_DIAGNOSIS": "Com ajuda el seqüenciament genòmic en el diagnòstic del càncer?",
+    "SOMATIC_GERMLINE_DIFFERENCE": "Explica la diferència entre mutacions somàtiques i germinals."
+  },
+  "SOURCES": {
+    "TITLE": "Font"
+  },
+  "FEEDBACK": {
+    "ADDITIONAL_FEEDBACK": "Feedback addicional",
+    "TELL_US_MORE": "Explica'ns més sobre la teva experiència...",
+    "CANCEL": "Cancel·lar",
+    "SUBMIT": "Enviar"
+  },
+  "SIDEBAR": {
+    "NEW_CHAT": "Nova xerrada",
+    "CHAT_HISTORY": "Historial de xerrades",
+    "SEARCH_PLACEHOLDER": "Cercar...",
+    "CLEAR_HISTORY": "Esborrar historial",
+    "HEALTH_PROFILE": "El meu perfil de salut",
+    "KNOW_MORE": "Saber més",
+    "ABOUT_US": "Sobre nosaltres",
+    "FAQS": "PMF",
+    "SOURCES": "Fonts",
+    "NO_RECENT_CONVERSATIONS": "Cap conversa recent",
+    "NO_MATCHING_QUESTIONS": "No s'han trobat preguntes coincidents"
+  },
+  "WELCOME": {
+    "HELLO": "Hola",
+    "HELP_TODAY": "Com puc ajudar-te avui?",
+    "SUGGESTED_QUESTIONS": "Preguntes suggerides"
+  },
+  "HOME": {
+    "WELCOME_TITLE": "Benvingut/da a eduCGI!",
+    "DESCRIPTION_1": "Com a <strong>chatbot d'IA</strong>, estic aquí per ajudar-te a entendre el món complex del càncer a nivell molecular. El meu objectiu és fer la informació científica més accessible, proporcionant explicacions clares basades en fonts fiables.",
+    "DESCRIPTION_2": "<strong>Recorda: sóc una IA, no un professional mèdic.</strong> La informació que comparteixo és només amb finalitats educatives i mai s'ha d'utilitzar per a autodiagnòstic o per prendre decisions mèdiques. Consulteu sempre amb un proveïdor de salut qualificat per a assessorament mèdic i tractament personalitzat.",
+    "AGREEMENT_TEXT": "Per a més informació, vegeu",
+    "AGREEMENT_LINK": "acord CGI-Clinics 101057509",
+    "START_BUTTON": "COMENÇAR",
+    "AGREEMENT_TITLE": "Acord CGI-Clinics 101057509",
+    "AGREEMENT_CONTENT": "Finançat per la Unió Europea. No obstant això, les opinions i punts de vista expressats són només dels autors i no reflecteixen necessàriament els de la Unió Europea o l'Agència Executiva Europea de Salut i Digital (HADEA). Ni la Unió Europea ni l'autoritat concessionària en són responsables.",
+    "CLOSE_BUTTON": "Tancar"
+  },
+  "LOGIN": {
+    "TITLE": "Inicia sessió per continuar",
+    "SUBTITLE": "Si us plau, inicia sessió per començar la teva xerrada",
+    "EMAIL_PLACEHOLDER": "Introdueix el teu email",
+    "PASSWORD_PLACEHOLDER": "Introdueix la teva contrasenya",
+    "LOGIN_BUTTON": "Iniciar sessió",
+    "SIGNUP_TEXT": "No tens un compte?",
+    "SIGNUP_LINK": "Unir-se",
+    "ERROR_REQUIRED_FIELDS": "Si us plau, omple tots els camps correctament",
+    "ERROR_INVALID_CREDENTIALS": "Credencials invàlides. Utilitza: test@gmail.com / 20432043",
+    "EMAIL_REQUIRED": "L'email és obligatori",
+    "EMAIL_INVALID": "Si us plau, introdueix un email vàlid",
+    "PASSWORD_REQUIRED": "La contrasenya és obligatòria",
+    "PASSWORD_LENGTH": "La contrasenya ha de tenir almenys 6 caràcters"
+  }
+}

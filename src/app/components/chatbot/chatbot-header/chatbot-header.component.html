@@ -1,0 +1,13 @@
+<div class="flex justify-between items-center p-3 backdrop-blur-sm flex-shrink-0 relative z-20">
+  <div class="flex space-x-2">
+    <!-- Mobile Menu Button -->
+    <button (click)="toggleSidebar.emit()" 
+            class="md:hidden w-7 h-7 bg-white border border-gray-300 rounded-lg flex items-center justify-center shadow-md hover:bg-gray-50 cursor-pointer transition-colors"
+            *ngIf="!sidebarExpanded"
+            title="Abrir Menú">
+      <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </div>
+</div>

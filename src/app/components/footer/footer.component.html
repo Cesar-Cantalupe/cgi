@@ -1,0 +1,61 @@
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-6">
+  <div class="max-w-8xl mx-auto px-6">
+    <!-- Main Footer Content -->
+    <div class="grid grid-cols-3 gap-6 items-center">
+      <!-- EU Funding Section -->
+      <div class="space-y-3 col-span-1">
+        <div class="flex flex-col items-center justify-start h-full">
+          <img src="assets/home/EN_FundedbytheEU_RGB_POS.png" alt="Funded by the European Union" class="h-12 w-auto object-contain">
+          <p class="text-sm italic cursor-pointer underline-offset-2 text-left transition-colors mt-2 text-[#37AAC4] hover:text-[#CE3262]" (click)="openModal()">
+            {{ 'FOOTER.GRANT_NUMBER' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Center Text Section -->
+      <div class="col-span-1 flex items-center justify-center">
+        <p class="text-sm text-gray-600 text-center px-4">
+          {{ 'FOOTER.TERMS_TEXT' | translate }}
+          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
+            {{ 'FOOTER.TERMS' | translate }}
+          </a> 
+          {{ 'FOOTER.AND_READ' | translate }}
+          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
+            {{ 'FOOTER.PRIVACY' | translate }}
+          </a> 
+          {{ 'FOOTER.AND' | translate }}
+          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
+            {{ 'FOOTER.COOKIES' | translate }}
+          </a>
+        </p>
+      </div>
+
+      <!-- CGI-Clinics Logo Section -->
+      <div class="space-y-3 col-span-1">
+        <div class="flex items-center justify-center h-full">
+          <a href="https://www.cgiclinics.eu/" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-105">
+            <img src="assets/home/marca_CGI-Clinics-01.png" alt="CGI-Clinics Cancer Genome Interpreter" class="h-16 w-auto object-contain">
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Modal para información de grant -->
+<div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(55, 170, 196, 0.35);" (click)="closeModal()">
+  <div class="bg-white rounded-lg p-8 max-w-2xl mx-4 shadow-2xl" (click)="$event.stopPropagation()">
+    <div class="flex justify-between items-start mb-4">
+      <h2 class="text-xl font-semibold text-gray-800">{{ 'FOOTER.GRANT_INFO_TITLE' | translate }}</h2>
+      <button (click)="closeModal()" class="text-gray-500 hover:text-gray-700 transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <p class="text-gray-700 leading-relaxed">
+      {{ 'FOOTER.GRANT_INFO_TEXT' | translate }}
+    </p>
+  </div>
+</div>

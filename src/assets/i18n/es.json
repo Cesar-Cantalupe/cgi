@@ -1,0 +1,120 @@
+{
+  "HEADER": {
+    "LOGOUT": "CERRAR SESIÓN"
+  },
+  "LANGUAGES": {
+    "EN": "EN",
+    "ES": "ES", 
+    "FR": "FR",
+    "CA": "CA",
+    "DE": "DE",
+    "EL": "EL"
+  },
+  "CHAT": {
+    "INPUT_PLACEHOLDER": "Escribe tu mensaje",
+    "DISCLAIMER": "Este contenido es solo con fines educativos. Para asesoramiento médico o diagnóstico, consulte a un profesional.",
+    "TOGGLE_SIDEBAR": "Alternar barra lateral",
+    "OPEN_MENU": "Abrir menú",
+    "CONNECTED": "Conectado",
+    "DISCONNECTED": "Desconectado",
+    "CONNECTED_HTTP": "Conectado vía HTTP",
+    "BACKEND_AVAILABLE": "Backend disponible",
+    "CONNECTION_ERROR": "Error de conexión",
+    "BACKEND_CONNECTION_ERROR": "❌ No se pudo conectar con el backend. Por favor, intente más tarde.",
+    "PROCESSING_QUERY": "⏳ Procesando consulta...",
+    "EMPTY_RESPONSE": "❌ Respuesta vacía del servidor",
+    "AUTH_ERROR": "❌ Error de autenticación - API key inválida",
+    "ENDPOINT_NOT_FOUND": "❌ Endpoint /query no encontrado",
+    "SERVER_ERROR": "❌ Error interno del servidor",
+    "HISTORY_CLEARED": "🗑️ Historial limpiado",
+    "QUESTION_HISTORY_CLEARED": "🗑️ Historial de preguntas limpiado",
+    "TESTING_CONNECTION": "🧪 Probando conexión...",
+    "WEBSOCKET_MODE": "🔧 Modo cambiado a: WebSocket",
+    "HTTP_MODE": "🔧 Modo cambiado a: HTTP",
+    "CONNECTED_WEBSOCKET": "Conectado vía WebSocket",
+    "WEBSOCKET_CONNECTED": "🔌 WebSocket conectado",
+    "WEBSOCKET_ACTIVE": "📡 WebSocket activo - Implementación pendiente",
+    "WEBSOCKET_DISCONNECTED": "🔌 WebSocket desconectado",
+    "WEBSOCKET_ERROR": "Error WebSocket",
+    "WEBSOCKET_FALLBACK": "❌ Error WebSocket, usando HTTP",
+    "SOURCE_DEFAULT_TITLE": "Fuente {{number}}",
+    "REFERENCE": "Referencia"
+  },
+  "FOOTER": {
+    "TERMS": "Términos",
+    "PRIVACY": "Privacidad",
+    "COOKIES": "Política de Cookies",
+    "GRANT_NUMBER": "CGI-Clinics GA No.101057509.",
+    "CGI_CLINICS": "CGI-Clinics",
+    "CANCER_GENOME_INTERPRETER": "Intérprete del Genoma del Cáncer",
+    "COPYRIGHT": "© 2025 | Clínicas del Intérprete del Genoma del Cáncer | Todos los derechos reservados",
+    "GRANT_INFO_TITLE": "Información de la Subvención",
+    "GRANT_INFO_TEXT": "Financiado por la Unión Europea. Las opiniones y puntos de vista expresados son, sin embargo, los del autor o autores solamente y no reflejan necesariamente los de la Unión Europea o la Agencia Ejecutiva de Salud y Digital (HADEA). Ni la Unión Europea ni la autoridad concedente pueden ser consideradas responsables de ellos.",
+    "TERMS_TEXT": "Al enviar mensajes a eduCGI, aceptas nuestros",
+    "AND_READ": "y has leído nuestra",
+    "AND": "y"
+  },
+  "SUGGESTIONS": {
+    "CANCER_MUTATIONS": "Cuéntame más sobre las mutaciones del cáncer",
+    "TREATMENT_OPTIONS": "¿Qué opciones de tratamiento existen?",
+    "GENOMIC_SEQUENCING": "Explica la secuenciación genómica",
+    "IMMUNOTHERAPY_WORK": "¿Cómo funciona la inmunoterapia?",
+    "WHAT_IS_CANCER": "¿Qué es el cáncer?",
+    "CANCER_MUTATION": "¿Qué es una mutación del cáncer?",
+    "GENOMIC_SEQUENCING_DIAGNOSIS": "¿Cómo ayuda la secuenciación genómica en el diagnóstico del cáncer?",
+    "SOMATIC_GERMLINE_DIFFERENCE": "Explica la diferencia entre mutaciones somáticas y germinales."
+  },
+  "SOURCES": {
+    "TITLE": "Fuente"
+  },
+  "FEEDBACK": {
+    "ADDITIONAL_FEEDBACK": "Feedback adicional",
+    "TELL_US_MORE": "Cuéntanos más sobre tu experiencia...",
+    "CANCEL": "Cancelar",
+    "SUBMIT": "Enviar"
+  },
+  "SIDEBAR": {
+    "NEW_CHAT": "Nuevo chat",
+    "CHAT_HISTORY": "Historial de chat",
+    "SEARCH_PLACEHOLDER": "Buscar...",
+    "CLEAR_HISTORY": "Limpiar historial",
+    "HEALTH_PROFILE": "Mi perfil de salud",
+    "KNOW_MORE": "Saber más",
+    "ABOUT_US": "Sobre nosotros",
+    "FAQS": "Preguntas frecuentes",
+    "SOURCES": "Fuentes",
+    "NO_RECENT_CONVERSATIONS": "No hay conversaciones recientes",
+    "NO_MATCHING_QUESTIONS": "No se encontraron preguntas que coincidan con"
+  },
+  "WELCOME": {
+    "HELLO": "¡Hola!",
+    "HELP_TODAY": "¿Cómo puedo ayudarte hoy?",
+    "SUGGESTED_QUESTIONS": "Preguntas sugeridas"
+  },
+  "HOME": {
+    "WELCOME_TITLE": "¡Bienvenido a eduCGI!",
+    "DESCRIPTION_1": "Como un <strong>chatbot de IA</strong>, estoy aquí para ayudarte a comprender el complejo mundo del cáncer a nivel molecular. Mi objetivo es hacer que la información científica sea más accesible, proporcionando explicaciones claras basadas en fuentes confiables.",
+    "DESCRIPTION_2": "<strong>Por favor recuerda: Soy una IA, no un profesional médico.</strong> La información que comparto es solo con fines educativos y nunca debe usarse para autodiagnóstico o para tomar decisiones médicas. Siempre consulte con un proveedor de atención médica calificado para obtener asesoramiento y tratamiento personalizado.",
+    "AGREEMENT_TEXT": "Para más información, consulte el",
+    "AGREEMENT_LINK": "acuerdo CGI-Clinics 101057509",
+    "START_BUTTON": "COMENZAR",
+    "AGREEMENT_TITLE": "Acuerdo CGI-Clinics 101057509",
+    "AGREEMENT_CONTENT": "Financiado por la Unión Europea. Las opiniones y puntos de vista expresados son, sin embargo, los del autor o autores solamente y no reflejan necesariamente los de la Unión Europea o la Agencia Ejecutiva de Salud y Digital (HADEA). Ni la Unión Europea ni la autoridad concedente pueden ser consideradas responsables de ellos.",
+    "CLOSE_BUTTON": "Cerrar"
+  },
+  "LOGIN": {
+    "TITLE": "Iniciar sesión para continuar",
+    "SUBTITLE": "Por favor inicia sesión para comenzar tu chat",
+    "EMAIL_PLACEHOLDER": "Ingresa tu email",
+    "PASSWORD_PLACEHOLDER": "Ingresa tu contraseña",
+    "LOGIN_BUTTON": "Iniciar sesión",
+    "SIGNUP_TEXT": "¿No tienes una cuenta?",
+    "SIGNUP_LINK": "Únete",
+    "ERROR_REQUIRED_FIELDS": "Por favor completa todos los campos correctamente",
+    "ERROR_INVALID_CREDENTIALS": "Credenciales inválidas. Usa: test@gmail.com / 20432043",
+    "EMAIL_REQUIRED": "El email es requerido",
+    "EMAIL_INVALID": "Por favor ingresa un email válido",
+    "PASSWORD_REQUIRED": "La contraseña es requerida",
+    "PASSWORD_LENGTH": "La contraseña debe tener al menos 6 caracteres"
+  }
+}
