@@ -34,8 +34,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "550kb",
+                  "maximumError": "800kb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -59,8 +59,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "educgi:build:development",
-            "proxyConfig": "proxy.conf.json"
+            "browserTarget": "educgi:build:development"
           },
           "configurations": {
             "production": {

@@ -4,7 +4,7 @@ import { AppComponent } from './app.component';
 import { AuthService } from './services/auth.service';
 import { TranslationService } from './services/translation.service';
 
-// Mocks para los servicios
+
 class MockAuthService {
   isAuthenticated$ = {
     pipe: () => ({ subscribe: (callback: any) => callback(false) })

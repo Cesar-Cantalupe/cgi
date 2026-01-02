@@ -1,65 +1,83 @@
-<div class="flex bg-gray-50 relative min-h-screen">  
+<div class="flex bg-gray-50 relative h-screen overflow-hidden">  
+  <!-- Overlay móvil -->
   <div class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" 
        *ngIf="sidebarExpanded" 
        (click)="toggleSidebar()"></div>  
   
+  <!-- Sidebar -->
   <app-chatbot-sidebar
     [sidebarExpanded]="sidebarExpanded"
     [healthProfileEnabled]="healthProfileEnabled"
     (toggleSidebar)="toggleSidebar()"
     (clearHistory)="clearHistory()"
-    (healthProfileToggled)="onHealthProfileToggle($event)">
+    (healthProfileToggled)="onHealthProfileToggle($event)"
+    (newChat)="newChat()"
+    (conversationSelected)="onConversationSelected($event)"
+    (suggestedQuestion)="onSuggestedQuestionClick($event)">
   </app-chatbot-sidebar>
 
-  <div class="flex-1 flex flex-col relative w-full mt-0 md:mt-4" 
-       style="background-image: url('assets/home/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+  <!-- Contenido principal -->
+  <div class="flex-1 flex flex-col relative w-full mt-0 md:mt-4">
+    <!-- Fondo -->
+    <div class="fixed inset-0 bg-cover bg-center bg-no-repeat z-0" 
+         style="background-image: url('assets/home/background.png')"></div>
+    <div class="fixed inset-0 bg-white bg-opacity-40 -z-40"></div>
+
+    <!-- Botones toggle sidebar -->
+    <button (click)="toggleSidebar()" class="hidden md:flex w-7 h-7 bg-white border border-gray-300 rounded-lg items-center justify-center shadow-md hover:bg-gray-50 cursor-pointer transition-all duration-300 fixed top-3 left-3 z-30">
+      <!-- SVG -->
+    </button>
+    <button (click)="toggleSidebar()" class="md:hidden w-7 h-7 bg-white border border-gray-300 rounded-lg flex items-center justify-center shadow-md hover:bg-gray-50 cursor-pointer transition-colors fixed top-3 left-3 z-30"
+            *ngIf="!sidebarExpanded">
+      <!-- SVG -->
+    </button>
+
+    <!-- Contenedor del chat -->
+    <div class="flex flex-col h-full relative z-10">
+      <!-- Área de mensajes -->
+      <div #messagesArea class="flex-1 overflow-y-auto bg-transparent pb-16">
+        <!-- Pantalla de bienvenida -->
+        <div class="h-full flex items-center justify-center px-4" 
+             *ngIf="shouldShowPredefinedQuestions()">  <!-- ACTUALIZADO -->
+          <app-chatbot-welcome
+            (suggestedQuestion)="onSuggestedQuestionClick($event)">
+          </app-chatbot-welcome>
+        </div>
         
-    <div class="absolute inset-0 bg-white bg-opacity-40 pointer-events-none"></div>
-
-    <button (click)="toggleSidebar()" 
-            class="hidden md:flex w-7 h-7 bg-white border border-gray-300 rounded-lg items-center justify-center shadow-md hover:bg-gray-50 cursor-pointer transition-all duration-300 sticky top-3 z-20 mb-3 ml-3"
-            [attr.title]="'CHAT.TOGGLE_SIDEBAR' | translate">
-      <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
-    
-    <button (click)="toggleSidebar()" 
-            class="md:hidden w-7 h-7 bg-white border border-gray-300 rounded-lg flex items-center justify-center shadow-md hover:bg-gray-50 cursor-pointer transition-colors fixed top-3 left-3 z-20"
-            *ngIf="!sidebarExpanded"
-            [attr.title]="'CHAT.OPEN_MENU' | translate">
-      <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
-
-    <div class="flex-1 flex flex-col relative z-10 min-h-0">        
-     
-      <app-chatbot-welcome
-        (suggestedQuestion)="onSuggestedQuestionClick($event)"
-        *ngIf="messages.length === 0">
-      </app-chatbot-welcome>
-
-      <app-chatbot-messages 
-        [messages]="messages"
-        *ngIf="messages.length > 0">
-      </app-chatbot-messages>
+        <!-- Mensajes -->
+          <app-chatbot-messages 
+              [messages]="messages"
+              [isProcessing]="isProcessing"
+              *ngIf="currentConversation && currentConversation.messages.length > 0"
+              (stop)="onStopFromMessages($event)"
+              (regenerate)="onRegenerateFromMessages($event)"
+              (feedback)="onFeedback($event)">
+          </app-chatbot-messages>
+        
+        <!-- Input para feedback de texto -->
+        <div *ngIf="showTextFeedbackFor" class="p-4 border-t bg-white">
+          <textarea [(ngModel)]="textFeedback" placeholder="Escribe tu comentario..." 
+                    class="w-full p-2 border rounded" rows="3"></textarea>
+          <div class="flex justify-end gap-2 mt-2">
+            <button (click)="cancelTextFeedback()" class="px-4 py-2 border rounded hover:bg-gray-50">
+              Cancelar
+            </button>
+            <button (click)="sendTextFeedback()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              Enviar comentario
+            </button>
+          </div>
+        </div>
+      </div>
       
-    </div>
-
-    <app-chatbot-input
-      [newMessage]="newMessage"
-      [showQuickSuggestions]="messages.length > 0"
-      (inputChange)="onInputChange($event)"
-      (sendMessage)="send()"
-      (quickSuggestion)="onQuickSuggestionClick($event)">
-    </app-chatbot-input>
- 
-    <div class="text-center pb-2 px-4 relative z-10">
-      <span class="text-xs text-gray-500" [class.text-green-500]="connectionStatus === ('CHAT.CONNECTED' | translate)" 
-            [class.text-red-500]="connectionStatus === ('CHAT.DISCONNECTED' | translate)">
-        {{ connectionStatus }}
-      </span>
+      <!-- Input del chat -->
+      <div class="bg-white/80 backdrop-blur-sm border-t border-gray-200">
+        <app-chatbot-input
+          [(newMessage)]="newMessage"  
+          [showQuickSuggestions]="!shouldShowPredefinedQuestions()"
+          (sendMessage)="send()"
+          (quickSuggestion)="onQuickSuggestionClick($event)">
+        </app-chatbot-input>
+      </div>
     </div>
   </div>
 </div>

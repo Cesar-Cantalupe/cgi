@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { WebSocketEvent } from './interfaces/websocket-events.interface';
+import { WebSocketEvent } from '../interfaces/websocket-events.interface';
 
 @Injectable({
   providedIn: 'root'

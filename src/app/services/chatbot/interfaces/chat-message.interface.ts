@@ -1,13 +1,25 @@
+// interfaces/chat-message.interface.ts
 export interface ChatMessage {
-  id?: string;
+  id: string;
   content: string;
-  isUser: boolean;
+  sender: 'user' | 'bot' | 'system';
   timestamp: Date;
+  isStreaming?: boolean;
   sources?: any[];
-  sender?: 'user' | 'bot' | 'system';
-  text?: string;
   feedback?: 'like' | 'dislike' | null;
   showFeedbackBox?: boolean;
-  feedbackText?: string;
-  isStreaming?: boolean;
+  
+  // Propiedades para compatibilidad
+  isUser?: boolean;
+  text?: string;
+  
+  // Propiedades internas para streaming
+  _streamingUpdate?: number;
+  _isProcessingPlaceholder?: boolean;
+  _originalQuestionType?: 'user' | 'predefined';
+  _isPredefinedQuestion?: boolean;
+  _initialStreaming?: boolean;
+  
+  // Propiedad específica de conversaciones
+  conversationId?: string;
 }

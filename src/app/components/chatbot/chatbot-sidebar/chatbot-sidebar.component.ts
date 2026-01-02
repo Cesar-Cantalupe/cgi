@@ -1,14 +1,18 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { ChatbotService,
-         ChatHistoryItem 
-} from '../../../services/chatbot';
+// chatbot-sidebar.component.ts (optimizado)
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subject, combineLatest, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { ChatbotService } from '../../../services/chatbot/chatbot.service';
 import { TranslationService } from '../../../services/translation.service';
+import { SuggestionsService } from '../../../services/suggestions.service';
+import { Conversation } from '../../../services/chatbot/interfaces/conversation.interface';
+import { ConversationService } from '../../../services/chatbot/core/conversation.service';
 
 @Component({
   selector: 'app-chatbot-sidebar',
   templateUrl: './chatbot-sidebar.component.html'
 })
-export class ChatbotSidebarComponent implements OnInit {
+export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   @Input() sidebarExpanded = true;
   @Input() healthProfileEnabled = false;
   
@@ -16,68 +20,310 @@ export class ChatbotSidebarComponent implements OnInit {
   @Output() clearHistory = new EventEmitter<void>();
   @Output() healthProfileToggled = new EventEmitter<boolean>();
   @Output() suggestedQuestion = new EventEmitter<string>();
+  @Output() newChat = new EventEmitter<void>();
+  @Output() conversationSelected = new EventEmitter<string>();
 
-  chatHistory: ChatHistoryItem[] = [];
-  searchQuery: string = '';
+  // Estado del sidebar
+  conversations: Conversation[] = [];
+  activeConversationId: string | null = null;
+  searchQuery = '';
+  isConnected = false;
+  canSendMessages = false;
+  
+  // Predefined questions
+  predefinedQuestions: any[] = [];
+  
+  // Gestión de suscripciones optimizada
+  private destroy$ = new Subject<void>();
 
   constructor(
     private chatbotService: ChatbotService,
-    private translationService: TranslationService
+    private translationService: TranslationService,
+    private suggestionsService: SuggestionsService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    private conversationService: ConversationService
   ) {}
 
-  ngOnInit() {
-    this.chatbotService.chatHistory$.subscribe(history => {
-      this.chatHistory = history;      
+  ngOnInit(): void {    
+    this.initialize();
+  }
+
+  private initialize(): void {
+    this.loadPredefinedQuestions();
+    this.setupSubscriptions();
+  }
+
+  private setupSubscriptions(): void {
+    // Una sola suscripción combinada para mejor rendimiento
+    combineLatest({
+      conversations: this.conversationService.conversations$,
+      activeConversation: this.conversationService.activeConversation$,
+      connectionStatus: this.chatbotService.connectionStatus$,
+      lang: this.translationService.getCurrentLangObservable(),
+      routeParams: this.route.queryParams
+    })
+    .pipe(
+      takeUntil(this.destroy$),
+      debounceTime(50),
+      distinctUntilChanged()
+    )
+    .subscribe(({
+      conversations,
+      activeConversation,
+      connectionStatus,
+      lang,
+      routeParams
+    }) => {
+      this.handleStateUpdate(
+        conversations, 
+        activeConversation, 
+        connectionStatus, 
+        lang, 
+        routeParams
+      );
     });
   }
 
-  get filteredChatHistory(): ChatHistoryItem[] {
-    if (!this.searchQuery) {
-      return this.chatHistory;
+  private handleStateUpdate(
+    conversations: Conversation[],
+    activeConversation: Conversation | null,
+    connectionStatus: string,
+    lang: string,
+    routeParams: any
+  ): void {
+    // Actualizar estado local
+    this.conversations = conversations;
+    this.activeConversationId = activeConversation?.id || null;
+    
+    // Actualizar estado de conexión
+    this.updateConnectionStatus(connectionStatus);
+    
+    // Detectar parámetros médicos en URL
+    this.detectMedicalParams(routeParams);
+    
+    // Actualizar preguntas predefinidas si cambió el idioma
+    if (lang) {
+      this.loadPredefinedQuestions();
     }
     
-    const query = this.searchQuery.toLowerCase();
-    return this.chatHistory.filter(item =>
-      item.question.toLowerCase().includes(query) ||
-      (item.answer && item.answer.toLowerCase().includes(query))
+    this.cdr.markForCheck();
+  }
+
+  private updateConnectionStatus(status: string): void {
+    const connectedStatuses = [
+      'Connected',
+      'Conectado',
+      'Connected via WebSocket',
+      'Conectado via WebSocket',
+      'Connected via HTTP',
+      'Conectado via HTTP'
+    ];
+    
+    this.isConnected = connectedStatuses.some(s => status.includes(s));
+    this.updateSendCapability();
+  }
+
+  private updateSendCapability(): void {
+    this.canSendMessages = this.chatbotService.canSendMessages() || this.isConnected;
+  }
+
+  private detectMedicalParams(params: any): void {
+    const hasMedicalParams = params['tumor_type'] || params['gene'] || params['treatment_drug'];
+    
+    if (hasMedicalParams && !this.healthProfileEnabled) {
+      this.healthProfileEnabled = true;
+      this.healthProfileToggled.emit(true);
+    }
+  }
+
+  private loadPredefinedQuestions(): void {
+    this.predefinedQuestions = this.suggestionsService.getPredefinedQuestions();
+  }
+
+  // ============ MÉTODOS PARA CONVERSACIONES ============
+
+  getFilteredConversations(): Conversation[] {
+    if (!this.searchQuery.trim()) {
+      return this.getUserConversations();
+    }
+    
+    const query = this.searchQuery.toLowerCase().trim();
+    return this.getUserConversations().filter(conv => 
+      conv.title.toLowerCase().includes(query) || 
+      (conv.preview && conv.preview.toLowerCase().includes(query)) ||
+      conv.messages.some(msg => 
+        msg.content.toLowerCase().includes(query)
+      )
     );
   }
 
-  getUserConversations(): ChatHistoryItem[] {
-    return this.chatHistory.filter(item => 
-      !item.isPredefined && 
-      item.answer && 
-      item.answer.trim() !== ''
-    );
-  }
-
-  getPredefinedQuestions(): ChatHistoryItem[] {
-    return this.chatHistory.filter(item => item.isPredefined);
+  getUserConversations(): Conversation[] {
+    return this.conversations
+      .filter(conv => conv.messages && conv.messages.length > 0)
+      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
   }
 
   hasUserConversations(): boolean {
     return this.getUserConversations().length > 0;
   }
 
+  // ============ MÉTODOS DE UI ============
+
   clearSearch(): void {
     this.searchQuery = '';
   }
 
-  onHealthProfileToggle(event: any): void {
-    const isEnabled = event.target.checked;
-    this.healthProfileToggled.emit(isEnabled);
+  onHealthProfileToggle(enabled: boolean): void {
+    this.healthProfileEnabled = enabled;
+    this.healthProfileToggled.emit(enabled);
   }
- 
-  onConversationClick(conversation: ChatHistoryItem): void {      
-  this.chatbotService.loadQuestionFromSidebar(conversation.question);
+
+  onHealthProfileIconClick(): void {
+    this.healthProfileEnabled = !this.healthProfileEnabled;
+    this.healthProfileToggled.emit(this.healthProfileEnabled);
+  }
+
+  onConversationClick(conversation: Conversation): void {
+    this.conversationService.selectConversation(conversation.id);
+    this.conversationSelected.emit(conversation.id);
+    this.handleMobileSidebar();
+  }
+
+  onPredefinedQuestionClick(questionItem: any): void {     
+    if (!this.canSendPredefinedQuestions()) {
+      console.warn('⚠️ Cannot send question: connection unavailable');
+      return; 
+    }    
+   
+    this.suggestedQuestion.emit(questionItem.questionText);
+    this.handleMobileSidebar();
+  }
+
+  onNewChat(): void {
+    this.conversationService.createConversation();
+    this.newChat.emit();
+    this.handleMobileSidebar();
+  }
+
+  onDeleteConversation(conversationId: string, event: Event): void {
+    event.stopPropagation();
     
-}
-  
-  onPredefinedQuestionClick(question: string): void {     
-  this.chatbotService.loadQuestionFromSidebar(question);
+    if (confirm(this.translationService.instant('SIDEBAR.DELETE_CONVERSATION_CONFIRM'))) {
+      this.conversationService.deleteConversation(conversationId);
+    }
+  }
+
+  private handleMobileSidebar(): void {
+    if (window.innerWidth < 768) {
+      this.toggleSidebar.emit();
+    }
+  }
+
+  // ============ MÉTODOS DE BÚSQUEDA Y FILTRADO ============
+
+  getFilteredPredefinedQuestions(): any[] {
+    if (!this.predefinedQuestions?.length) {
+      return [];
+    }
     
-}
-  trackByConversation(index: number, item: ChatHistoryItem): string {
-    return item.id;
+    // Filtrar preguntas ya respondidas
+    const unansweredQuestions = this.predefinedQuestions.filter(item => 
+      !this.isQuestionAlreadyAnswered(item.questionText)
+    );
+    
+    if (!this.searchQuery.trim()) {
+      return unansweredQuestions;
+    }
+    
+    const query = this.searchQuery.toLowerCase().trim();
+    return unansweredQuestions.filter(item => 
+      item.questionText.toLowerCase().includes(query)
+    );
+  }
+
+  isQuestionAlreadyAnswered(questionText: string): boolean {
+    return this.conversations.some(conv => 
+      conv.messages.some(msg => 
+        msg.sender === 'user' && 
+        msg.content === questionText &&
+        conv.messages.some(m => m.sender === 'bot' && m.content.trim() !== '')
+      )
+    );
+  }
+
+  canSendPredefinedQuestions(): boolean {
+    return this.canSendMessages;
+  }
+
+  // ============ MÉTODOS DE UTILIDAD ============
+
+  getConversationPreview(conversation: Conversation): string {
+    // Usar preview del servicio si existe
+    if (conversation.preview) {
+      return conversation.preview;
+    }
+    
+    // Buscar último mensaje no vacío
+    const lastMessage = [...conversation.messages]
+      .reverse()
+      .find(msg => msg.content?.trim());
+    
+    return lastMessage ? this.truncateText(lastMessage.content, 80) : 'Empty conversation';
+  }
+
+  getConversationTitle(conversation: Conversation): string {
+    return conversation.title || 'Untitled conversation';
+  }
+
+  isActiveConversation(conversationId: string): boolean {
+    return this.activeConversationId === conversationId;
+  }
+
+    // En chatbot-sidebar.component.ts
+  formatDate(date: Date): string {
+    if (!date) return '';
+    
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `${diffMins} min`;
+    if (diffHours < 24) return `${diffHours} h`;
+    if (diffDays < 7) return `${diffDays} d`;
+    
+    // Formato de fecha fijo sin locale
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  private truncateText(text: string, maxLength: number): string {
+    if (!text || text.length <= maxLength) {
+      return text || '';
+    }
+    
+    return text.substring(0, maxLength).trim() + '...';
+  }
+
+  // ============ MÉTODOS DE RENDIMIENTO ============
+
+  trackByConversation(index: number, conversation: Conversation): string {
+    return `${conversation.id}-${conversation.updatedAt.getTime()}`;
+  }
+
+  trackByPredefinedQuestion(index: number, item: any): string {
+    return item.id || item.questionText || `question-${index}`;
+  }
+
+  // ============ CLEANUP ============
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -1,3 +1,7 @@
 .chat-messages-container {
   scroll-behavior: smooth;
 }
+
+.messages-area {
+  scroll-behavior: smooth;
+}

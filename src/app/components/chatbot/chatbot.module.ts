@@ -8,6 +8,7 @@ import { ChatbotSidebarComponent } from './chatbot-sidebar/chatbot-sidebar.compo
 import { ChatbotMessagesComponent } from './chatbot-messages/chatbot-messages.component';
 import { ChatbotWelcomeComponent } from './chatbot-welcome/chatbot-welcome.component';
 import { ChatbotInputComponent } from './chatbot-input/chatbot-input.component';
+import { ChatbotControlsComponent } from './chatbot-controls/chatbot-controls.component'; 
 
 @NgModule({
   declarations: [
@@ -16,8 +17,8 @@ import { ChatbotInputComponent } from './chatbot-input/chatbot-input.component';
     ChatbotSidebarComponent,
     ChatbotMessagesComponent,
     ChatbotWelcomeComponent,
-    ChatbotInputComponent
-    
+    ChatbotInputComponent,
+    ChatbotControlsComponent 
   ],
   imports: [
     CommonModule,

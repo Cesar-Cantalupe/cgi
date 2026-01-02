@@ -1,569 +1,875 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+
 import { TranslationService } from '../translation.service';
-import { WebsocketService } from './websocket.service';
-import { StorageService } from './storage.service';
-import { MessageParserService } from './message-parser.service';
-
+import { SuggestionsService } from '../suggestions.service';
+import { ChatbotStateService } from './core/chatbot-state.service';
+import { ChatbotEngineService } from './core/chatbot-engine.service';
+import { ConversationService } from './core/conversation.service';
+import { StreamingModule } from './modules/streaming.module';
+import { WebsocketModule } from './modules/websocket.module';
+import { FiltersModule } from './modules/filters.module';
+import { FeedbackModule } from './modules/feedback.module';
 import { ChatMessage } from './interfaces/chat-message.interface';
-import { ChatHistoryItem } from './interfaces/chat-history.interface';
-import { QueryRequest, WebSocketEvent } from './interfaces/websocket-events.interface';
+import { Conversation } from './interfaces/conversation.interface';
 
-import { environment } from '../../../environments/environment';
+// Interface para eventos de STOP
+export interface StopRequestData {
+  messageId?: string;
+  questionType?: 'user' | 'predefined';
+  questionContent?: string;
+  shouldRestoreToInput?: boolean;
+  shouldCleanMessages?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class ChatbotService {
+export class ChatbotService implements OnDestroy {
+  // Observables del estado
+  public messages$: Observable<ChatMessage[]>;
+  public isProcessing$: Observable<boolean>;
+  public currentStreamingMessage$: Observable<ChatMessage | null>;
+  public currentClientId$: Observable<string | null>;
+  public connectionStatus$: Observable<string>;
   
-  private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
-  private chatHistorySubject = new BehaviorSubject<ChatHistoryItem[]>([]);
+  // Observables de conversaciones (directos del ConversationService)
+  public conversations$: Observable<Conversation[]>;
+  public currentConversation$: Observable<Conversation | null>;
   
-  public messages$ = this.messagesSubject.asObservable();
-  public chatHistory$ = this.chatHistorySubject.asObservable();
-
-  // ✅ URL DIRECTA - SIN process.env
-  private readonly WS_URL = `${environment.websocketUrl}?api_key=${environment.apiKey}`;
+  // Subject para eventos de STOP
+  private stopRequested$ = new Subject<StopRequestData>();
+  public onStopRequested$ = this.stopRequested$.asObservable();
   
-  private currentStreamingMessage: ChatMessage | null = null;
-  private streamingBuffer: string = '';
-  private displayedContent: string = '';
-  private animationFrameId: number | null = null;
-  private _isAnimatingValue: boolean = false;
-
-  private predefinedQuestionKeys = [
-    "SUGGESTIONS.CANCER_MUTATIONS",
-    "SUGGESTIONS.TREATMENT_OPTIONS",
-    "SUGGESTIONS.GENOMIC_SEQUENCING",
-    "SUGGESTIONS.IMMUNOTHERAPY_WORK",
-    "SUGGESTIONS.WHAT_IS_CANCER",
-    "SUGGESTIONS.CANCER_MUTATION",
-    "SUGGESTIONS.GENOMIC_SEQUENCING_DIAGNOSIS",
-    "SUGGESTIONS.SOMATIC_GERMLINE_DIFFERENCE"
-  ];
+  // Módulos públicos
+  public streaming = this.streamingModule;
+  public websocket = this.websocketModule;
+  public filters = this.filtersModule;
+  public feedback = this.feedbackModule;
+  
+  private destroy$ = new Subject<void>();
+  private initializationComplete = false;
+  private processingMessageId: string | null = null;
+  private debugMode = false;
+  private lastCanSendCheck = 0;
+  private readonly CAN_SEND_CHECK_INTERVAL = 500;
+  private lastProcessingStartTime: number = 0;
+  private readonly MAX_PROCESSING_TIME = 30000;
+  
+  // Cache para última pregunta y su tipo
+  private lastStopData: StopRequestData | null = null;
+  private lastUserQuestion: {content: string, id: string, type: 'user' | 'predefined'} | null = null;
 
   constructor(
+    private state: ChatbotStateService,
+    private engine: ChatbotEngineService,
+    private conversationService: ConversationService,
+    private suggestionsService: SuggestionsService,
+    private websocketModule: WebsocketModule,
+    private streamingModule: StreamingModule,
+    private filtersModule: FiltersModule,
+    private feedbackModule: FeedbackModule,
     private translationService: TranslationService,
-    private websocketService: WebsocketService,
-    private storageService: StorageService,
-    private messageParser: MessageParserService
+    private route: ActivatedRoute
   ) {
-    this.initializeService();
-    this.initializeConnection();
+    // Observables del estado
+    this.messages$ = this.state.messages$;
+    this.isProcessing$ = this.state.isProcessing$;
+    this.currentStreamingMessage$ = this.state.currentStreamingMessage$;
+    this.currentClientId$ = this.state.currentClientId$;
+    this.connectionStatus$ = this.websocketModule.connectionStatus$;
+    
+    // Observables de conversaciones
+    this.conversations$ = this.conversationService.conversations$;
+    this.currentConversation$ = this.conversationService.activeConversation$;
+    
+    this.initialize();
   }
 
-  private get _isAnimating(): boolean {
-    return this._isAnimatingValue;
+  private initialize(): void {
+    // Configurar filtros de URL
+    this.setupUrlFilters();
+    
+    // Inicializar websocket
+    setTimeout(() => {
+      this.websocketModule.initialize();
+      this.monitorConnection();
+      this.initializationComplete = true;
+    }, 200);
+    
+    // Detección de estado bloqueado
+    this.setupHungStateDetection();
+    
+    // Escuchar eventos de streaming completado
+    this.setupStreamingCompletionListener();
+    
+    // Escuchar eventos de STOP internos
+    this.setupStopEventListener();
+    
+    // Trackear última pregunta del usuario
+    this.trackLastUserQuestion();
   }
 
-  private set _isAnimating(value: boolean) {
-    this._isAnimatingValue = value;
+  // ============ NUEVO: SISTEMA UNIFICADO DE STOP ============
+
+  /**
+   * MÉTODO PRINCIPAL DE STOP - COORDINA TODO EL SISTEMA
+   */
+  async emergencyStop(options?: {
+    messageId?: string;
+    questionType?: 'user' | 'predefined';
+    shouldRestoreToInput?: boolean;
+  }): Promise<StopRequestData> {
+    console.log('🚨 EMERGENCY STOP ejecutado con opciones:', options);
+    
+    // 1. Obtener información actual
+    const currentData = await this.collectCurrentStopData(options);
+    
+    // 2. Emitir evento de STOP para que los componentes sepan
+    this.stopRequested$.next(currentData);
+    
+    // 3. Detener todos los procesos activos
+    this.stopAllActiveProcesses();
+    
+    // 4. Limpiar mensajes según el tipo de pregunta
+    await this.cleanupMessagesByQuestionType(currentData);
+    
+    // 5. Actualizar conversación si es necesario
+    this.updateConversationAfterStop(currentData);
+    
+    // 6. Resetear estado interno
+    this.resetInternalState();
+    
+    // 7. Cachear datos para referencia
+    this.lastStopData = currentData;
+    
+    console.log('✅ EMERGENCY STOP completado:', {
+      tipo: currentData.questionType,
+      limpiarMensajes: currentData.shouldCleanMessages,
+      restaurarInput: currentData.shouldRestoreToInput,
+      contenidoPregunta: currentData.questionContent?.substring(0, 50)
+    });
+    
+    return currentData;
   }
 
-  private initializeService(): void {
-    if (this.translationService.instant('SUGGESTIONS.CANCER_MUTATIONS') !== 'SUGGESTIONS.CANCER_MUTATIONS') {
-      this.loadChatHistoryFromStorage();
-    } else {
-      setTimeout(() => this.initializeService(), 100);
+  /**
+   * Versión simple para el botón STOP
+   */
+  forceStopProcessing(): void {
+    this.emergencyStop().catch(console.error);
+  }
+
+  /**
+   * Versión para regeneración
+   */
+  async stopAndPrepareForRegeneration(message: ChatMessage): Promise<StopRequestData> {
+    console.log('🔄 STOP para regeneración:', message.id);
+    
+    const stopData = await this.emergencyStop({
+      messageId: message.id,
+      questionType: 'user', // Asumimos que es pregunta de usuario para regenerar
+      shouldRestoreToInput: false
+    });
+    
+    return stopData;
+  }
+
+  private async collectCurrentStopData(options?: any): Promise<StopRequestData> {
+    const messages = this.state.messages;
+    const streamingMessage = this.state.currentStreamingMessage;
+    
+    // Determinar tipo de pregunta
+    let questionType: 'user' | 'predefined' = 'user';
+    let questionContent = '';
+    let messageId = options?.messageId;
+    let shouldRestoreToInput = options?.shouldRestoreToInput ?? true;
+    let shouldCleanMessages = true;
+    
+    // Usar el tipo proporcionado o determinar automáticamente
+    if (options?.questionType) {
+      questionType = options.questionType;
+    } else if (this.lastUserQuestion) {
+      questionType = this.lastUserQuestion.type;
+      questionContent = this.lastUserQuestion.content;
     }
-  }
-
-  private initializeConnection(): void {
-    // ✅ USAR DIRECTAMENTE this.WS_URL
-    this.websocketService.connect(this.WS_URL).subscribe({
-      next: (connected) => {
-        if (connected) {
-          this.setupMessageHandling();
+    
+    // Buscar última pregunta de usuario si no la tenemos
+    if (!questionContent && messages.length > 0) {
+      const userMessages = messages.filter(m => m.sender === 'user' || m.isUser);
+      if (userMessages.length > 0) {
+        const lastUserMessage = userMessages[userMessages.length - 1];
+        questionContent = lastUserMessage.content || lastUserMessage.text || '';
+        
+        if (!questionType) {
+          const isPredefined = (lastUserMessage as any)._isPredefinedQuestion;
+          questionType = isPredefined ? 'predefined' : 'user';
         }
-      },
-      error: (error) => {
-        console.error('Error conectando WebSocket:', error);
       }
-    });
-  }
-
-  private setupMessageHandling(): void {
-    this.websocketService.messages$.subscribe((event: WebSocketEvent) => {
-      this.handleWebSocketEvent(event);
-    });
-  }
-
-  private handleWebSocketEvent(event: WebSocketEvent): void {
-    switch(event.type) {
-      case 'status':
-        this.handleStatusEvent(event);
-        break;
-      case 'stream_start':
-        this.handleStreamStartEvent(event);
-        break;
-      case 'stream_chunk':
-        this.handleStreamChunkEvent(event);
-        break;
-      case 'stream_end':
-        this.handleStreamEndEvent(event);
-        break;
-      case 'error':
-        this.handleErrorEvent(event);
-        break;
-      default:
-        const unknownEvent = event as any;
-        console.warn('Tipo de evento desconocido:', unknownEvent.type, unknownEvent);
-    }
-  }
-
-  private handleStatusEvent(event: any): void {
-    if (this.currentStreamingMessage) {
-      this.displayedContent += `\n\n_${event.message}_\n\n`;
-      this.updateStreamingContent(this.displayedContent);
-    }
-  }
-
-  private handleStreamStartEvent(event: any): void {
-    this.streamingBuffer = '';
-    this.displayedContent = '';
-    this._isAnimating = false;
-    
-    this.currentStreamingMessage = this.addBotMessage('', true);
-  }
-
-  private handleStreamChunkEvent(event: any): void {
-    if (!this.currentStreamingMessage || !event.chunk) return;
-    
-    if (event.chunk.trim().length === 0) {
-      return;
     }
     
-    this.streamingBuffer += event.chunk;
-    
-    if (!this._isAnimating) {
-      this.startStreamingAnimation();
-    }
-  }
-
-  private startStreamingAnimation(): void {
-    if (this._isAnimating) {
-      return;
+    // Para preguntas predefinidas, NO restaurar al input
+    if (questionType === 'predefined') {
+      shouldRestoreToInput = false;
     }
     
-    this._isAnimating = true;
+    // Para streaming actual, obtener el ID
+    if (!messageId && streamingMessage?.isStreaming) {
+      messageId = streamingMessage.id;
+    }
     
-    const animate = () => {
-      if (!this._isAnimating) {
-        return;
-      }
-      
-      this.processAnimationFrame(3);
-      
-      if (this._isAnimating) {
-        this.animationFrameId = requestAnimationFrame(animate);
-      }
+    return {
+      messageId,
+      questionType,
+      questionContent,
+      shouldRestoreToInput,
+      shouldCleanMessages: true // Siempre limpiar mensajes
     };
-    
-    this.animationFrameId = requestAnimationFrame(animate);
   }
 
-  private processAnimationFrame(charsPerBatch: number): void {
-    if (this.streamingBuffer.length === 0) {
-      return;
-    }
+  private stopAllActiveProcesses(): void {
+    console.log('⏹️ Deteniendo todos los procesos activos...');
     
-    const charsToTake = Math.min(charsPerBatch, this.streamingBuffer.length);
-    const nextChars = this.streamingBuffer.substring(0, charsToTake);
-    this.streamingBuffer = this.streamingBuffer.slice(charsToTake);
+    // 1. Detener streaming
+    this.streamingModule.cancelStream();
     
-    this.displayedContent += nextChars;
+    // 2. Cancelar consulta WebSocket
+    this.websocketModule.cancelCurrentQuery();
     
-    this.updateStreamingContent(this.displayedContent);
+    // 3. Detener motor
+    this.engine.stopCurrentRequest();
+    
+    // 4. Resetear estado
+    this.state.setProcessing(false);
+    this.state.setStreamingMessage(null);
+    
+    // 5. Resetear tiempos
+    this.processingMessageId = null;
+    this.lastProcessingStartTime = 0;
   }
 
-  private pauseStreamingAnimation(): void {
-    this._isAnimating = false;
+  private async cleanupMessagesByQuestionType(data: StopRequestData): Promise<void> {
+    if (!data.shouldCleanMessages) return;
     
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-  }
-
-  private stopStreamingAnimation(): void {
-    this.pauseStreamingAnimation();
-    this.streamingBuffer = '';
-  }
-
-  private handleStreamEndEvent(event: any): void {
-    if (this.streamingBuffer.length > 0 && this.displayedContent.length < 100) {
-      const remainingContent = this.streamingBuffer;
-      this.streamingBuffer = '';
-      
-      this.simulateRemainingAnimation(remainingContent, event);
+    const messages = this.state.messages;
+    console.log('🧹 Limpiando mensajes. Tipo:', data.questionType);
+    
+    if (data.questionType === 'user' && data.questionContent) {
+      // CASO 1: Pregunta de usuario - mantener pregunta, limpiar respuesta
+      await this.cleanupForUserQuestion(data, messages);
+    } else if (data.questionType === 'predefined') {
+      // CASO 2: Pregunta predefinida - limpiar TODO
+      await this.cleanupForPredefinedQuestion(data, messages);
     } else {
-      this.finalizeStreaming(event);
+      // CASO 3: Desconocido - limpiar mensajes de streaming
+      this.cleanupStreamingMessagesOnly(messages);
     }
   }
 
-  private simulateRemainingAnimation(remainingContent: string, event: any): void {
-    let currentIndex = 0;
-    const chunkSize = 5;
+  private async cleanupForUserQuestion(data: StopRequestData, messages: ChatMessage[]): Promise<void> {
+    console.log('👤 Limpieza para pregunta de usuario');
     
-    const simulateChunk = () => {
-      if (currentIndex >= remainingContent.length) {
-        this.finalizeStreaming(event);
-        return;
-      }
-      
-      const nextChunk = remainingContent.substring(currentIndex, currentIndex + chunkSize);
-      currentIndex += chunkSize;
-      
-      this.displayedContent += nextChunk;
-      this.updateStreamingContent(this.displayedContent);
-      
-      setTimeout(simulateChunk, 50);
-    };
-    
-    simulateChunk();
-  }
-
-  private finalizeStreaming(event: any): void {
-    this.stopStreamingAnimation();
-    
-    if (this.streamingBuffer.length > 0) {
-      this.displayedContent += this.streamingBuffer;
-      this.streamingBuffer = '';
-      this.updateStreamingContent(this.displayedContent);
-    }
-    
-    if (this.currentStreamingMessage && event.full_response) {
-      this.finalizeStreamingMessage(
-        event.full_response, 
-        event.sources, 
-        event.metadata
-      );
-    } else if (this.currentStreamingMessage) {
-      this.finalizeStreamingMessage(
-        this.displayedContent, 
-        event.sources || [], 
-        event.metadata || {}
-      );
-    }
-    
-    this.currentStreamingMessage = null;
-  }
-
-  private updateStreamingContent(content: string): void {
-    if (!this.currentStreamingMessage) {
-      return;
-    }
-
-    const currentMessages = this.messagesSubject.value;
-    const messageIndex = currentMessages.findIndex(msg => 
-      msg.id === this.currentStreamingMessage!.id
+    // Encontrar la pregunta del usuario
+    const userMessage = messages.find(m => 
+      (m.sender === 'user' || m.isUser) && 
+      (m.content === data.questionContent || m.text === data.questionContent)
     );
-
-    if (messageIndex === -1) {
-      return;
-    }
-
-    const updatedMessages = currentMessages.map((message, index) => {
-      if (index === messageIndex) {
-        return {
-          ...message,
-          content: content,
-          text: content,
-          timestamp: new Date(),
-          isStreaming: true
-        };
-      }
-      return message;
-    });
-
-    this.messagesSubject.next(updatedMessages);
-  }
-
-  private handleErrorEvent(event: any): void {
-    console.error('Error del servidor:', event.message);
-    this.stopStreamingAnimation();
-    this.currentStreamingMessage = null;
-    this.addSystemMessage('CHAT.SERVER_ERROR');
-  }
-
-  async sendMessage(message: string, fromSidebar: boolean = false): Promise<void> {
-    if (!message.trim()) return;
-
-    if (!this.websocketService.isWebSocketConnected()) {
-      this.addSystemMessage('CHAT.NOT_CONNECTED');
+    
+    if (userMessage) {
+      // Encontrar respuestas de bot después de esta pregunta
+      const userIndex = messages.indexOf(userMessage);
+      const messagesAfter = messages.slice(userIndex + 1);
+      const botResponses = messagesAfter.filter(m => 
+        m.sender === 'bot' || !m.isUser
+      );
       
-      if (!fromSidebar) {
-        this.addUserMessage(message);
+      // Eliminar respuestas de bot
+      botResponses.forEach(msg => {
+        if (msg.id) {
+          this.state.removeMessage(m => m.id === msg.id);
+        }
+      });
+      
+      console.log(`🗑️ Eliminadas ${botResponses.length} respuestas de bot`);
+    }
+  }
+
+  private async cleanupForPredefinedQuestion(data: StopRequestData, messages: ChatMessage[]): Promise<void> {
+    console.log('🔖 Limpieza para pregunta predefinida');
+    
+    // Para preguntas predefinidas, limpiar pregunta y respuesta
+    const predefinedQuestions = messages.filter(m => 
+      (m.sender === 'user' || m.isUser) && 
+      (m as any)._isPredefinedQuestion === true
+    );
+    
+    if (predefinedQuestions.length > 0) {
+      const lastPredefinedQuestion = predefinedQuestions[predefinedQuestions.length - 1];
+      
+      // Eliminar la pregunta predefinida
+      this.state.removeMessage(m => m.id === lastPredefinedQuestion.id);
+      
+      // Eliminar respuestas de bot después de esta pregunta
+      const questionIndex = messages.indexOf(lastPredefinedQuestion);
+      const messagesAfter = messages.slice(questionIndex + 1);
+      const botResponses = messagesAfter.filter(m => 
+        m.sender === 'bot' || !m.isUser
+      );
+      
+      botResponses.forEach(msg => {
+        if (msg.id) {
+          this.state.removeMessage(m => m.id === msg.id);
+        }
+      });
+      
+      console.log(`🗑️ Eliminada pregunta predefinida y ${botResponses.length} respuestas`);
+    }
+  }
+
+  private cleanupStreamingMessagesOnly(messages: ChatMessage[]): void {
+    console.log('🌀 Limpieza genérica de mensajes streaming');
+    
+    const streamingMessages = messages.filter(m => m.isStreaming);
+    streamingMessages.forEach(msg => {
+      if (msg.id) {
+        this.state.removeMessage(m => m.id === msg.id);
       }
-      return;
-    }
+    });
+    
+    console.log(`🗑️ Eliminados ${streamingMessages.length} mensajes de streaming`);
+  }
 
-    if (!fromSidebar) {
-      this.addUserMessage(message);
-    }
+  private updateConversationAfterStop(data: StopRequestData): void {
+    const activeConversation = this.conversationService.getActiveConversation();
+    if (!activeConversation) return;
+    
+    // Sincronizar mensajes actuales con la conversación
+    const currentMessages = this.state.messages
+      .filter(m => !m.isStreaming) // No incluir mensajes streaming
+      .map(m => ({
+        id: m.id,
+        content: m.content || m.text || '',
+        sender: m.sender || (m.isUser ? 'user' : 'bot'),
+        timestamp: m.timestamp || new Date(),
+        sources: m.sources || [],
+        feedback: m.feedback || null,
+        isStreaming: false
+      }));
+    
+    this.conversationService.updateConversationMessages(
+      activeConversation.id,
+      currentMessages
+    );
+  }
 
-    const request: QueryRequest = {
-      query: message,
-      filters: {},
-      stream: true
+  private resetInternalState(): void {
+    this.processingMessageId = null;
+    this.lastProcessingStartTime = 0;
+    
+    // Resetear motor si es necesario
+    if (typeof this.engine['resetEngineState'] === 'function') {
+      (this.engine as any).resetEngineState();
+    }
+  }
+
+  private setupStopEventListener(): void {
+    // Escuchar eventos de STOP del streaming module
+    this.streamingModule.onStreamComplete
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result.wasCancelled) {
+          console.log('📡 Streaming cancelado, ejecutando limpieza automática');
+          // Si fue cancelado, hacer limpieza automática
+          setTimeout(() => {
+            this.cleanupAfterStreamingCancellation();
+          }, 100);
+        }
+      });
+  }
+
+  private cleanupAfterStreamingCancellation(): void {
+    // Limpiar mensajes de streaming obsoletos
+    const messages = this.state.messages;
+    const streamingMessages = messages.filter(m => 
+      m.isStreaming && 
+      (!m.content || m.content.trim().length === 0)
+    );
+    
+    streamingMessages.forEach(msg => {
+      if (msg.id) {
+        this.state.removeMessage(m => m.id === msg.id);
+      }
+    });
+    
+    // Resetear estado
+    this.state.setProcessing(false);
+  }
+
+  private trackLastUserQuestion(): void {
+    this.state.messages$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(messages => {
+        const userMessages = messages.filter(m => m.sender === 'user' || m.isUser);
+        if (userMessages.length > 0) {
+          const lastUserMessage = userMessages[userMessages.length - 1];
+          const isPredefined = (lastUserMessage as any)._isPredefinedQuestion;
+          
+          this.lastUserQuestion = {
+            content: lastUserMessage.content || lastUserMessage.text || '',
+            id: lastUserMessage.id || '',
+            type: isPredefined ? 'predefined' : 'user'
+          };
+        }
+      });
+  }
+
+  // ============ MÉTODOS EXISTENTES (MODIFICADOS) ============
+
+  private setupUrlFilters(): void {
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const filters: any = {};
+        
+        const paramMappings: { [key: string]: string } = {
+          'tumor_type': 'tumor_type',
+          'cancer_type': 'cancer_type',
+          'gene': 'gene',
+          'mutation_type': 'mutation_type',
+          'treatment_drug': 'treatment_drug',
+          'treatment_family': 'treatment_family',
+          'treatment_response': 'treatment_response'
+        };
+        
+        Object.keys(paramMappings).forEach(paramKey => {
+          if (params[paramKey]) {
+            filters[paramMappings[paramKey]] = params[paramKey];
+          }
+        });
+        
+        Object.keys(filters).forEach(key => {
+          if (!filters[key]?.trim()) delete filters[key];
+        });
+        
+        this.filtersModule.setUrlFilters(filters);
+      });
+  }
+
+  private setupStreamingCompletionListener(): void {
+    this.streamingModule.onStreamComplete
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (!this.state.isProcessing && this.processingMessageId) {
+          this.processingMessageId = null;
+          this.lastProcessingStartTime = 0;
+        }
+      });
+  }
+
+  private monitorConnection(): void {
+    this.connectionStatus$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        if ((status === 'disconnected' || status === 'error') && this.initializationComplete) {
+          setTimeout(() => {
+            if (!this.isConnected()) {
+              this.websocketModule.reconnect();
+            }
+          }, 3000);
+        }
+      });
+  }
+
+  private setupHungStateDetection(): void {
+    setInterval(() => {
+      if (this.state.isProcessing && this.lastProcessingStartTime > 0) {
+        const processingTime = Date.now() - this.lastProcessingStartTime;
+        
+        if (processingTime > this.MAX_PROCESSING_TIME) {
+          this.softResetProcessingState();
+        }
+      }
+    }, 10000);
+  }
+
+  // ============ MÉTODOS PARA CONVERSACIONES ============
+
+  getConversations(): Conversation[] {
+    return this.conversationService.getConversations();
+  }
+
+  getCurrentConversation(): Conversation | null {
+    return this.conversationService.getActiveConversation();
+  }
+
+  createNewConversation(firstMessage?: string): Conversation {
+    // 1. Limpiar estado actual ANTES de crear nueva conversación
+    this.engine.clearChat();
+    this.state.clearMessages();
+    this.state.setProcessing(false);
+    this.processingMessageId = null;
+    this.lastProcessingStartTime = 0;
+    this.lastUserQuestion = null;
+    
+    // 2. Cancelar cualquier streaming activo
+    this.streaming.cancelStream();
+    this.websocket.cancelCurrentQuery();
+    
+    // 3. Crear nueva conversación
+    const newConversation = this.conversationService.createConversation(firstMessage);
+    
+    return newConversation;
+  }
+
+  setCurrentConversation(conversationId: string): boolean {
+    return this.conversationService.selectConversation(conversationId);
+  }
+
+  loadConversationToChat(conversationId: string): void {
+    this.conversationService.selectConversation(conversationId);
+  }
+
+  deleteConversation(conversationId: string): boolean {
+    return this.conversationService.deleteConversation(conversationId);
+  }
+
+  updateConversationTitle(conversationId: string, title: string): boolean {
+    return this.conversationService.renameConversation(conversationId, title);
+  }
+
+  // ============ MÉTODOS PRINCIPALES ============
+
+  async sendMessage(
+    message: string, 
+    customFilters: any = null,
+    fromSidebar: boolean = false,
+    questionType: 'user' | 'predefined' = 'user'
+  ): Promise<boolean> {
+    if (!this.initializationComplete) {
+      return false;
+    }
+    
+    // Verificar si puede enviar
+    if (!this.canSendMessages()) {
+      if (this.checkForInconsistentState()) {
+        await this.softResetProcessingState();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (this.canSendMessages()) {
+          return this.sendMessage(message, customFilters, fromSidebar, questionType);
+        }
+      }
+      
+      return false;
+    }
+    
+    // Registrar inicio de procesamiento
+    this.processingMessageId = `user-${Date.now()}`;
+    this.lastProcessingStartTime = Date.now();
+    
+    // Registrar última pregunta del usuario
+    this.lastUserQuestion = {
+      content: message,
+      id: this.processingMessageId,
+      type: questionType
     };
-
-    try {
-      this.websocketService.sendMessage(request);
-    } catch (error) {
-      console.error('Error enviando mensaje:', error);
-      this.addSystemMessage('CHAT.CONNECTION_ERROR');
+    
+    // Agregar mensaje a conversación activa
+    const currentConversation = this.getCurrentConversation();
+    if (!currentConversation) {
+      this.conversationService.createConversation(message);
+    } else {
+      this.conversationService.addMessage(message, 'user');
     }
+    
+    // Enviar al motor
+    const result = await this.engine.sendUserMessage(message, customFilters, fromSidebar, questionType);
+    
+    if (!result) {
+      this.processingMessageId = null;
+      this.lastProcessingStartTime = 0;
+      this.lastUserQuestion = null;
+    }
+    
+    return result;
   }
 
-  clearHistory(): void {
-    this.stopStreamingAnimation();
-    this.currentStreamingMessage = null;
-    this.messagesSubject.next([]);
-    this.chatHistorySubject.next([]);
-    this.storageService.clearChatHistory();
-    this.showPredefinedQuestions();
+  canSendMessages(): boolean {
+    const now = Date.now();
+    
+    // Cache de verificación por intervalo
+    if (now - this.lastCanSendCheck < this.CAN_SEND_CHECK_INTERVAL) {
+      return !this.state.isProcessing && 
+             !this.streamingModule.getIsAnimating() && 
+             this.initializationComplete &&
+             this.engine.canSendMessage();
+    }
+    
+    this.lastCanSendCheck = now;
+    
+    const hasActiveStreaming = !!this.state.currentStreamingMessage?.isStreaming;
+    const isEngineReady = this.engine.canSendMessage();
+    const isServiceReady = this.initializationComplete;
+    const isStateProcessing = this.state.isProcessing;
+    const isStreamingAnimating = this.streamingModule.getIsAnimating();
+    const isConnected = this.engine.isConnected();
+    
+    // Detectar streaming activo
+    const actuallyStreaming = hasActiveStreaming || isStreamingAnimating;
+    
+    if (actuallyStreaming) {
+      if (isStateProcessing && !this.engine.canSendMessage()) {
+        // Estado correcto
+      } else {
+        return false;
+      }
+    }
+    
+    // Detectar desincronización
+    if (isStateProcessing && isEngineReady && !actuallyStreaming) {
+      setTimeout(() => {
+        if (this.state.isProcessing && this.engine.canSendMessage() && !actuallyStreaming) {
+          this.state.setProcessing(false);
+        }
+      }, 0);
+    }
+    
+    const result = isEngineReady && isServiceReady && !isStateProcessing && isConnected;
+    
+    return result;
   }
 
-  getChatHistory(): string[] {
-    return this.chatHistorySubject.value.map(item => item.question);
+  private async softResetProcessingState(): Promise<void> {
+    if (this.streamingModule.getIsAnimating()) {
+      this.streamingModule.cancelStream();
+    }
+    
+    this.state.setProcessing(false);
+    this.processingMessageId = null;
+    this.lastProcessingStartTime = 0;
   }
 
-  getFullChatHistory(): ChatHistoryItem[] {
-    return this.chatHistorySubject.value;
+  private checkForInconsistentState(): boolean {
+    const hasActiveStreaming = !!this.state.currentStreamingMessage?.isStreaming;
+    const isStreamingAnimating = this.streamingModule.getIsAnimating();
+    const isConnected = this.engine.isConnected();
+    
+    const processingTime = Date.now() - this.lastProcessingStartTime;
+    const isProcessingTooLong = processingTime > 5000;
+    
+    const isInconsistent = this.state.isProcessing && 
+                          !hasActiveStreaming && 
+                          !isStreamingAnimating &&
+                          !isConnected &&
+                          isProcessingTooLong;
+    
+    return isInconsistent;
+  }
+
+  // ============ API PÚBLICA ============
+
+  isConnected(): boolean {
+    return this.engine.isConnected();
   }
 
   getConnectionStatus(): Observable<string> {
-    return this.websocketService.connectionStatus$;
+    return this.connectionStatus$;
+  }
+
+  getIsProcessing(): boolean {
+    return this.state.isProcessing;
+  }
+
+  getCurrentFilters(): any {
+    return this.filtersModule.getCombinedFilters();
+  }
+
+  hasActiveFilters(): boolean {
+    return this.filtersModule.hasActiveFilters();
+  }
+
+  clearHistory(): void {
+    this.state.clearMessages();
+    this.conversationService.clearAll();
+    this.streamingModule.cancelStream();
+    this.processingMessageId = null;
+    this.lastProcessingStartTime = 0;
+    this.lastUserQuestion = null;
   }
 
   getMessages(): ChatMessage[] {
-    return this.messagesSubject.value;
+    return this.state.messages;
   }
 
-  testConnection(): void {
-    this.addSystemMessage('CHAT.TESTING_CONNECTION');
-    this.initializeConnection();
-  }
-
-  private loadChatHistoryFromStorage(): void {
-    const storedHistory = this.storageService.loadChatHistory();
-    
-    if (storedHistory && Array.isArray(storedHistory) && storedHistory.length > 0) {
-      this.chatHistorySubject.next(storedHistory);
-    } else {
-      this.showPredefinedQuestions();
-    }
-  }
-
-  private showPredefinedQuestions(): void {
-    const predefinedQuestions = this.getPredefinedQuestions();
-    
-    if (predefinedQuestions.some(q => !q || q.startsWith('SUGGESTIONS.'))) {
-      setTimeout(() => this.showPredefinedQuestions(), 100);
-      return;
-    }
-    
-    const predefinedItems: ChatHistoryItem[] = predefinedQuestions.map((question, index) => ({
-      id: `predefined-${index}`,
-      question: question,
-      answer: '',
-      timestamp: new Date(),
-      isPredefined: true
-    }));
-    
-    this.chatHistorySubject.next(predefinedItems);
-  }
-
-  getPredefinedQuestions(): string[] {
-    return this.predefinedQuestionKeys.map(key => 
-      this.translationService.instant(key)
-    );
-  }
-
-  private finalizeStreamingMessage(
-    fullResponse: string, 
-    sources: any[], 
-    metadata: any
-  ): void {
-    const currentMessages = this.messagesSubject.value;
-    const updatedMessages = currentMessages.map(msg => {
-      if (msg.id === this.currentStreamingMessage?.id) {
-        return {
-          ...msg,
-          content: fullResponse,
-          text: fullResponse,
-          isStreaming: false,
-          sources: this.messageParser.formatSources(sources),
-          timestamp: new Date()
-        };
-      }
-      return msg;
-    });
-    
-    this.messagesSubject.next(updatedMessages);
-    this.saveConversationToHistory(fullResponse, sources);
-  }
-
-  private saveConversationToHistory(answer: string, sources?: any[]): void {
-    const currentMessages = this.messagesSubject.value;
-    
-    let userMessage: ChatMessage | null = null;
-    
-    for (let i = currentMessages.length - 1; i >= 0; i--) {
-      const message = currentMessages[i];
-      if (message.isUser && !message.isStreaming) {
-        userMessage = message;
-        break;
-      }
-    }
-    
-    if (userMessage && answer && answer.trim()) {
-      this.addConversationToHistory(userMessage.content, answer, sources);
-    }
-  }
-
-  private addConversationToHistory(question: string, answer: string, sources?: any[]): void {
-    const currentHistory = this.chatHistorySubject.value;
-    
-    const newConversation: ChatHistoryItem = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-      question: question,
-      answer: answer,
-      timestamp: new Date(),
-      sources: sources
-    };
-    
-    const filteredHistory = currentHistory.filter(item => 
-      !item.isPredefined && 
-      item.question !== question
-    );
-    
-    const predefinedQuestions = currentHistory.filter(item => item.isPredefined);
-    let newHistory = [newConversation, ...filteredHistory];
-    
-    if (predefinedQuestions.length > 0) {
-      newHistory = [...newHistory, ...predefinedQuestions];
-    }
-    
-    const userConversations = newHistory.filter(item => !item.isPredefined);
-    if (userConversations.length > 50) {
-      const recentUserConversations = userConversations.slice(0, 50);
-      const predefined = newHistory.filter(item => item.isPredefined);
-      newHistory = [...recentUserConversations, ...predefined];
-    }
-    
-    this.chatHistorySubject.next(newHistory);
-    
-    try {
-      this.storageService.saveChatHistory(newHistory);
-    } catch (error) {
-      console.error('Error guardando en storage:', error);
-    }
-  }
-
-  private addSystemMessage(textKey: string): void {
-    const translatedText = this.translationService.instant(textKey);
-    this.addMessage('system', translatedText);
-  }
-
-  private addUserMessage(text: string): void {
-    this.addMessage('user', text);
-  }
-
-  private addBotMessage(textKey: string, isStreaming: boolean = false, sources?: any[]): ChatMessage {
-    if (!isStreaming) {
-      const currentMessages = this.messagesSubject.value;
-      const filteredMessages = currentMessages.filter(m => 
-        !(m.isUser === false && m.isStreaming)
-      );
-      this.messagesSubject.next(filteredMessages);
-    }
-    
-    const translatedText = this.translationService.instant(textKey);
-    return this.addMessage('bot', translatedText, isStreaming, sources);
-  }
-
-  private addMessage(
-    sender: 'user' | 'bot' | 'system', 
-    text: string, 
-    isStreaming: boolean = false,
-    sources?: any[]
-  ): ChatMessage {
-    const newMessage: ChatMessage = {
-      id: Math.random().toString(36).substr(2, 9),
-      content: text,
-      text: text,
-      sender: sender,
-      isUser: sender === 'user',
-      timestamp: new Date(),
-      isStreaming,
-      sources: sources
-    };
-    
-    const currentMessages = this.messagesSubject.value;
-    this.messagesSubject.next([...currentMessages, newMessage]);
-    
-    return newMessage;
-  }
-
-  loadConversationFromHistory(conversationId: string): void {
-    const currentHistory = this.chatHistorySubject.value;
-    const conversation = currentHistory.find(item => item.id === conversationId);
-    
-    if (conversation && conversation.answer) {
-      const currentMessages = this.messagesSubject.value;
-      
-      const userMessage: ChatMessage = {
-        id: `history-user-${conversation.id}`,
-        content: conversation.question,
-        text: conversation.question,
-        sender: 'user',
-        isUser: true,
-        timestamp: conversation.timestamp
-      };
-      
-      const botMessage: ChatMessage = {
-        id: `history-bot-${conversation.id}`,
-        content: conversation.answer,
-        text: conversation.answer,
-        sender: 'bot',
-        isUser: false,
-        timestamp: new Date(conversation.timestamp.getTime() + 1000),
-        sources: conversation.sources ? this.messageParser.formatSources(conversation.sources) : undefined
-      };
-      
-      this.messagesSubject.next([...currentMessages, userMessage, botMessage]);
-    }
+  getPredefinedQuestions(): any[] {
+    return this.suggestionsService.getPredefinedQuestions();
   }
 
   loadPredefinedQuestion(question: string): void {
-    this.sendMessage(question);
+    if (!this.state.isProcessing) {
+      this.sendPredefinedQuestion(question, {});
+    }
   }
 
   async loadQuestionFromSidebar(question: string): Promise<void> {
-    const currentMessages = this.messagesSubject.value;
+    if (!this.canSendMessages()) {
+      return;
+    }
     
-    const userMessage: ChatMessage = {
-      id: `sidebar-${Date.now()}`,
-      content: question,
-      text: question,
-      sender: 'user',
-      isUser: true,
-      timestamp: new Date()
+    await this.sendMessage(question, {}, true, 'predefined');
+  }
+
+  sendPredefinedQuestion(question: string, customFilters: any = null): Promise<boolean> {
+    return this.sendMessage(question, customFilters, false, 'predefined');
+  }
+
+  sendUserQuestion(question: string, customFilters: any = null): Promise<boolean> {
+    return this.sendMessage(question, customFilters, false, 'user');
+  }
+
+  sendFeedback(message: ChatMessage, rating: 'up' | 'down' | null = null, comment: string = ''): void {
+    if (!message?.id) {
+      return;
+    }
+    
+    this.feedbackModule.sendFeedback(message, rating, comment);
+    
+    if (rating) {
+      const feedback = rating === 'up' ? 'like' : 'dislike';
+      this.conversationService.updateMessageFeedback(message.id, feedback);
+    }
+  }
+  
+  newChat(): void {
+    // 1. Crear nueva conversación
+    const newConversation = this.createNewConversation();
+    
+    // 2. Forzar sincronización del estado
+    setTimeout(() => {
+      this.state.clearMessages();
+      this.state.setProcessing(false);
+    }, 50);
+  }
+
+  testConnection(): void {
+    this.websocketModule.reconnect();
+  }
+
+  getDebugState(): any {
+    const currentConversation = this.getCurrentConversation();
+    const conversations = this.getConversations();
+    
+    const debugState = {
+      initializationComplete: this.initializationComplete,
+      isProcessing: this.state.isProcessing,
+      isConnected: this.isConnected(),
+      canSendMessages: this.canSendMessages(),
+      messageCount: this.state.messages.length,
+      conversationCount: conversations.length,
+      streamingActive: this.streamingModule.getIsAnimating(),
+      processingMessageId: this.processingMessageId,
+      currentStreamingMessage: this.state.currentStreamingMessage?.id,
+      filters: this.getCurrentFilters(),
+      engineStatus: this.engine['getStatus'] ? this.engine['getStatus']() : 'N/A',
+      processingTime: this.lastProcessingStartTime > 0 ? Date.now() - this.lastProcessingStartTime : 0,
+      currentConversationId: currentConversation?.id || 'none',
+      currentConversationTitle: currentConversation?.title || 'none',
+      currentConversationMessageCount: currentConversation?.messages.length || 0,
+      totalConversations: conversations.length,
+      totalMessagesInConversations: conversations.reduce((sum, conv) => sum + conv.messages.length, 0),
+      lastUserQuestion: this.lastUserQuestion,
+      lastStopData: this.lastStopData
     };
     
-    this.messagesSubject.next([...currentMessages, userMessage]);
+    return debugState;
+  }
+
+  isMessageBeingProcessed(messageId: string): boolean {
+    return this.processingMessageId === messageId && this.state.isProcessing;
+  }
+
+  // ============ MÉTODOS ADICIONALES PARA CONVERSACIONES ============
+
+  getConversationsInfo(): {
+    total: number;
+    activeConversation: string | null;
+    totalMessages: number;
+  } {
+    const conversations = this.getConversations();
+    const currentConversation = this.getCurrentConversation();
+    const totalMessages = conversations.reduce((sum, conv) => sum + conv.messages.length, 0);
     
-    if (this.websocketService.isWebSocketConnected()) {
-      await this.sendMessage(question, true);
-    } else {
-      this.addSystemMessage('CHAT.NOT_CONNECTED');
+    const info = {
+      total: conversations.length,
+      activeConversation: currentConversation?.id || null,
+      totalMessages: totalMessages
+    };
+    
+    return info;
+  }
+
+  exportConversations(): string {
+    const conversations = this.getConversations();
+    return JSON.stringify(conversations, null, 2);
+  }
+
+  importConversations(jsonString: string): boolean {
+    try {
+      const conversations = JSON.parse(jsonString);
+      
+      if (!Array.isArray(conversations)) {
+        throw new Error('Invalid conversations format');
+      }
+      
+      this.conversationService.clearAll();
+      
+      conversations.forEach((conversation) => {
+        const newConversation = this.conversationService.createConversation();
+        
+        this.conversationService.updateConversationMessages(
+          newConversation.id, 
+          conversation.messages || []
+        );
+        
+        if (conversation.title && conversation.title !== 'New Chat') {
+          this.conversationService.renameConversation(newConversation.id, conversation.title);
+        }
+      });
+      
+      return true;
+      
+    } catch (error) {
+      return false;
     }
-  } 
+  }
+  
+  
+    
+  simulateStopScenario(type: 'user' | 'predefined'): void {
+    const testMessage = type === 'user' 
+      ? 'Esta es una pregunta de usuario de prueba'
+      : '¿Cuáles son los síntomas del cáncer de pulmón?';
+    
+    const testData: StopRequestData = {
+      questionType: type,
+      questionContent: testMessage,
+      shouldRestoreToInput: type === 'user',
+      shouldCleanMessages: true
+    };
+    
+    console.log('🧪 Simulando escenario STOP:', testData);
+    this.stopRequested$.next(testData);
+  }
+  
 
   ngOnDestroy(): void {
-    this.stopStreamingAnimation();
-    this.websocketService.disconnect();
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.websocketModule.disconnect();
+    this.processingMessageId = null;
+    this.lastProcessingStartTime = 0;
+    this.lastUserQuestion = null;
+    this.lastStopData = null;
   }
 }
