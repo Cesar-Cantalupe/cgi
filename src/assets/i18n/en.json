@@ -96,7 +96,8 @@
     "NO_RECENT_CONVERSATIONS": "No recent conversations",
     "NO_MATCHING_QUESTIONS": "No questions found matching",
     "YOUR_CONVERSATIONS": "Your conversations...",
-    "ALL_QUESTIONS_ANSWERED": "All suggested questions have been answered"
+    "ALL_QUESTIONS_ANSWERED": "All suggested questions have been answered",
+    "DELETE_CONVERSATION_CONFIRM": "Are you sure you want to delete this conversation?"
   },
   "WELCOME": {
     "HELLO": "Hello",

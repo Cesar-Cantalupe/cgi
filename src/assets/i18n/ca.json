@@ -96,7 +96,8 @@
     "NO_RECENT_CONVERSATIONS": "Cap conversa recent",
     "NO_MATCHING_QUESTIONS": "No s'han trobat preguntes coincidents amb",
     "YOUR_CONVERSATIONS": "Les teves converses...",
-    "ALL_QUESTIONS_ANSWERED": "Totes les preguntes suggerides han estat respostes"
+    "ALL_QUESTIONS_ANSWERED": "Totes les preguntes suggerides han estat respostes",
+    "DELETE_CONVERSATION_CONFIRM": "Segur que vols eliminar aquesta conversa?"
   },
   "WELCOME": {
     "HELLO": "Hola",

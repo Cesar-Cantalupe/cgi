@@ -3,6 +3,7 @@ import { Subject, Subscription, firstValueFrom } from 'rxjs';
 import { ChatbotStateService } from '../core/chatbot-state.service';
 import { TypewriterModule } from './typewriter.module';
 import { ChatMessage } from '../interfaces/chat-message.interface';
+import { MessageParserService } from '../shared/message-parser.service';
 
 export interface StreamingCompleteData {
   content: string;
@@ -48,7 +49,8 @@ export class StreamingModule implements OnDestroy {
   constructor(
     private state: ChatbotStateService,
     private typewriter: TypewriterModule,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private messageParser: MessageParserService
   ) {
     console.log('🎬 StreamingModule creado');
   }
@@ -165,7 +167,7 @@ export class StreamingModule implements OnDestroy {
     this.clearAutoCancellation();
     
     this.accumulatedText = fullResponse;
-    this.finalSources = sources;
+    this.finalSources = this.messageParser.formatSources(sources || []);
     
     // Primero, actualizar el mensaje con el texto completo (sin animación)
     this.updateMessage(this.currentStreamId, {
@@ -422,7 +424,7 @@ export class StreamingModule implements OnDestroy {
       text: finalText,
       isStreaming: false,
       showFeedbackBox: true,
-      sources: sources,
+      sources: this.messageParser.formatSources(sources),
       _isProcessingPlaceholder: false,
       _streamingUpdate: Date.now(),
       _originalQuestionType: questionType

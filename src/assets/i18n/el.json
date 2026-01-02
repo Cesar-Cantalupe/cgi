@@ -96,7 +96,8 @@
     "NO_RECENT_CONVERSATIONS": "Δεν υπάρχουν πρόσφατες συνομιλίες",
     "NO_MATCHING_QUESTIONS": "Δεν βρέθηκαν ερωτήσεις που να ταιριάζουν με",
     "YOUR_CONVERSATIONS": "Οι συνομιλίες σας...",
-    "ALL_QUESTIONS_ANSWERED": "Όλες οι προτεινόμενες ερωτήσεις έχουν απαντηθεί"
+    "ALL_QUESTIONS_ANSWERED": "Όλες οι προτεινόμενες ερωτήσεις έχουν απαντηθεί",
+    "DELETE_CONVERSATION_CONFIRM": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη συνομιλία;"
   },
   "WELCOME": {
     "HELLO": "Γεια σας",

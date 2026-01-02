@@ -842,10 +842,6 @@ private createFallbackStopMessage(): ChatMessage {
     
     const result = isBotMessage && isComplete && hasContent && isNotSystemMessage && isNotError && canRegenerateNow;
     
-    if (result) {
-      console.log('🔄 Regenerate button should show for:', message.id);
-    }
-    
     return result;
   }
 
@@ -883,7 +879,6 @@ private createFallbackStopMessage(): ChatMessage {
 
   canSendMessages(): boolean {
     const result = this.chatbotService.canSendMessages();
-    console.log('📤 canSendMessages:', result);
     return result;
   }
   

@@ -13,6 +13,7 @@ import { FiltersModule } from './modules/filters.module';
 import { FeedbackModule } from './modules/feedback.module';
 import { ChatMessage } from './interfaces/chat-message.interface';
 import { Conversation } from './interfaces/conversation.interface';
+import { MessageParserService } from './shared/message-parser.service';
 
 // Interface para eventos de STOP
 export interface StopRequestData {
@@ -71,7 +72,8 @@ export class ChatbotService implements OnDestroy {
     private filtersModule: FiltersModule,
     private feedbackModule: FeedbackModule,
     private translationService: TranslationService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private messageParser: MessageParserService
   ) {
     // Observables del estado
     this.messages$ = this.state.messages$;
@@ -354,7 +356,7 @@ export class ChatbotService implements OnDestroy {
         content: m.content || m.text || '',
         sender: m.sender || (m.isUser ? 'user' : 'bot'),
         timestamp: m.timestamp || new Date(),
-        sources: m.sources || [],
+        sources: this.messageParser.formatSources(m.sources || []),
         feedback: m.feedback || null,
         isStreaming: false
       }));

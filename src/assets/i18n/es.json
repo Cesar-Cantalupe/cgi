@@ -96,7 +96,8 @@
     "NO_RECENT_CONVERSATIONS": "No hay conversaciones recientes",
     "NO_MATCHING_QUESTIONS": "No se encontraron preguntas que coincidan con",
     "YOUR_CONVERSATIONS": "Tus conversaciones...",
-    "ALL_QUESTIONS_ANSWERED": "Todas las preguntas sugeridas han sido respondidas"
+    "ALL_QUESTIONS_ANSWERED": "Todas las preguntas sugeridas han sido respondidas",
+    "DELETE_CONVERSATION_CONFIRM": "¿Seguro que quieres eliminar esta conversación?"
   },
   "WELCOME": {
     "HELLO": "Hola",
