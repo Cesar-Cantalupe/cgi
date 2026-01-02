@@ -1,14 +1,15 @@
-
+<!-- chatbot-sidebar.component.html -->
 <div class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" 
      *ngIf="sidebarExpanded" 
      (click)="toggleSidebar.emit()"></div>
 
 <div class="sidebar-container bg-bg-gray shadow-lg flex flex-col z-50
-            fixed md:sticky top-0 left-0 h-screen transition-all duration-300"
+            fixed md:sticky top-0 left-0 h-screen overflow-hidden transition-all duration-300"
      [class]="sidebarExpanded ? 'w-[280px] md:w-[320px]' : 'w-0 md:w-20'">
   
   <div class="flex flex-col h-full">
 
+    <!-- Botón para cerrar en móvil -->
     <div class="md:hidden flex justify-end p-4 border-b border-gray-100" *ngIf="sidebarExpanded">
       <button (click)="toggleSidebar.emit()" 
               class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
@@ -18,14 +19,17 @@
       </button>
     </div>
 
+    <!-- Botón Nuevo Chat -->
     <div class="p-4">
-      <button class="w-full border-2 border-[#37AAC4] rounded-lg px-4 py-3 flex items-center justify-center hover:border-[#CE3262] transition-colors group"
+      <button (click)="onNewChat()" 
+              class="w-full border-2 border-[#37AAC4] rounded-lg px-4 py-3 flex items-center justify-center hover:border-[#CE3262] transition-colors group"
               [class.justify-center]="!sidebarExpanded"
               [class.p-2]="!sidebarExpanded">
+        
         <svg class="w-5 h-5 text-[#37AAC4] group-hover:text-[#CE3262] transition-colors" 
              [class.mr-2]="sidebarExpanded" 
-             fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+             fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
         <span class="text-[#37AAC4] group-hover:text-[#CE3262] font-medium transition-colors" 
               [class.hidden]="!sidebarExpanded">
@@ -34,10 +38,11 @@
       </button>
     </div>
 
-    <div class="flex-1 flex flex-col min-h-0 p-4 border-b border-[#37AAC4]" 
-         [class.hidden]="!sidebarExpanded">
+    <!-- Historial de Chat y Búsqueda -->
+    <div class="flex-1 flex flex-col min-h-0 p-4 border-b border-[#37AAC4]" *ngIf="sidebarExpanded">
       <h3 class="text-sm font-medium text-gray-700 mb-3">{{ 'SIDEBAR.CHAT_HISTORY' | translate }}</h3>
-
+      
+      <!-- Búsqueda -->
       <div class="relative mb-4">
         <input type="text" 
                [placeholder]="'SIDEBAR.SEARCH_PLACEHOLDER' | translate"
@@ -47,111 +52,128 @@
         <button *ngIf="searchQuery" 
                 (click)="clearSearch()"
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
 
         <button *ngIf="!searchQuery" 
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
         </button>
       </div>
 
-<div class="flex-1 min-h-0 space-y-4 pr-1 overflow-y-auto">
-
-  <div *ngIf="hasUserConversations()" class="space-y-2">
-    <div class="text-xs text-gray-500 font-medium">{{ 'SIDEBAR.YOUR_CONVERSATIONS' | translate }}</div>
-    
-    <div *ngFor="let conversation of getUserConversations(); trackBy: trackByConversation" 
-         class="bg-white border border-gray-200 rounded-lg hover:border-[#37AAC4] hover:shadow-sm transition-all duration-200"
-         [class.border-[#37AAC4]]="searchQuery && (conversation.question.toLowerCase().includes(searchQuery.toLowerCase()) || (conversation.answer && conversation.answer.toLowerCase().includes(searchQuery.toLowerCase())))">
-      
-      <button (click)="onConversationClick(conversation)"
-              class="w-full text-left p-3">
-        <div class="flex items-start">
-
-          <div class="flex-shrink-0 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center mr-2 group-hover:bg-[#37AAC4] transition-colors">
-            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-          </div>
-
-          <div class="flex-1 min-w-0">
-      
-            <p class="text-xs font-medium text-gray-700 truncate" 
-               [class.text-[#37AAC4]]="searchQuery && conversation.question.toLowerCase().includes(searchQuery.toLowerCase())">
-              {{ conversation.question }}
-            </p>
-
-            <p *ngIf="conversation.answer" 
-               class="text-xs text-gray-500 mt-1 line-clamp-2"
-               [class.text-[#37AAC4]]="searchQuery && conversation.answer.toLowerCase().includes(searchQuery.toLowerCase())">
-              {{ conversation.answer }}
-            </p>
-
-            <div *ngIf="conversation.sources && conversation.sources.length > 0" 
-                 class="flex items-center mt-1">
-              <span class="text-xs text-gray-400">
-                {{ conversation.sources.length }} {{ 'SOURCES.REFERENCES' | translate }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </button>
-    </div>
-  </div>
-
-  <div class="space-y-2">
-    <div class="text-xs text-gray-500 font-medium">{{ 'SUGGESTIONS' | translate }}</div>
-    
-    <button *ngFor="let item of getPredefinedQuestions(); trackBy: trackByConversation" 
-        (click)="onPredefinedQuestionClick(item.question)"
-            class="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-[#37AAC4] hover:shadow-sm transition-all duration-200 group"
-            [class.border-[#37AAC4]]="searchQuery && item.question.toLowerCase().includes(searchQuery.toLowerCase())">
-      
-      <div class="flex items-start">
-
-        <div class="flex-shrink-0 w-6 h-6 bg-[#37AAC4] rounded-full flex items-center justify-center mr-2 group-hover:bg-[#CE3262] transition-colors">
-          <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
+      <!-- Lista de Conversaciones -->
+      <div class="flex-1 min-h-0 space-y-2 pr-1 overflow-y-auto">
         
-        <span class="text-xs text-gray-600 group-hover:text-[#37AAC4] transition-colors line-clamp-2"
-              [class.text-[#37AAC4]]="searchQuery && item.question.toLowerCase().includes(searchQuery.toLowerCase())">
-          {{ item.question }}
-        </span>
-      </div>
+        <div *ngIf="hasUserConversations()" class="space-y-2">
+  <div class="text-xs text-gray-500 font-medium">{{ 'SIDEBAR.YOUR_CONVERSATIONS' | translate }}</div>
+  
+  <div *ngFor="let conversation of getFilteredConversations(); trackBy: trackByConversation" 
+       class="flex items-center p-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors group"
+       [class.bg-gray-50]="isActiveConversation(conversation.id)"
+       [class.border-l-4]="isActiveConversation(conversation.id)"
+       [class.border-[#37AAC4]]="isActiveConversation(conversation.id)"
+       (click)="onConversationClick(conversation)">
+    
+    <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-[#37AAC4] transition-colors flex-shrink-0" 
+         [class.text-[#37AAC4]]="isActiveConversation(conversation.id)"
+         fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+    </svg>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-medium text-gray-700 truncate">
+        {{ getConversationTitle(conversation) }}
+      </p>
+      <p class="text-xs text-gray-500 mt-1 line-clamp-1">
+        {{ getConversationPreview(conversation) }}
+      </p>
+      <p class="text-xs text-gray-400 mt-1">
+        {{ formatDate(conversation.updatedAt) }}
+      </p>
+    </div>
+    
+    <!-- Botón de eliminar (solo en hover) -->
+    <button *ngIf="sidebarExpanded"
+            (click)="onDeleteConversation(conversation.id, $event)"
+            class="opacity-0 group-hover:opacity-100 ml-2 text-gray-400 hover:text-red-500 transition-all"
+            [attr.title]="'SIDEBAR.DELETE_CONVERSATION' | translate">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+      </svg>
     </button>
   </div>
-
-  <div *ngIf="searchQuery && filteredChatHistory.length === 0" 
-       class="text-center py-4">
-    <p class="text-xs text-gray-500">{{ 'SIDEBAR.NO_RESULTS' | translate }}</p>
-  </div>
 </div>
+        
+        <!-- Sugerencias (Igual para ambos sistemas) -->
+        <div class="space-y-2">
+          <div class="text-xs text-gray-500 font-medium">{{ 'Suggestions' | translate }}</div>
+  
+          <div *ngFor="let item of getFilteredPredefinedQuestions(); trackBy: trackByPredefinedQuestion" 
+              class="flex items-center p-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors group"
+              [class.opacity-50]="!canSendPredefinedQuestions() && !sidebarExpanded"
+              [class.cursor-not-allowed]="!canSendPredefinedQuestions() && !sidebarExpanded"
+              [class.hover:bg-transparent]="!canSendPredefinedQuestions() && !sidebarExpanded"
+              (click)="onPredefinedQuestionClick(item)">
+    
+                <svg class="w-4 h-4 mr-2 text-gray-400 group-hover:text-[#37AAC4] transition-colors flex-shrink-0" 
+                    [class.group-hover:text-gray-400]="!canSendPredefinedQuestions() && !sidebarExpanded"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                </svg>
+                <span class="text-sm text-gray-700 group-hover:text-[#37AAC4] transition-colors line-clamp-2 flex-1"
+                      [class.group-hover:text-gray-700]="!canSendPredefinedQuestions() && !sidebarExpanded">
+                  {{ item.questionText }}
+                </span>
+                
+                <!-- Indicador de no disponible -->
+                <div *ngIf="!canSendPredefinedQuestions() && sidebarExpanded" class="ml-2 text-xs text-gray-400">
+                  (...)
+                </div>
+              </div>
 
+              
+              <div *ngIf="getFilteredPredefinedQuestions().length === 0" 
+                  class="text-center text-gray-500 text-sm py-4">
+                {{ 'SIDEBAR.ALL_QUESTIONS_ANSWERED' | translate }}
+              </div>
+            </div>
+        
+        <!-- Mensaje de no resultados -->
+        <!-- En la sección de "Mensaje de no resultados", actualizar: -->
+          <div *ngIf="searchQuery && getFilteredConversations().length === 0 && getFilteredPredefinedQuestions().length === 0" 
+              class="text-center text-gray-500 text-sm py-4">
+            {{ 'SIDEBAR.NO_MATCHING_QUESTIONS' | translate }} "{{ searchQuery }}"
+          </div>
+
+      </div>
+
+      <!-- Botón Limpiar Historial -->
       <button (click)="clearHistory.emit()"
               class="w-full mt-4 border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg px-4 py-2 flex items-center justify-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors group">
-        <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        
+        <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors flex-shrink-0" 
+             fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
         {{ 'SIDEBAR.CLEAR_HISTORY' | translate }}
       </button>
     </div>
 
-    <div class="p-4 border-b border-[#37AAC4]">
-
-      <div [class.hidden]="!sidebarExpanded" class="flex items-center justify-between">
+    <!-- Perfil de Salud -->
+    <div class="p-6 border-b border-[#37AAC4] relative">
+      
+      <div *ngIf="sidebarExpanded" class="flex items-center justify-between">
         <h3 class="text-sm font-medium text-gray-700">{{ 'SIDEBAR.HEALTH_PROFILE' | translate }}</h3>
         <div class="flex items-center space-x-2">
-
+          
           <div class="relative inline-block w-10 mr-2">
             <input type="checkbox" [(ngModel)]="healthProfileEnabled" 
-                   (change)="healthProfileToggled.emit(healthProfileEnabled)"
+                   (ngModelChange)="onHealthProfileToggle($event)"
                    class="sr-only peer" id="health-toggle">
             <label for="health-toggle" 
                    class="block h-5 w-10 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out"
@@ -162,20 +184,24 @@
                     [class.translate-x-5]="healthProfileEnabled"></span>
             </label>
           </div>
-
+          
           <button class="text-[#CE3262] hover:text-[#37AAC4] transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+            
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
             </svg>
           </button>
         </div>
       </div>
-
-      <div [class.hidden]="sidebarExpanded" class="flex justify-center">
-        <button class="w-8 h-8 border-2 border-[#37AAC4] rounded-lg flex items-center justify-center hover:bg-[#CE3262] hover:border-[#CE3262] transition-colors group" 
+      
+      <!-- Versión colapsada -->
+      <div *ngIf="!sidebarExpanded" class="flex justify-center">
+        <button (click)="onHealthProfileIconClick()"
+                class="w-8 h-8 border-2 border-[#37AAC4] rounded-lg flex items-center justify-center hover:bg-[#CE3262] hover:border-[#CE3262] transition-colors group" 
                 [class.bg-[#CE3262]]="healthProfileEnabled" 
                 [attr.title]="'SIDEBAR.HEALTH_PROFILE' | translate">
-          <svg class="w-4 h-4 text-[#37AAC4] group-hover:text-white transition-colors" 
+          
+          <svg class="w-4 h-4 text-[#37AAC4] group-hover:text-white transition-colors flex-shrink-0" 
                 [class.text-white]="healthProfileEnabled" 
                 fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
@@ -184,54 +210,70 @@
       </div>
     </div>
 
+    <!-- Enlaces de Información -->
     <div class="p-4">
-
-      <div [class.hidden]="!sidebarExpanded">
+      
+      <div *ngIf="sidebarExpanded">
         <h3 class="text-sm font-medium text-gray-700 mb-3">{{ 'SIDEBAR.KNOW_MORE' | translate }}</h3>
         
         <div class="space-y-2">
-          <button class="w-full border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg px-4 py-2 flex justify-center items-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors group">
-            <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
+          <a href="https://www.cgiclinics.eu/" target="_blank" rel="noopener noreferrer" 
+             class="w-full border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg px-4 py-2 flex justify-center items-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors group">
+            
+            <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors flex-shrink-0" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
             </svg>
             {{ 'SIDEBAR.ABOUT_US' | translate }}
-          </button>
+          </a>
           
           <button class="w-full border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg px-4 py-2 flex justify-center items-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors group">
-            <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+            
+            <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors flex-shrink-0" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
             </svg>
             {{ 'SIDEBAR.FAQS' | translate }}
           </button>
           
           <button class="w-full border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg px-4 py-2 flex justify-center items-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors group">
-            <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+            
+            <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors flex-shrink-0" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
             </svg>
             {{ 'SIDEBAR.SOURCES' | translate }}
           </button>
         </div>
       </div>
-
-      <div [class.hidden]="sidebarExpanded" class="space-y-2">
-        <button class="w-8 h-8 border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg flex items-center justify-center hover:bg-[#CE3262] hover:border-[#CE3262] transition-colors mx-auto group" 
-                [attr.title]="'SIDEBAR.ABOUT_US' | translate">
-          <svg class="w-4 h-4 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
+      
+      <!-- Versión colapsada -->
+      <div *ngIf="!sidebarExpanded" class="space-y-2">
+        <a href="https://www.cgiclinics.eu/" target="_blank" rel="noopener noreferrer" 
+           class="w-8 h-8 border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg flex items-center justify-center hover:bg-[#CE3262] hover:border-[#CE3262] transition-colors mx-auto group" 
+           [attr.title]="'SIDEBAR.ABOUT_US' | translate">
+          
+          <svg class="w-4 h-4 group-hover:text-white transition-colors flex-shrink-0" 
+               fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
           </svg>
-        </button>
+        </a>
         
         <button class="w-8 h-8 border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg flex items-center justify-center hover:bg-[#CE3262] hover:border-[#CE3262] transition-colors mx-auto group" 
                 [attr.title]="'SIDEBAR.FAQS' | translate">
-          <svg class="w-4 h-4 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+          
+          <svg class="w-4 h-4 group-hover:text-white transition-colors flex-shrink-0" 
+               fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
           </svg>
         </button>
         
         <button class="w-8 h-8 border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg flex items-center justify-center hover:bg-[#CE3262] hover:border-[#CE3262] transition-colors mx-auto group" 
                 [attr.title]="'SIDEBAR.SOURCES' | translate">
-          <svg class="w-4 h-4 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+          
+          <svg class="w-4 h-4 group-hover:text-white transition-colors flex-shrink-0" 
+               fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
           </svg>
         </button>
       </div>

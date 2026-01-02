@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://educgi-backend-alb-441514687.eu-west-2.elb.amazonaws.com:443",
+    "target": "",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug",
@@ -9,3 +9,5 @@
     }
   }
 }
+
+

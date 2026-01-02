@@ -19,7 +19,7 @@ export class AuthService {
   public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
 
   constructor() {
-    // Check if user is already logged in (from localStorage)
+    
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       const user = JSON.parse(savedUser);
@@ -29,31 +29,43 @@ export class AuthService {
   }
 
   login(email: string, password: string): boolean {
-    // Check credentials - hardcoded for demo
+    /*
     if (email === 'test@gmail.com' && password === '20432043') {
       const user: User = {
         email: email,
         name: 'Usuario Test'
       };
-      
-      // Save to localStorage
+            
       localStorage.setItem('currentUser', JSON.stringify(user));
-      
-      // Update state
+            
       this.currentUserSubject.next(user);
       this.isAuthenticatedSubject.next(true);
       
       return true;
     }
-    
+    */
+
+    if (email === 'test@cgi.com' && password === '20252026') {
+      const user: User = {
+        email: email,
+        name: 'CGI Test'
+      };
+            
+      localStorage.setItem('currentUser', JSON.stringify(user));
+            
+      this.currentUserSubject.next(user);
+      this.isAuthenticatedSubject.next(true);
+      
+      return true;
+    }
+       
     return false;
   }
 
   logout(): void {
-    // Remove from localStorage
-    localStorage.removeItem('currentUser');
     
-    // Update state
+    localStorage.removeItem('currentUser');
+   
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
   }

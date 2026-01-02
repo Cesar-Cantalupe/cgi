@@ -1,13 +1,14 @@
-/* En tu archivo CSS */
-.message-content.streaming {
-  position: relative;
+/* chatbot-messages.component.css*/
+.messages-container {
+  scroll-behavior: smooth;
 }
 
-/* Cursor parpadeante */
-.message-content.streaming .message-text::after {
-  content: '▊';
-  animation: blink 1s infinite;
-  margin-left: 2px;
+.message-content {
+  position: relative;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-height: 1.2em; 
 }
 
 @keyframes blink {
@@ -15,7 +16,60 @@
   51%, 100% { opacity: 0; }
 }
 
-/* Indicador de escribiendo */
+@keyframes blink-smooth {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { 
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.streaming-cursor {
+  display: inline-block;
+  animation: blink 0.7s infinite;
+  color: #37AAC4;
+  font-weight: bold;
+  margin-left: 2px;
+  font-family: monospace;
+  vertical-align: baseline;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.2em;
+  margin-left: 2px;
+  background-color: currentColor;
+  animation: blink-smooth 1s infinite;
+  vertical-align: text-bottom;
+  opacity: 0.8;
+  border-radius: 1px;
+}
+
+.message-streaming .message-content {
+  min-height: 1.4em;
+  position: relative;
+}
+
+.streaming-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 .typing-indicator {
   display: flex;
   align-items: center;
@@ -42,14 +96,92 @@
 .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
 .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
 
-@keyframes typing-bounce {
-  0%, 80%, 100% { 
-    transform: scale(0);
-    opacity: 0.5;
+.message-content strong {
+  font-weight: 600;
+}
+
+.message-content em {
+  font-style: italic;
+}
+
+.message-content code {
+  background: rgba(0,0,0,0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.message-content a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.messages-container ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.messages-container li {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.messages-container li:last-child {
+  margin-bottom: 0;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap !important;
+}
+
+.break-words {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.font-sans {
+  font-family: system-ui, -apple-system, sans-serif !important;
+}
+
+.streaming-text {
+  display: inline;
+  transition: all 0.1s ease;
+}
+
+.inline-flow {
+  display: inline;
+}
+
+.typing-active {
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .streaming-text {
+    font-size: 0.95em;
+    line-height: 1.6;
   }
-  40% { 
-    transform: scale(1);
-    opacity: 1;
+  
+  .streaming-cursor {
+    font-size: 0.9em;
+  }
+    
+  .typing-cursor {
+    width: 6px;
+    height: 1.1em;
+    margin-left: 1px;
+  }
+  
+  .message-streaming .message-content {
+    min-height: 1.3em;
   }
 }
 
+.message-content .typing-cursor {
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

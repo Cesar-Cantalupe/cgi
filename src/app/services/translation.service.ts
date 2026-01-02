@@ -67,7 +67,8 @@ export class TranslationService {
       ).toPromise();
 
     } catch (error) {
-      console.error('Error cargando traducciones:', error);
+      console.error(this.getErrorMessage('TRANSLATION_LOAD_ERROR'), error);
+      throw new Error(this.getErrorMessage('TRANSLATION_LOAD_ERROR'));
     }
   }
 
@@ -128,16 +129,33 @@ export class TranslationService {
 
   waitForTranslations(): Promise<void> {
     return new Promise((resolve) => {
-      if (this.isInitialized) {
+      if (this.isInitialized && this.translations.value) {
         resolve();
       } else {
         const sub = this.translations$.subscribe(translations => {
-          if (translations) {
+          if (translations && Object.keys(translations).length > 0) {
+            this.isInitialized = true;
             sub.unsubscribe();
             resolve();
           }
         });
+        
+        setTimeout(() => {
+          if (!this.isInitialized) {
+            console.error(this.getErrorMessage('TRANSLATION_TIMEOUT_ERROR'));
+            sub.unsubscribe();
+            resolve();
+          }
+        }, 5000);
       }
     });
+  }
+
+  private getErrorMessage(errorKey: string): string {
+    const errorMessages: { [key: string]: string } = {
+      'TRANSLATION_LOAD_ERROR': 'Error loading translations',
+      'TRANSLATION_TIMEOUT_ERROR': 'Translation loading timeout'
+    };
+    return errorMessages[errorKey] || 'Unknown translation error';
   }
 }

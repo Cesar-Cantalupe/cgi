@@ -9,10 +9,15 @@ import { FooterComponent } from './components/footer/footer.component';
 import { HomeComponent } from './components/home/home.component';
 import { LoginFormComponent } from './components/login-form/login-form.component';
 import { ChatbotModule } from './components/chatbot/chatbot.module';
-import { SharedModule } from './shared/shared.module'; // ← Importar SharedModule
+import { SharedModule } from './shared/shared.module';
 import { AuthService } from './services/auth.service';
 import { AuthGuard } from './guards/auth.guard';
 import { TranslationService } from './services/translation.service';
+import { LinkGeneratorComponent } from './components/link-generator/link-generator.component';
+
+
+// ✅ SOLO este servicio necesitas proveer aquí
+import { ChatbotService } from './services/chatbot/chatbot.service';
 
 @NgModule({
   declarations: [
@@ -20,20 +25,22 @@ import { TranslationService } from './services/translation.service';
     HeaderComponent,
     FooterComponent,
     HomeComponent,
-    LoginFormComponent
+    LoginFormComponent,
+    LinkGeneratorComponent,
+  
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     FormsModule,        
     AppRoutingModule,   
-    ChatbotModule,
     SharedModule
   ],
   providers: [
     AuthService,        
     AuthGuard,
-    TranslationService           
+    TranslationService,     
+    ChatbotService  
   ],
   bootstrap: [AppComponent]
 })
