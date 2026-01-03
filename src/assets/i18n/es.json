@@ -81,7 +81,9 @@
     "LIKE_SENT": "Me gusta enviado",
     "LIKE_ACTION": "Me gusta esta respuesta",
     "DISLIKE_SENT": "No me gusta enviado",
-    "DISLIKE_ACTION": "No me gusta esta respuesta"
+    "DISLIKE_ACTION": "No me gusta esta respuesta",
+    "REGENERATE_RESPONSE": "Regenerar respuesta",
+    "STOP": "Detener"
   },
   "SIDEBAR": {
     "NEW_CHAT": "Nuevo chat",

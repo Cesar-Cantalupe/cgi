@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Conversation, StoredConversation } from '../interfaces/conversation.interface';
 import { ChatMessage } from '../interfaces/chat-message.interface';
@@ -11,6 +11,7 @@ export class ConversationService {
   
   public conversations$ = this.conversations.asObservable();
   public activeConversation$ = this.activeConversation.asObservable();
+  public conversationBlurred = new EventEmitter<Conversation>();
 
   constructor() {
     this.loadFromStorage();
@@ -58,6 +59,12 @@ export class ConversationService {
       return false;
     }
 
+    // Si había otra conversación seleccionada antes que esta, emite su evento de blurred
+    const prevActive = this.getActiveConversation();
+    if (prevActive && prevActive.id !== conversation.id) {
+      this.conversationBlurred.emit(prevActive);
+    }
+
     // Desactivar todas
     this.deactivateAll();
     
@@ -97,7 +104,7 @@ export class ConversationService {
 
     conversation.messages = messages.map(msg => this.normalizeMessage(msg, id));
     conversation.messageCount = messages.length;
-    conversation.updatedAt = new Date();
+    //conversation.updatedAt = new Date(); //Muestra la conversación arriba de todo en el sidebar
     conversation.preview = this.getConversationPreview(messages);
     
     this.saveToStorage();
@@ -134,8 +141,13 @@ export class ConversationService {
   }
 
   deleteConversation(id: string): boolean {
+    const toDelete = this.conversations.value.find(c => c.id === id);
     const conversations = this.conversations.value.filter(c => c.id !== id);
     if (conversations.length === this.conversations.value.length) return false;
+
+    if (toDelete && toDelete.isActive) {
+      this.conversationBlurred.emit(toDelete);
+    }
 
     this.conversations.next(conversations);
     

@@ -24,12 +24,13 @@ export class WebsocketService implements OnDestroy {
   private readonly PING_INTERVAL = 45000;
   private lastPingTime: number = 0;
   private lastPongTime: number = 0;
-  private readonly PONG_TIMEOUT = 10000;
+  private readonly PONG_TIMEOUT = 30000; // Aumentado de 10s a 30s para dar más margen al servidor
   private pingPongTimeoutId: any = null;
   private clientId: string = '';
   
   private pingCount = 0;
   private pongCount = 0;
+  private isPingAwaitingPong = false; // Rastrear si hay un PING sin responder
 
   public messages$ = this.messageSubject.asObservable();
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
@@ -142,16 +143,24 @@ export class WebsocketService implements OnDestroy {
     
     this.pingCount = 0;
     this.pongCount = 0;
+    this.isPingAwaitingPong = false;
   }
 
   private sendPing(): void {
     if (!this.isWebSocketConnected()) {
-      console.warn('ERRORS.PING_NOT_CONNECTED');
+      console.warn('⚠️ ERRORS.PING_NOT_CONNECTED');
+      return;
+    }
+    
+    // Si hay un PING sin respuesta, no enviar otro
+    if (this.isPingAwaitingPong) {
+      console.warn('⚠️ Hay un PING sin respuesta, esperando PONG...');
       return;
     }
     
     this.pingCount++;
     this.lastPingTime = Date.now();
+    this.isPingAwaitingPong = true; // Marcar que esperamos PONG
     
     const pingMessage: PingMessage = {
       type: 'ping',
@@ -172,12 +181,13 @@ export class WebsocketService implements OnDestroy {
 
   private handlePongMessage(pongData: any): void {
     if (!pongData || pongData.type !== 'pong') {
-      console.warn('ERRORS.INVALID_PONG_FORMAT', pongData);
+      console.warn('⚠️ ERRORS.INVALID_PONG_FORMAT', pongData);
       return;
     }
     
     this.pongCount++;
     this.lastPongTime = Date.now();
+    this.isPingAwaitingPong = false; // Marcamos que recibimos PONG
     
     if (this.pingPongTimeoutId) {
       clearTimeout(this.pingPongTimeoutId);
@@ -187,6 +197,8 @@ export class WebsocketService implements OnDestroy {
     const pingTime = this.lastPingTime;
     const pongTime = this.lastPongTime;
     const latency = pongTime - pingTime;
+    
+    console.log('✅ PONG recibido con latencia:', latency, 'ms');
     
     this.messageSubject.next({
       type: 'pong',
@@ -202,11 +214,19 @@ export class WebsocketService implements OnDestroy {
       clearTimeout(this.pingPongTimeoutId);
     }
     
+    // Solo setup timeout si hay un PING esperando PONG
+    if (!this.isPingAwaitingPong) {
+      return;
+    }
+    
+    console.log('⏳ Setup PONG timeout - esperando respuesta del servidor...');
+    
     this.pingPongTimeoutId = setTimeout(() => {
-      console.warn('ERRORS.PONG_TIMEOUT', this.PONG_TIMEOUT);
+      console.warn('⚠️ ERRORS.PONG_TIMEOUT', this.PONG_TIMEOUT, 'ms');
       
       if (this.isWebSocketConnected()) {
-        console.warn('ERRORS.RECONNECT_DUE_TO_PONG_TIMEOUT');
+        console.warn('⚠️ ERRORS.RECONNECT_DUE_TO_PONG_TIMEOUT');
+        this.isPingAwaitingPong = false;
         this.reconnect();
       }
     }, this.PONG_TIMEOUT);

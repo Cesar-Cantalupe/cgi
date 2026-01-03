@@ -81,7 +81,9 @@
     "LIKE_SENT": "Gefällt mir gesendet",
     "LIKE_ACTION": "Diese Antwort gefällt mir",
     "DISLIKE_SENT": "Gefällt mir nicht gesendet",
-    "DISLIKE_ACTION": "Diese Antwort gefällt mir nicht"
+    "DISLIKE_ACTION": "Diese Antwort gefällt mir nicht",
+    "REGENERATE_RESPONSE": "Antwort neu generieren",
+    "STOP": "Stoppen"
   },
   "SIDEBAR": {
     "NEW_CHAT": "Neuer Chat",

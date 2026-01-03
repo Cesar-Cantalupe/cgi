@@ -283,17 +283,39 @@ export class ChatbotStateService {
 
   /**
    * Limpia mensajes de streaming activos
+   * CORREGIDO: Mantiene mensajes con contenido, solo elimina placeholders vacíos
    */
   cleanupActiveStreamingMessages(): number {
     const streamingMessages = this.messages.filter(m => m.isStreaming);
     
     if (streamingMessages.length > 0) {
+      let removed = 0;
+      let preserved = 0;
+      
       streamingMessages.forEach(msg => {
-        this.removeMessage(m => m.id === msg.id);
+        const hasContent = msg.content && msg.content.trim().length > 0;
+        
+        if (hasContent) {
+          // Mantener el mensaje pero cambiar isStreaming a false
+          console.log(`💾 Manteniendo contenido de streaming:`, {
+            id: msg.id?.substring(0, 20),
+            contentLength: msg.content?.length
+          });
+          
+          // Actualizar el mensaje in-place
+          msg.isStreaming = false;
+          msg._isProcessingPlaceholder = false;
+          preserved++;
+        } else {
+          // Eliminar solo si está vacío
+          console.log(`🗑️ Eliminando mensaje de streaming vacío:`, msg.id?.substring(0, 20));
+          this.removeMessage(m => m.id === msg.id);
+          removed++;
+        }
       });
       
-      console.log(`🗑️ Limpiados ${streamingMessages.length} mensajes de streaming`);
-      return streamingMessages.length;
+      console.log(`🧹 Limpieza de streaming: ${preserved} preservados, ${removed} eliminados`);
+      return removed;
     }
     
     return 0;

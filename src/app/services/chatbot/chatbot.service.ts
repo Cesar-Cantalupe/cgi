@@ -64,7 +64,7 @@ export class ChatbotService implements OnDestroy {
 
   constructor(
     private state: ChatbotStateService,
-    private engine: ChatbotEngineService,
+    public engine: ChatbotEngineService,
     private conversationService: ConversationService,
     private suggestionsService: SuggestionsService,
     private websocketModule: WebsocketModule,
@@ -497,8 +497,6 @@ export class ChatbotService implements OnDestroy {
     }, 10000);
   }
 
-  // ============ MÉTODOS PARA CONVERSACIONES ============
-
   getConversations(): Conversation[] {
     return this.conversationService.getConversations();
   }
@@ -791,6 +789,34 @@ export class ChatbotService implements OnDestroy {
 
   isMessageBeingProcessed(messageId: string): boolean {
     return this.processingMessageId === messageId && this.state.isProcessing;
+  }
+
+  /**
+   * Elimina mensajes de streaming (placeholders) de la conversación actual
+   */
+  removeStreamingPlaceholders(): void {
+    const messages = this.state.messages;
+    const streamingMessages = messages.filter(m => m.isStreaming);
+    streamingMessages.forEach(msg => {
+      if (msg.id) {
+        this.state.removeMessage(m => m.id === msg.id);
+      }
+    });
+  }
+
+  /**
+   * Cancela cualquier stream pendiente o activo al cambiar de conversación
+   */
+  cancelAllStreamsOnConversationChange(): void {
+    if (this.streaming && typeof this.streaming.cancelStream === 'function') {
+      this.streaming.cancelStream('user_request');
+    }
+    if (this.websocket && typeof this.websocket.cancelCurrentQuery === 'function') {
+      this.websocket.cancelCurrentQuery();
+    }
+    if (typeof this.removeStreamingPlaceholders === 'function') {
+      this.removeStreamingPlaceholders();
+    }
   }
 
   // ============ MÉTODOS ADICIONALES PARA CONVERSACIONES ============

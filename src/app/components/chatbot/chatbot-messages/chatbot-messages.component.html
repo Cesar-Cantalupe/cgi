@@ -131,22 +131,11 @@
           
           <!-- Controles (regenerar/detener) - REEMPLAZADO TEMPORALMENTE PARA DEBUG -->
           <div class="flex items-center gap-2 ml-auto">
-            <!-- Botón STOP solo para streaming activo reciente -->
-            <button *ngIf="shouldShowStopButton(message) && hasRecentStreamingUpdate(message)"
-                   (click)="onStopResponse()"
-                    class="px-3 py-1.5 text-xs font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-1.5"
-                    title="Detener respuesta">
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <rect x="5" y="5" width="10" height="10" rx="1"/>
-              </svg>
-              
-            </button>
-            
             <!-- Botón Regenerate -->
             <button *ngIf="shouldShowRegenerateButton(message)"
                     (click)="onRegenerateMessage(message)"
                     class="px-3 py-1.5 text-xs font-medium bg-[#37AAC4] text-white rounded-lg hover:bg-[#2a8a9f] transition-colors flex items-center gap-1.5"
-                    title="Regenerar respuesta">
+                    title="{{ 'FEEDBACK.REGENERATE_RESPONSE' | translate }}">
               <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
               </svg>
@@ -201,6 +190,20 @@
           <span class="text-sm md:text-base font-medium">{{ getMessageText(message) }}</span>
         </div>
       </div>
+    </div>
+
+    <!-- Botón STOP FUERA del loop - solo se renderiza cuando hay streaming activo -->
+    <div *ngIf="currentStreamingMessage && shouldShowStopButton(currentStreamingMessage)" 
+         class="flex mt-4">
+      <button (click)="onStopButton(currentStreamingMessage)"
+              type="button"
+              class="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 cursor-pointer"
+              title="Detener respuesta">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <rect x="5" y="5" width="10" height="10" rx="1"/>
+        </svg>
+        {{ 'FEEDBACK.STOP' | translate }}
+      </button>
     </div>
   </div>
 </div>

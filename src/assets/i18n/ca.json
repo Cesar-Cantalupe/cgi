@@ -81,7 +81,9 @@
     "LIKE_SENT": "M'agrada enviat",
     "LIKE_ACTION": "M'agrada aquesta resposta",
     "DISLIKE_SENT": "No m'agrada enviat",
-    "DISLIKE_ACTION": "No m'agrada aquesta resposta"
+    "DISLIKE_ACTION": "No m'agrada aquesta resposta",
+    "REGENERATE_RESPONSE": "Regenerar resposta",
+    "STOP": "Aturar"
   },
   "SIDEBAR": {
     "NEW_CHAT": "Nova xerrada",

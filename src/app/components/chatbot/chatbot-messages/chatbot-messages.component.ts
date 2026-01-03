@@ -30,7 +30,7 @@ interface FeedbackState {
   selector: 'app-chatbot-messages',
   templateUrl: './chatbot-messages.component.html',
   styleUrls: ['./chatbot-messages.component.css'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None
 })
 export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
@@ -54,6 +54,7 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
   feedbackStates = new Map<string, FeedbackState>();
     
   filteredMessages: ChatMessage[] = [];
+  currentStreamingMessage: ChatMessage | null = null;
   
   // Cache para última pregunta de usuario
   private lastUserQuestion: {
@@ -105,9 +106,6 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
         newCount: changes['messages'].currentValue?.length || 0
       });
       
-      // DEBUG CRÍTICO: Verificar el estado de streaming de cada mensaje
-      this.debugStreamingMessages();
-      
       // Limpiar estados de streaming obsoletos
       this.cleanupOldStreamingStates();
       
@@ -120,19 +118,20 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
       // Actualizar cache de última pregunta
       this.updateLastUserQuestionCache();
       
-      // DEPURACIÓN: Verificar si hay streaming activo
-      this.debugStreamingState();
+      // Actualizar currentStreamingMessage (para mostrar botón STOP fuera del loop)
+      this.currentStreamingMessage = this.findCurrentStreamingMessage();
       
       // Resetear contador de STOP si los mensajes cambiaron
       this.stopRetryCount = 0;
+      
+      // Marcar para re-check SOLO si el array realmente cambió
+      this.cdr.markForCheck();
     }
     
     if (changes['isProcessing']) {
       console.log('⚙️ Estado procesamiento:', this.isProcessing);
+      this.cdr.markForCheck();
     }
-    
-    // Forzar actualización
-    this.cdr.detectChanges();
   }
   
   // ============ SISTEMA UNIFICADO DE STOP MEJORADO ============
@@ -286,34 +285,63 @@ private createFallbackStopMessage(): ChatMessage {
       return;
     }
     
-    // MODIFICACIÓN: Mantener TODOS los mensajes importantes
-    this.filteredMessages = this.messages.filter(message => {
-      // Mantener todos los mensajes no-streaming
-      if (!message.isStreaming) return true;
+    // OPTIMIZACIÓN: Solo recrear el array si realmente cambió la longitud
+    // o si hay nuevos mensajes (no solo actualizaciones de streaming)
+    const newFilteredMessages = this.messages.filter(message => {
+      const sender = this.getMessageSender(message);
       
-      // Mantener TODOS los mensajes de bot en streaming (para STOP)
-      if (this.getMessageSender(message) === 'bot') {
+      // REGLA 1: Mensajes del USUARIO siempre se muestran
+      if (sender === 'user') {
         return true;
       }
       
-      // Para mensajes de usuario en streaming, usar lógica normal
-      const hasContent = !!(message.content || message.text);
-      const isPlaceholder = message._isProcessingPlaceholder && !hasContent;
-      
-      if (isPlaceholder) {
-        console.log('🗑️ Filtrando placeholder vacío (usuario):', message.id);
-        return false;
+      // REGLA 2: Mensajes del SISTEMA siempre se muestran
+      if (sender === 'system') {
+        return true;
       }
       
+      // REGLA 3: Mensajes del BOT - lógica especial
+      if (sender === 'bot') {
+        // 3a. Si NO está en streaming, siempre mostrar
+        if (!message.isStreaming) {
+          return true;
+        }
+        
+        // 3b. Si está en streaming, verificar si tiene contenido
+        const hasContent = !!(message.content || message.text);
+        
+        // 3c. Si es placeholder vacío, ocultar
+        if (message._isProcessingPlaceholder && !hasContent) {
+          return false;
+        }
+        
+        // 3d. Si está en streaming con contenido, mostrar
+        return true;
+      }
+
+      // Por defecto, mostrar
       return true;
     });
     
-    console.log('📊 filteredMessages actualizadas:', {
-      total: this.filteredMessages.length,
-      streaming: this.filteredMessages.filter(m => m.isStreaming).length,
-      botMessages: this.filteredMessages.filter(m => this.getMessageSender(m) === 'bot').length,
-      userMessages: this.filteredMessages.filter(m => this.getMessageSender(m) === 'user').length
+    // Solo actualizar si el array realmente cambió
+    // Comparar longitud y IDs para evitar re-renders innecesarios
+    const lengthChanged = this.filteredMessages.length !== newFilteredMessages.length;
+    const idsChanged = this.filteredMessages.some((m, i) => m.id !== newFilteredMessages[i]?.id);
+
+    //Si cambió el content de alguno de los mensajes
+    const contentChanged = this.filteredMessages.some((m, i) => {
+      const oldContent = m.content || m.text || '';
+      const newContent = newFilteredMessages[i]?.content || newFilteredMessages[i]?.text || '';
+      return oldContent !== newContent;
     });
+    
+    if (lengthChanged || idsChanged || contentChanged) {
+      this.filteredMessages = newFilteredMessages;
+      console.log('📊 filteredMessages realmente actualizadas:', {
+        total: this.filteredMessages.length,
+        streaming: this.filteredMessages.filter(m => m.isStreaming).length
+      });
+    }
   }
   
   // ============ MÉTODO SIMPLIFICADO PARA OBTENER TEXTO ============
@@ -404,11 +432,9 @@ private createFallbackStopMessage(): ChatMessage {
   trackByMessage(index: number, message: ChatMessage): string {
     if (!message) return `null-${index}`;
     
-    // Usar ID y timestamp de streaming para forzar re-render
-    const streamingUpdate = message._streamingUpdate || 0;
-    const contentHash = (message.content || message.text || '').length;
-    
-    return `${message.id}-${streamingUpdate}-${contentHash}`;
+    // Usar SOLO el ID, no el _streamingUpdate
+    // Esto evita que se re-renderice cada chunk del streaming
+    return message.id || `index-${index}`;
   }
   
   // ============ FEEDBACK METHODS ============
@@ -548,6 +574,37 @@ private createFallbackStopMessage(): ChatMessage {
     }
     this.regenerate.emit(message);
   }
+
+  onStopButton(message: ChatMessage): void {
+    console.log('🛑 ============ STOP BUTTON CLICKED ============');
+    console.log('Message ID:', message?.id);
+    console.log('Message sender:', message?.sender);
+    console.log('Message isStreaming:', message?.isStreaming);
+    
+    if (!message) {
+      console.error('❌ Message es null/undefined');
+      return;
+    }
+    
+    // Construir el evento con la información del mensaje
+    const stopEvent = {
+      message: message,
+      questionType: (message as any)._originalQuestionType || 'user',
+      questionContent: this.findLastUserMessage()?.content || '',
+      shouldRestoreToInput: false
+    };
+    
+    console.log('📤 EMITIENDO EVENTO STOP CON DATOS:', {
+      messageId: stopEvent.message.id,
+      questionType: stopEvent.questionType,
+      contentPreview: stopEvent.questionContent?.substring(0, 50)
+    });
+    
+    // Emitir el evento
+    this.stop.emit(stopEvent);
+    
+    console.log('✅ EVENTO EMITIDO EXITOSAMENTE');
+  }
   
   // ============ MÉTODOS MEJORADOS PARA SISTEMA UNIFICADO ============
   
@@ -557,24 +614,61 @@ private createFallbackStopMessage(): ChatMessage {
   ): void {
     console.log('🎨 Realizando limpieza visual inmediata...', {
       hasStreamingMessage: !!streamingMessage,
-      questionType
+      questionType,
+      streamingMessageContent: streamingMessage?.content?.substring(0, 50)
     });
     
     const beforeCount = this.filteredMessages.length;
     
-    // 1. Remover mensaje de streaming actual si existe
-    if (streamingMessage) {
-      this.filteredMessages = this.filteredMessages.filter(m => 
-        m.id !== streamingMessage.id
-      );
+    // CORRECCIÓN: NO eliminar el mensaje de streaming
+    // En su lugar, mantener el contenido y solo cambiar isStreaming a false
+    
+    // 1. Si hay mensaje de streaming con contenido, mantenerlo pero marcar como NO streaming
+    if (streamingMessage && streamingMessage.content && streamingMessage.content.trim()) {
+      console.log('💾 Manteniendo contenido del mensaje de streaming:', {
+        id: streamingMessage.id,
+        contentLength: streamingMessage.content.length,
+        preview: streamingMessage.content.substring(0, 100)
+      });
+      
+      // Buscar el mensaje en filteredMessages y actualizar su estado
+      const messageIndex = this.filteredMessages.findIndex(m => m.id === streamingMessage.id);
+      if (messageIndex !== -1) {
+        this.filteredMessages[messageIndex] = {
+          ...this.filteredMessages[messageIndex],
+          isStreaming: false,
+          _isProcessingPlaceholder: false
+        };
+        console.log('✅ Mensaje actualizado a NO streaming pero con contenido preservado');
+      }
+    } else {
+      // Solo si NO hay contenido, entonces eliminar el mensaje
+      if (streamingMessage) {
+        console.log('🗑️ Eliminando mensaje de streaming vacío');
+        this.filteredMessages = this.filteredMessages.filter(m => 
+          m.id !== streamingMessage.id
+        );
+      }
+      
+      // También remover otros mensajes de bot en streaming SIN contenido
+      const messagesToRemove: string[] = [];
+      this.filteredMessages = this.filteredMessages.filter(m => {
+        const isStreamingBot = m.isStreaming && this.getMessageSender(m) === 'bot';
+        const hasNoContent = !m.content || !m.content.trim();
+        
+        if (isStreamingBot && hasNoContent) {
+          messagesToRemove.push(m.id || 'unknown');
+          return false;
+        }
+        return true;
+      });
+      
+      if (messagesToRemove.length > 0) {
+        console.log('🗑️ Mensajes de streaming vacíos removidos:', messagesToRemove);
+      }
     }
     
-    // 2. También remover cualquier otro mensaje de bot en streaming
-    this.filteredMessages = this.filteredMessages.filter(m => 
-      !(m.isStreaming && this.getMessageSender(m) === 'bot')
-    );
-    
-    // 3. Si es pregunta predefinida, también remover la pregunta del usuario
+    // 2. Si es pregunta predefinida, también remover la pregunta del usuario
     if (questionType === 'predefined') {
       const lastUserMessage = this.findLastUserMessage();
       if (lastUserMessage && (lastUserMessage as any)._isPredefinedQuestion) {
@@ -587,7 +681,7 @@ private createFallbackStopMessage(): ChatMessage {
     
     const removedCount = beforeCount - this.filteredMessages.length;
     
-    // 4. Forzar actualización de UI
+    // 3. Forzar actualización de UI
     this.cdr.detectChanges();
     
     console.log('✅ Limpieza visual completada. Mensajes removidos:', removedCount);
@@ -863,16 +957,16 @@ private createFallbackStopMessage(): ChatMessage {
     
     const result = isBotMessage && (isStreaming || wasRecentlyStreaming);
     
-    if (result) {
-      console.log('🛑 STOP Button SHOULD SHOW for:', {
-        id: message.id?.substring(0, 20),
-        isBotMessage,
-        isStreaming,
-        wasRecentlyStreaming,
-        timeSinceUpdate: Math.round(timeSinceUpdate / 1000) + 's',
-        contentLength: message.content?.length
-      });
-    }
+    // if (result) {
+    //   console.log('🛑 STOP Button SHOULD SHOW for:', {
+    //     id: message.id?.substring(0, 20),
+    //     isBotMessage,
+    //     isStreaming,
+    //     wasRecentlyStreaming,
+    //     timeSinceUpdate: Math.round(timeSinceUpdate / 1000) + 's',
+    //     contentLength: message.content?.length
+    //   });
+    // }
     
     return result;
   }
@@ -915,13 +1009,13 @@ private createFallbackStopMessage(): ChatMessage {
     // Considerar "reciente" si se actualizó en los últimos 15 segundos
     const isRecent = timeSinceUpdate < 15000;
     
-    console.log('⏰ Recent streaming check:', {
-      id: message.id?.substring(0, 20),
-      isStreaming: message.isStreaming,
-      lastUpdate,
-      timeSinceUpdate: Math.round(timeSinceUpdate / 1000) + 's',
-      isRecent
-    });
+    // console.log('⏰ Recent streaming check:', {
+    //   id: message.id?.substring(0, 20),
+    //   isStreaming: message.isStreaming,
+    //   lastUpdate,
+    //   timeSinceUpdate: Math.round(timeSinceUpdate / 1000) + 's',
+    //   isRecent
+    // });
     
     return isRecent;
   }

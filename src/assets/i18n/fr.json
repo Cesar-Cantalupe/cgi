@@ -81,7 +81,9 @@
     "LIKE_SENT": "J'aime envoyé",
     "LIKE_ACTION": "J'aime cette réponse",
     "DISLIKE_SENT": "Je n'aime pas envoyé",
-    "DISLIKE_ACTION": "Je n'aime pas cette réponse"
+    "DISLIKE_ACTION": "Je n'aime pas cette réponse",
+    "REGENERATE_RESPONSE": "Régénérer la réponse",
+    "STOP": "Arrêter"
   },
   "SIDEBAR": {
     "NEW_CHAT": "Nouvelle conversation",

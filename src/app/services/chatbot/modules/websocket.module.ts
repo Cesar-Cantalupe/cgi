@@ -61,6 +61,7 @@ export class WebsocketModule implements OnDestroy {
       throw new Error('WebSocket not connected');
     }
     
+    // Preparar nuevo estado
     this.currentQuestion = query;
     this.streamingActive = true;
     
@@ -72,6 +73,7 @@ export class WebsocketModule implements OnDestroy {
     };
     
     this.websocket.sendMessage(message);
+    console.log('✅ Query enviado:', { query, streamingActive: this.streamingActive });
   }
 
   cancelCurrentQuery(): void {
@@ -100,6 +102,17 @@ export class WebsocketModule implements OnDestroy {
     setTimeout(() => {
       this.initialize();
     }, 1000);
+  }
+
+  forceReset(): void {
+    console.log('⚠️ FORCE RESET solicitado en WebsocketModule');
+    this.resetStreamState();
+    
+    // Verificar estado de conexión
+    if (!this.isConnected()) {
+      console.log('⚠️ Conexión caída detectada en forceReset, reconectando...');
+      this.reconnect();
+    }
   }
 
   disconnect(): void {
@@ -167,17 +180,32 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private handleStreamStart(event: WebsocketEvent): void {
+    console.log('📨 Stream START recibido:', {
+      clientId: event['client_id'],
+      currentQuestion: this.currentQuestion,
+      isStreaming: this.streaming.isStreaming(),
+      streamingActive: this.streamingActive
+    });
+    
     if (event['client_id']) {
       this.state.setClientId(event['client_id']);
     }
     
     if (!this.streaming.isStreaming()) {
+      console.log('✅ Iniciando nuevo stream para:', this.currentQuestion);
       this.streaming.startStream(this.currentQuestion);
+    } else {
+      console.warn('⚠️ Ya hay un stream activo, ignorando nuevo stream_start');
     }
   }
 
   private handleStreamChunk(event: WebsocketEvent): void {
     if (!this.streamingActive) {
+      console.warn('⚠️ stream_chunk recibido pero streamingActive=false, ignorando:', {
+        chunk_preview: event['chunk']?.substring(0, 50),
+        streamingActive: this.streamingActive,
+        currentQuestion: this.currentQuestion
+      });
       return;
     }
     
@@ -188,15 +216,32 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private handleStreamEnd(event: WebsocketEvent): void {
-    if (!this.streamingActive) {
+    console.log('📨 Stream END recibido:', {
+      streamingActive: this.streamingActive,
+      isStreaming: this.streaming.isStreaming(),
+      fullResponse_length: event['full_response']?.length || 0,
+      currentQuestion: this.currentQuestion?.substring(0, 50)
+    });
+    
+    // Verificar si hay un stream activo en streaming.module
+    const hasActiveStream = this.streaming.isStreaming();
+    
+    if (!this.streamingActive && !hasActiveStream) {
+      console.warn('⚠️ Stream END recibido pero no hay stream activo (streamingActive=false e isStreaming=false)');
       return;
     }
     
     const fullResponse = event['full_response'] || '';
     const sources = event['sources'] || [];
     
+    console.log('✅ Completando stream con respuesta:', {
+      length: fullResponse.length,
+      sourcesCount: sources.length
+    });
+    
     this.streaming.completeStream(fullResponse, sources)
       .then(() => {
+        console.log('✅ completeStream() completado, reseteando stream state');
         this.resetStreamState();
       })
       .catch(error => {
@@ -221,10 +266,19 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private resetStreamState(): void {
+    console.log('🔄 Reseteando stream state:', {
+      streamingActive_before: this.streamingActive,
+      currentQuestion_before: this.currentQuestion,
+      isStreaming: this.streaming.isStreaming()
+    });
     this.streamingActive = false;
     this.currentQuestion = '';
     this.state.setProcessing(false);
     this.state.setClientId(null);
+    console.log('✅ Stream state reseteado:', {
+      streamingActive_after: this.streamingActive,
+      currentQuestion_after: this.currentQuestion
+    });
   }
 
   // ============ MÉTODOS UTILITARIOS ============

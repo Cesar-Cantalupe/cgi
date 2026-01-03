@@ -81,7 +81,9 @@
     "LIKE_SENT": "Liked",
     "LIKE_ACTION": "Like this response",
     "DISLIKE_SENT": "Disliked",
-    "DISLIKE_ACTION": "Dislike this response"
+    "DISLIKE_ACTION": "Dislike this response",
+    "REGENERATE_RESPONSE": "Regenerate response",
+    "STOP": "Stop"
   },
   "SIDEBAR": {
     "NEW_CHAT": "New chat",

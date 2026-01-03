@@ -43,7 +43,13 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private conversationService: ConversationService
-  ) {}
+  ) {
+    // Cuando se cambia de conversación y había un request en curso, lo detiene
+    this.conversationService.conversationBlurred.subscribe(() => {
+      this.chatbotService.streaming.cancelStream();
+      this.chatbotService.removeStreamingPlaceholders();
+    });
+  }
 
   ngOnInit(): void {    
     this.initialize();
@@ -185,7 +191,17 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   }
 
   onConversationClick(conversation: Conversation): void {
-    this.conversationService.selectConversation(conversation.id);
+    if (this.activeConversationId == conversation.id){
+      return;
+    }
+    // Cancelar cualquier stream pendiente antes de cambiar
+    if (this.chatbotService.cancelAllStreamsOnConversationChange) {
+      this.chatbotService.cancelAllStreamsOnConversationChange();
+    } else {
+      // Fallback: cancelar stream activo y placeholders
+      this.chatbotService.streaming.cancelStream();
+      this.chatbotService.removeStreamingPlaceholders();
+    }
     this.conversationSelected.emit(conversation.id);
     this.handleMobileSidebar();
   }

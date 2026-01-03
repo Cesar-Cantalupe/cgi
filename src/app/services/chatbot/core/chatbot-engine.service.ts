@@ -156,6 +156,89 @@ export class ChatbotEngineService implements OnDestroy {
       return false;
     }
   }
+
+  /**
+   * Método especial para regeneración que reutiliza el mensaje de usuario existente
+   */
+  async regenerateResponse(
+    message: string,
+    existingUserMessageId: string,
+    customFilters: any = null,
+    questionType: 'user' | 'predefined' = 'user'
+  ): Promise<boolean> {
+    console.log('🔄 ChatbotEngineService.regenerateResponse:', {
+      message: message.substring(0, 50),
+      existingUserMessageId,
+      questionType
+    });
+    
+    if (!this.canSendMessage()) {
+      console.warn('❌ No se puede enviar mensaje para regeneración');
+      return false;
+    }
+    
+    try {
+      // Reutilizar el ID del mensaje existente
+      this.lastUserMessage = message;
+      this.lastUserMessageId = existingUserMessageId; // NO crear nuevo ID
+      this.currentQuestionType = questionType;
+      
+      this.lastQuestionData = {
+        content: message,
+        id: existingUserMessageId,
+        type: questionType,
+        timestamp: Date.now()
+      };
+      
+      this.state.setProcessing(true);
+      
+      const streamingMessageId = `stream-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      console.log('📝 Creando nuevo mensaje de streaming para regeneración:', streamingMessageId);
+      const placeholderMessage: ChatMessage = {
+        id: streamingMessageId,
+        content: '',
+        text: '',
+        sender: 'bot',
+        isUser: false,
+        isStreaming: true,
+        timestamp: new Date(),
+        _streamingUpdate: Date.now(),
+        _isProcessingPlaceholder: true,
+        _originalQuestionType: questionType,
+        showFeedbackBox: false
+      };
+      
+      this.state.addMessage(placeholderMessage);
+      
+      this.currentBotMessageId = streamingMessageId;
+      this.currentStreamingMessageId = streamingMessageId;
+      
+      this.state.setStreamingMessage(placeholderMessage);
+      
+      this.streaming.setLastQuestion(message);
+      this.isStreamingActive = true;
+      this.streamStartTime = Date.now();
+      this.stopRequested = false;
+      this.isHandlingStop = false;
+      
+      const filterConfig = this.filters.getCombinedFilters(customFilters);
+      
+      this.websocket.sendQuery(message, filterConfig);
+      
+      return true;
+      
+    } catch (error) {
+      console.error('💥 Error en regeneración:', error);
+      this.state.setProcessing(false);
+      
+      if (this.currentStreamingMessageId) {
+        this.state.removeMessage(msg => msg.id === this.currentStreamingMessageId);
+      }
+      
+      return false;
+    }
+  }
   
   private addUserMessage(text: string, questionType: 'user' | 'predefined' = 'user'): ChatMessage {
     const message: ChatMessage = {
@@ -550,9 +633,9 @@ export class ChatbotEngineService implements OnDestroy {
       
       const questionType = (userMessage as any)._isPredefinedQuestion ? 'predefined' : 'user';
       
-      // Usar el nuevo sistema de limpieza
+      // Limpiar solo la respuesta de bot asociada a este mensaje de usuario
       if (userMessage.id) {
-        this.cleanupMessagesByQuestionType(questionType, userMessage.id);
+        this.state.cleanupBotResponsesAfterQuestion(userMessage.id);
       }
       
       this.streaming.cancelStream();
@@ -844,12 +927,12 @@ export class ChatbotEngineService implements OnDestroy {
   }
 
   // Método para regeneración
-  regenerateResponse(message: ChatMessage): Promise<boolean> {
-    console.log('🔄 Regenerando respuesta para:', message.id);
-    return this.handleRegeneration(message)
-      .then(() => true)
-      .catch(() => false);
-  }
+  // regenerateResponse(message: ChatMessage): Promise<boolean> {
+  //   console.log('🔄 Regenerando respuesta para:', message.id);
+  //   return this.handleRegeneration(message)
+  //     .then(() => true)
+  //     .catch(() => false);
+  // }
 
   // ============ MÉTODOS DE DEBUG ============
   

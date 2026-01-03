@@ -25,3 +25,6 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+# Problemas conocidos
+ - 02/01/2025: La API que consumimos para operar con el bot, no envía los chunks gradualmente sino que los envía todos juntos al final, por lo que el streaming no funciona correctamente.
