@@ -45,6 +45,8 @@ export class StreamingModule implements OnDestroy {
   private readonly STREAM_TIMEOUT = 30000;
   private readonly MIN_TEXT_FOR_DISPLAY = 1;
   private cancellationTimeout: any = null;
+  
+  private readonly TYPEWRITER_ENABLED = false;
 
   constructor(
     private state: ChatbotStateService,
@@ -358,6 +360,12 @@ export class StreamingModule implements OnDestroy {
     const textToAnimate = this.accumulatedText;
     const sourcesToUse = [...this.finalSources];
     const questionType = this.lastQuestionType;
+    
+    // Si typewriter está deshabilitado, finalizar inmediatamente sin animación
+    if (!this.TYPEWRITER_ENABLED) {
+      this.finalizeAnimationWithId(streamIdToAnimate, textToAnimate, sourcesToUse, questionType);
+      return;
+    }
     
     try {
       // Detener cualquier animación previa
