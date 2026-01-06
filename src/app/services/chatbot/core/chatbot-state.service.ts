@@ -135,7 +135,7 @@ export class ChatbotStateService {
 
   setProcessing(value: boolean): void {
     if (this.processingSubject.value !== value) {
-      console.log('🔄 Estado procesamiento cambiado a:', value);
+      // console.log('🔄 Estado procesamiento cambiado a:', value);
       this.processingSubject.next(value);
     }
   }
@@ -237,7 +237,7 @@ export class ChatbotStateService {
    * Método avanzado para limpiar mensajes con opciones específicas
    */
   cleanupMessages(options: MessageCleanupOptions): number {
-    console.log('🧹 cleanupMessages con opciones:', options);
+    // console.log('🧹 cleanupMessages con opciones:', options);
     
     const messages = this.messages;
     let messagesToRemove: ChatMessage[] = [];
@@ -274,7 +274,7 @@ export class ChatbotStateService {
         this.removeMessage(m => m.id === msg.id);
       });
       
-      console.log(`✅ Removidos ${messagesToRemove.length} mensajes`);
+      // console.log(`✅ Removidos ${messagesToRemove.length} mensajes`);
       return messagesToRemove.length;
     }
     
@@ -297,10 +297,10 @@ export class ChatbotStateService {
         
         if (hasContent) {
           // Mantener el mensaje pero cambiar isStreaming a false
-          console.log(`💾 Manteniendo contenido de streaming:`, {
-            id: msg.id?.substring(0, 20),
-            contentLength: msg.content?.length
-          });
+          // console.log(`💾 Manteniendo contenido de streaming:`, {
+          //   id: msg.id?.substring(0, 20),
+          //   contentLength: msg.content?.length
+          // });
           
           // Actualizar el mensaje in-place
           msg.isStreaming = false;
@@ -308,13 +308,13 @@ export class ChatbotStateService {
           preserved++;
         } else {
           // Eliminar solo si está vacío
-          console.log(`🗑️ Eliminando mensaje de streaming vacío:`, msg.id?.substring(0, 20));
+          // console.log(`🗑️ Eliminando mensaje de streaming vacío:`, msg.id?.substring(0, 20));
           this.removeMessage(m => m.id === msg.id);
           removed++;
         }
       });
       
-      console.log(`🧹 Limpieza de streaming: ${preserved} preservados, ${removed} eliminados`);
+      // console.log(`🧹 Limpieza de streaming: ${preserved} preservados, ${removed} eliminados`);
       return removed;
     }
     
@@ -342,7 +342,7 @@ export class ChatbotStateService {
         this.removeMessage(m => m.id === msg.id);
       });
       
-      console.log(`🤖 Limpiadas ${botResponses.length} respuestas de bot`);
+      // console.log(`🤖 Limpiadas ${botResponses.length} respuestas de bot`);
       return botResponses.length;
     }
     
@@ -385,7 +385,7 @@ export class ChatbotStateService {
     // Remover la pregunta misma
     this.removeMessage(m => m.id === questionToRemove!.id);
     
-    console.log(`🔖 Limpiada pregunta predefinida y ${removedCount - 1} respuestas`);
+    // console.log(`🔖 Limpiada pregunta predefinida y ${removedCount - 1} respuestas`);
     return removedCount;
   }
 
@@ -402,7 +402,7 @@ export class ChatbotStateService {
         this.removeMessage(m => m.id === msg.id);
       });
       
-      console.log(`🤖 Limpiadas ${botMessages.length} respuestas de bot (manteniendo preguntas)`);
+      // console.log(`🤖 Limpiadas ${botMessages.length} respuestas de bot (manteniendo preguntas)`);
       return botMessages.length;
     }
     

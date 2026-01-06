@@ -43,3 +43,4 @@ Thumbs.db
 
 #Config files
 proxy.conf.json
+.vscode/settings.json

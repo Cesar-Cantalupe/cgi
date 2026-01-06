@@ -28,7 +28,6 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   activeConversationId: string | null = null;
   searchQuery = '';
   isConnected = false;
-  canSendMessages = false;
   
   // Predefined questions
   predefinedQuestions: any[] = [];
@@ -127,11 +126,6 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
     ];
     
     this.isConnected = connectedStatuses.some(s => status.includes(s));
-    this.updateSendCapability();
-  }
-
-  private updateSendCapability(): void {
-    this.canSendMessages = this.chatbotService.canSendMessages() || this.isConnected;
   }
 
   private detectMedicalParams(params: any): void {
@@ -202,13 +196,17 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
       this.chatbotService.streaming.cancelStream();
       this.chatbotService.removeStreamingPlaceholders();
     }
+    
+    // Forzar actualización del estado de envío después de cambiar conversación
+    this.cdr.markForCheck();
+    
     this.conversationSelected.emit(conversation.id);
     this.handleMobileSidebar();
   }
 
   onPredefinedQuestionClick(questionItem: any): void {     
-    if (!this.canSendPredefinedQuestions()) {
-      console.warn('⚠️ Cannot send question: connection unavailable');
+    if (!this.chatbotService.canSendMessages()) {
+      console.warn('⚠️ Cannot send question: request in progress or connection unavailable');
       return; 
     }    
    
@@ -269,7 +267,7 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   }
 
   canSendPredefinedQuestions(): boolean {
-    return this.canSendMessages;
+    return this.chatbotService.canSendMessages();
   }
 
   // ============ MÉTODOS DE UTILIDAD ============

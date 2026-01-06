@@ -79,7 +79,7 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.log('🔧 ChatbotMessagesComponent inicializado');
+    // console.log('🔧 ChatbotMessagesComponent inicializado');
     
     // Inicializar con los mensajes recibidos
     this.updateFilteredMessages();
@@ -98,13 +98,13 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('🔄 ngOnChanges llamado', Object.keys(changes));
+    // console.log('🔄 ngOnChanges llamado', Object.keys(changes));
     
     if (changes['messages']) {
-      console.log('📥 Mensajes actualizados:', {
-        oldCount: changes['messages'].previousValue?.length || 0,
-        newCount: changes['messages'].currentValue?.length || 0
-      });
+      // console.log('📥 Mensajes actualizados:', {
+      //   oldCount: changes['messages'].previousValue?.length || 0,
+      //   newCount: changes['messages'].currentValue?.length || 0
+      // });
       
       // Limpiar estados de streaming obsoletos
       this.cleanupOldStreamingStates();
@@ -129,7 +129,7 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
     }
     
     if (changes['isProcessing']) {
-      console.log('⚙️ Estado procesamiento:', this.isProcessing);
+      // console.log('⚙️ Estado procesamiento:', this.isProcessing);
       this.cdr.markForCheck();
     }
   }
@@ -138,11 +138,11 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
    // ============ SISTEMA UNIFICADO DE STOP MEJORADO ============
   
 onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
-  console.log('🛑 STOP button clicked - Usando sistema unificado', event);
+  // console.log('🛑 STOP button clicked - Usando sistema unificado', event);
   
   // Evitar múltiples STOPs simultáneos
   if (this.isStopInProgress) {
-    console.log('⏸️ STOP ya en progreso, ignorando...');
+    // console.log('⏸️ STOP ya en progreso, ignorando...');
     return;
   }
   
@@ -167,12 +167,12 @@ onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
       questionContent: lastUserMessage?.content || ''
     };
     
-    console.log('📤 Emitiendo evento STOP para sistema unificado:', {
-      questionType: stopData.questionType,
-      shouldRestoreToInput: stopData.shouldRestoreToInput,
-      contentPreview: stopData.questionContent?.substring(0, 50),
-      hasStreamingMessage: !!streamingMessage
-    });
+    // console.log('📤 Emitiendo evento STOP para sistema unificado:', {
+    //   questionType: stopData.questionType,
+    //   shouldRestoreToInput: stopData.shouldRestoreToInput,
+    //   contentPreview: stopData.questionContent?.substring(0, 50),
+    //   hasStreamingMessage: !!streamingMessage
+    // });
     
     // 5. Emitir evento (SIEMPRE, incluso si no hay streamingMessage)
     this.stop.emit(stopData);
@@ -189,7 +189,7 @@ onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
     // Reintentar si es necesario
     if (this.stopRetryCount < this.MAX_STOP_RETRIES) {
       this.stopRetryCount++;
-      console.log(`🔄 Reintentando STOP (intento ${this.stopRetryCount}/${this.MAX_STOP_RETRIES})`);
+      // console.log(`🔄 Reintentando STOP (intento ${this.stopRetryCount}/${this.MAX_STOP_RETRIES})`);
       setTimeout(() => {
         this.isStopInProgress = false;
         this.onStopResponse(event);
@@ -207,7 +207,7 @@ onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
 // ============ NUEVO MÉTODO: CREAR MENSAJE DE FALLBACK ============
 
 private createFallbackStopMessage(): ChatMessage {
-  console.log('🔄 Creando mensaje de fallback para STOP');
+  // console.log('🔄 Creando mensaje de fallback para STOP');
   
   // Buscar cualquier mensaje de bot como fallback
   const botMessages = this.filteredMessages.filter(m => 
@@ -337,10 +337,10 @@ private createFallbackStopMessage(): ChatMessage {
     
     if (lengthChanged || idsChanged || contentChanged) {
       this.filteredMessages = newFilteredMessages;
-      console.log('📊 filteredMessages realmente actualizadas:', {
-        total: this.filteredMessages.length,
-        streaming: this.filteredMessages.filter(m => m.isStreaming).length
-      });
+      // console.log('📊 filteredMessages realmente actualizadas:', {
+      //   total: this.filteredMessages.length,
+      //   streaming: this.filteredMessages.filter(m => m.isStreaming).length
+      // });
     }
   }
   
@@ -576,11 +576,6 @@ private createFallbackStopMessage(): ChatMessage {
   }
 
   onStopButton(message: ChatMessage): void {
-    console.log('🛑 ============ STOP BUTTON CLICKED ============');
-    console.log('Message ID:', message?.id);
-    console.log('Message sender:', message?.sender);
-    console.log('Message isStreaming:', message?.isStreaming);
-    
     if (!message) {
       console.error('❌ Message es null/undefined');
       return;
@@ -594,16 +589,14 @@ private createFallbackStopMessage(): ChatMessage {
       shouldRestoreToInput: false
     };
     
-    console.log('📤 EMITIENDO EVENTO STOP CON DATOS:', {
-      messageId: stopEvent.message.id,
-      questionType: stopEvent.questionType,
-      contentPreview: stopEvent.questionContent?.substring(0, 50)
-    });
+    // console.log('📤 EMITIENDO EVENTO STOP CON DATOS:', {
+    //   messageId: stopEvent.message.id,
+    //   questionType: stopEvent.questionType,
+    //   contentPreview: stopEvent.questionContent?.substring(0, 50)
+    // });
     
     // Emitir el evento
     this.stop.emit(stopEvent);
-    
-    console.log('✅ EVENTO EMITIDO EXITOSAMENTE');
   }
   
   // ============ MÉTODOS MEJORADOS PARA SISTEMA UNIFICADO ============
@@ -612,11 +605,11 @@ private createFallbackStopMessage(): ChatMessage {
     streamingMessage: ChatMessage | null, 
     questionType: 'user' | 'predefined'
   ): void {
-    console.log('🎨 Realizando limpieza visual inmediata...', {
-      hasStreamingMessage: !!streamingMessage,
-      questionType,
-      streamingMessageContent: streamingMessage?.content?.substring(0, 50)
-    });
+    // console.log('🎨 Realizando limpieza visual inmediata...', {
+    //   hasStreamingMessage: !!streamingMessage,
+    //   questionType,
+    //   streamingMessageContent: streamingMessage?.content?.substring(0, 50)
+    // });
     
     const beforeCount = this.filteredMessages.length;
     
@@ -625,11 +618,11 @@ private createFallbackStopMessage(): ChatMessage {
     
     // 1. Si hay mensaje de streaming con contenido, mantenerlo pero marcar como NO streaming
     if (streamingMessage && streamingMessage.content && streamingMessage.content.trim()) {
-      console.log('💾 Manteniendo contenido del mensaje de streaming:', {
-        id: streamingMessage.id,
-        contentLength: streamingMessage.content.length,
-        preview: streamingMessage.content.substring(0, 100)
-      });
+      // console.log('💾 Manteniendo contenido del mensaje de streaming:', {
+      //   id: streamingMessage.id,
+      //   contentLength: streamingMessage.content.length,
+      //   preview: streamingMessage.content.substring(0, 100)
+      // });
       
       // Buscar el mensaje en filteredMessages y actualizar su estado
       const messageIndex = this.filteredMessages.findIndex(m => m.id === streamingMessage.id);
@@ -639,12 +632,12 @@ private createFallbackStopMessage(): ChatMessage {
           isStreaming: false,
           _isProcessingPlaceholder: false
         };
-        console.log('✅ Mensaje actualizado a NO streaming pero con contenido preservado');
+        // console.log('✅ Mensaje actualizado a NO streaming pero con contenido preservado');
       }
     } else {
       // Solo si NO hay contenido, entonces eliminar el mensaje
       if (streamingMessage) {
-        console.log('🗑️ Eliminando mensaje de streaming vacío');
+        // console.log('🗑️ Eliminando mensaje de streaming vacío');
         this.filteredMessages = this.filteredMessages.filter(m => 
           m.id !== streamingMessage.id
         );
@@ -664,7 +657,7 @@ private createFallbackStopMessage(): ChatMessage {
       });
       
       if (messagesToRemove.length > 0) {
-        console.log('🗑️ Mensajes de streaming vacíos removidos:', messagesToRemove);
+        // console.log('🗑️ Mensajes de streaming vacíos removidos:', messagesToRemove);
       }
     }
     
@@ -672,7 +665,7 @@ private createFallbackStopMessage(): ChatMessage {
     if (questionType === 'predefined') {
       const lastUserMessage = this.findLastUserMessage();
       if (lastUserMessage && (lastUserMessage as any)._isPredefinedQuestion) {
-        console.log('🗑️ Removiendo pregunta predefinida del chat:', lastUserMessage.id);
+        // console.log('🗑️ Removiendo pregunta predefinida del chat:', lastUserMessage.id);
         this.filteredMessages = this.filteredMessages.filter(m => 
           m.id !== lastUserMessage.id
         );
@@ -684,7 +677,7 @@ private createFallbackStopMessage(): ChatMessage {
     // 3. Forzar actualización de UI
     this.cdr.detectChanges();
     
-    console.log('✅ Limpieza visual completada. Mensajes removidos:', removedCount);
+    // console.log('✅ Limpieza visual completada. Mensajes removidos:', removedCount);
   }
   
   private trackLastUserQuestion(): void {
@@ -712,11 +705,11 @@ private createFallbackStopMessage(): ChatMessage {
       timestamp: Date.now()
     };
     
-    console.log('💾 Última pregunta cacheada:', {
-      type: this.lastUserQuestion.type,
-      content: this.lastUserQuestion.content.substring(0, 50),
-      id: this.lastUserQuestion.messageId
-    });
+    // console.log('💾 Última pregunta cacheada:', {
+    //   type: this.lastUserQuestion.type,
+    //   content: this.lastUserQuestion.content.substring(0, 50),
+    //   id: this.lastUserQuestion.messageId
+    // });
   }
   
   private findLastUserMessage(): ChatMessage | null {
@@ -739,11 +732,11 @@ private createFallbackStopMessage(): ChatMessage {
       m.isStreaming === true
     );
     
-    console.log('🔍 Buscando mensajes de streaming:', {
-      totalFiltered: this.filteredMessages.length,
-      streamingFound: streamingMessages.length,
-      streamingIds: streamingMessages.map(m => ({id: m.id, contentLength: m.content?.length}))
-    });
+    // console.log('🔍 Buscando mensajes de streaming:', {
+    //   totalFiltered: this.filteredMessages.length,
+    //   streamingFound: streamingMessages.length,
+    //   streamingIds: streamingMessages.map(m => ({id: m.id, contentLength: m.content?.length}))
+    // });
     
     if (streamingMessages.length === 0) {
       return null;
@@ -755,12 +748,12 @@ private createFallbackStopMessage(): ChatMessage {
       return currentTime > latestTime ? current : latest;
     });
     
-    console.log('🎯 Último mensaje de streaming encontrado:', {
-      id: latest.id,
-      contentLength: latest.content?.length,
-      timestamp: latest.timestamp,
-      _streamingUpdate: latest._streamingUpdate
-    });
+    // console.log('🎯 Último mensaje de streaming encontrado:', {
+    //   id: latest.id,
+    //   contentLength: latest.content?.length,
+    //   timestamp: latest.timestamp,
+    //   _streamingUpdate: latest._streamingUpdate
+    // });
     
     return latest;
   }
@@ -810,64 +803,8 @@ private createFallbackStopMessage(): ChatMessage {
     });
     
     if (foundOldStreaming) {
-      console.log('🔧 Recomendación: Los mensajes con isStreaming:true y sin actualización reciente deberían tener isStreaming:false');
+      // console.log('🔧 Recomendación: Los mensajes con isStreaming:true y sin actualización reciente deberían tener isStreaming:false');
     }
-  }
-
-  private debugStreamingState(): void {
-    const streamingMessages = this.findAllStreamingMessages();
-    console.log('🐛 DEBUG Streaming State:', {
-      totalMessages: this.messages.length,
-      filteredMessages: this.filteredMessages.length,
-      streamingMessagesCount: streamingMessages.length,
-      streamingMessages: streamingMessages.map(m => ({
-        id: m.id,
-        isStreaming: m.isStreaming,
-        sender: this.getMessageSender(m),
-        contentPreview: m.content?.substring(0, 50),
-        contentLength: m.content?.length,
-        _streamingUpdate: m._streamingUpdate,
-        timeSinceUpdate: m._streamingUpdate ? Date.now() - m._streamingUpdate : 'N/A',
-        shouldShowStop: this.shouldShowStopButton(m)
-      })),
-      isProcessing: this.isProcessing,
-      canSendMessages: this.canSendMessages(),
-      hasActiveStreaming: this.hasActiveStreaming()
-    });
-  }
-  
-  private debugStreamingMessages(): void {
-    console.log('🔍 ESTADO DE STREAMING DE CADA MENSAJE:');
-    this.messages.forEach((msg, i) => {
-      const showStop = this.shouldShowStopButton(msg);
-      const showRegenerate = this.shouldShowRegenerateButton(msg);
-      
-      console.log(`📝 Mensaje ${i}:`, {
-        id: msg.id?.substring(0, 20),
-        sender: msg.sender || (msg.isUser ? 'user' : 'bot'),
-        isStreaming: msg.isStreaming,
-        isUser: msg.isUser,
-        contentPreview: msg.content?.substring(0, 30) || 'vacío',
-        contentLength: msg.content?.length || 0,
-        _streamingUpdate: msg._streamingUpdate,
-        _isProcessingPlaceholder: msg._isProcessingPlaceholder,
-        showStop: showStop,
-        showRegenerate: showRegenerate,
-        isBot: (msg.sender || (msg.isUser ? 'user' : 'bot')) === 'bot'
-      });
-      
-      // Si debería mostrar STOP pero no lo hace, investigar más
-      if ((msg.sender || (msg.isUser ? 'user' : 'bot')) === 'bot' && msg.isStreaming && !showStop) {
-        console.error('❌ ALERTA: Mensaje de bot en streaming pero shouldShowStopButton = FALSE', {
-          id: msg.id,
-          isStreaming: msg.isStreaming,
-          isBot: (msg.sender || (msg.isUser ? 'user' : 'bot')) === 'bot',
-          contentPreview: msg.content?.substring(0, 50),
-          _streamingUpdate: msg._streamingUpdate,
-          timeSinceUpdate: msg._streamingUpdate ? Date.now() - msg._streamingUpdate : 'N/A'
-        });
-      }
-    });
   }
 
   // ============ MÉTODOS DE DETERMINACIÓN DE TIPO DE PREGUNTA ============
@@ -883,13 +820,13 @@ private createFallbackStopMessage(): ChatMessage {
     
     // Prioridad 1: Usar cache local
     if (this.lastUserQuestion) {
-      console.log('📋 Usando lastUserQuestion cacheado:', this.lastUserQuestion.type);
+      // console.log('📋 Usando lastUserQuestion cacheado:', this.lastUserQuestion.type);
       return this.lastUserQuestion.type;
     }
     
     // Prioridad 2: Usar _originalQuestionType
     if ((message as any)._originalQuestionType) {
-      console.log('📋 Usando _originalQuestionType:', (message as any)._originalQuestionType);
+      // console.log('📋 Usando _originalQuestionType:', (message as any)._originalQuestionType);
       return (message as any)._originalQuestionType;
     }
     
@@ -901,10 +838,10 @@ private createFallbackStopMessage(): ChatMessage {
           const prevMessage = this.messages[i];
           if (prevMessage.sender === 'user' || prevMessage.isUser) {
             const isPredefined = (prevMessage as any)._isPredefinedQuestion;
-            console.log('🔍 Tipo determinado desde mensaje previo:', {
-              isPredefined,
-              content: prevMessage.content?.substring(0, 50)
-            });
+            // console.log('🔍 Tipo determinado desde mensaje previo:', {
+            //   isPredefined,
+            //   content: prevMessage.content?.substring(0, 50)
+            // });
             return isPredefined ? 'predefined' : 'user';
           }
         }
@@ -914,11 +851,11 @@ private createFallbackStopMessage(): ChatMessage {
     // Prioridad 4: Buscar en el mensaje actual (si es usuario)
     if (message.sender === 'user' || message.isUser) {
       const isPredefined = (message as any)._isPredefinedQuestion;
-      console.log('🔍 Tipo determinado desde mensaje actual:', isPredefined ? 'predefined' : 'user');
+      // console.log('🔍 Tipo determinado desde mensaje actual:', isPredefined ? 'predefined' : 'user');
       return isPredefined ? 'predefined' : 'user';
     }
     
-    console.log('❓ No se pudo determinar el tipo de pregunta');
+    // console.log('❓ No se pudo determinar el tipo de pregunta');
     return undefined;
   }
 
@@ -1020,27 +957,10 @@ private createFallbackStopMessage(): ChatMessage {
     return isRecent;
   }
   
-  // ============ MÉTODOS DE DEBUG ============
-  
-  debugStopButton(message: ChatMessage): void {
-    console.log('🔍 DEBUG STOP BUTTON:', {
-      messageId: message.id,
-      sender: this.getMessageSender(message),
-      isStreaming: message.isStreaming,
-      isBotMessage: this.getMessageSender(message) === 'bot',
-      shouldShowStop: this.shouldShowStopButton(message),
-      isProcessing: this.isProcessing,
-      canSendMessages: this.canSendMessages(),
-      filteredMessagesCount: this.filteredMessages.length,
-      currentStreamingMessage: this.findCurrentStreamingMessage()?.id,
-      contentPreview: message.content?.substring(0, 100)
-    });
-  }
-  
   // ============ MÉTODOS DE EMERGENCIA ============
   
   emergencyStop(): void {
-    console.log('🚨 EMERGENCY STOP desde ChatbotMessagesComponent');
+    // console.log('🚨 EMERGENCY STOP desde ChatbotMessagesComponent');
     this.onStopResponse();
   }
   
@@ -1055,7 +975,7 @@ private createFallbackStopMessage(): ChatMessage {
       canSendMessages: this.canSendMessages()
     };
     
-    console.log('🐛 DEBUG ChatbotMessagesComponent:', debugInfo);
+    // console.log('🐛 DEBUG ChatbotMessagesComponent:', debugInfo);
   }
   
   // ============ CLEANUP ============

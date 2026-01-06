@@ -111,6 +111,9 @@ export class ChatbotService implements OnDestroy {
     
     // Trackear última pregunta del usuario
     this.trackLastUserQuestion();
+
+    // Detener cualquier stream al cambiar de conversación
+    this.setupConversationChangeStopper();
   }
 
   // ============ NUEVO: SISTEMA UNIFICADO DE STOP ============
@@ -125,7 +128,7 @@ export class ChatbotService implements OnDestroy {
     shouldRestoreToInput?: boolean;
     shouldCleanMessages?: boolean;
   }): Promise<StopRequestData> {
-    console.log('🚨 EMERGENCY STOP ejecutado con opciones:', options);
+    // console.log('🚨 EMERGENCY STOP ejecutado con opciones:', options);
     
     // 1. Obtener información actual
     const currentData = await this.collectCurrentStopData(options);
@@ -148,12 +151,12 @@ export class ChatbotService implements OnDestroy {
     // 7. Cachear datos para referencia
     this.lastStopData = currentData;
     
-    console.log('✅ EMERGENCY STOP completado:', {
-      tipo: currentData.questionType,
-      limpiarMensajes: currentData.shouldCleanMessages,
-      restaurarInput: currentData.shouldRestoreToInput,
-      contenidoPregunta: currentData.questionContent?.substring(0, 50)
-    });
+    // console.log('✅ EMERGENCY STOP completado:', {
+    //   tipo: currentData.questionType,
+    //   limpiarMensajes: currentData.shouldCleanMessages,
+    //   restaurarInput: currentData.shouldRestoreToInput,
+    //   contenidoPregunta: currentData.questionContent?.substring(0, 50)
+    // });
     
     return currentData;
   }
@@ -169,7 +172,7 @@ export class ChatbotService implements OnDestroy {
    * Versión para regeneración
    */
   async stopAndPrepareForRegeneration(message: ChatMessage): Promise<StopRequestData> {
-    console.log('🔄 STOP para regeneración:', message.id);
+    // console.log('🔄 STOP para regeneración:', message.id);
     
     const stopData = await this.emergencyStop({
       messageId: message.id,
@@ -233,7 +236,7 @@ export class ChatbotService implements OnDestroy {
   }
 
   private stopAllActiveProcesses(): void {
-    console.log('⏹️ Deteniendo todos los procesos activos...');
+    // console.log('⏹️ Deteniendo todos los procesos activos...');
     
     // 1. Detener streaming
     this.streamingModule.cancelStream();
@@ -257,7 +260,7 @@ export class ChatbotService implements OnDestroy {
     if (!data.shouldCleanMessages) return;
     
     const messages = this.state.messages;
-    console.log('🧹 Limpiando mensajes. Tipo:', data.questionType);
+    // console.log('🧹 Limpiando mensajes. Tipo:', data.questionType);
     
     if (data.questionType === 'user' && data.questionContent) {
       // CASO 1: Pregunta de usuario - mantener pregunta, limpiar respuesta
@@ -272,7 +275,7 @@ export class ChatbotService implements OnDestroy {
   }
 
   private async cleanupForUserQuestion(data: StopRequestData, messages: ChatMessage[]): Promise<void> {
-    console.log('👤 Limpieza para pregunta de usuario');
+    // console.log('👤 Limpieza para pregunta de usuario');
     
     // Encontrar la pregunta del usuario
     const userMessage = messages.find(m => 
@@ -295,12 +298,12 @@ export class ChatbotService implements OnDestroy {
         }
       });
       
-      console.log(`🗑️ Eliminadas ${botResponses.length} respuestas de bot`);
+      // console.log(`🗑️ Eliminadas ${botResponses.length} respuestas de bot`);
     }
   }
 
   private async cleanupForPredefinedQuestion(data: StopRequestData, messages: ChatMessage[]): Promise<void> {
-    console.log('🔖 Limpieza para pregunta predefinida');
+    // console.log('🔖 Limpieza para pregunta predefinida');
     
     // Para preguntas predefinidas, limpiar pregunta y respuesta
     const predefinedQuestions = messages.filter(m => 
@@ -327,12 +330,12 @@ export class ChatbotService implements OnDestroy {
         }
       });
       
-      console.log(`🗑️ Eliminada pregunta predefinida y ${botResponses.length} respuestas`);
+      // console.log(`🗑️ Eliminada pregunta predefinida y ${botResponses.length} respuestas`);
     }
   }
 
   private cleanupStreamingMessagesOnly(messages: ChatMessage[]): void {
-    console.log('🌀 Limpieza genérica de mensajes streaming');
+    // console.log('🌀 Limpieza genérica de mensajes streaming');
     
     const streamingMessages = messages.filter(m => m.isStreaming);
     streamingMessages.forEach(msg => {
@@ -341,7 +344,7 @@ export class ChatbotService implements OnDestroy {
       }
     });
     
-    console.log(`🗑️ Eliminados ${streamingMessages.length} mensajes de streaming`);
+    // console.log(`🗑️ Eliminados ${streamingMessages.length} mensajes de streaming`);
   }
 
   private updateConversationAfterStop(data: StopRequestData): void {
@@ -383,7 +386,7 @@ export class ChatbotService implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result.wasCancelled) {
-          console.log('📡 Streaming cancelado, ejecutando limpieza automática');
+          // console.log('📡 Streaming cancelado, ejecutando limpieza automática');
           // Si fue cancelado, hacer limpieza automática
           setTimeout(() => {
             this.cleanupAfterStreamingCancellation();
@@ -408,6 +411,14 @@ export class ChatbotService implements OnDestroy {
     
     // Resetear estado
     this.state.setProcessing(false);
+  }
+
+  private setupConversationChangeStopper(): void {
+    this.conversationService.conversationBlurred
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.cancelAllStreamsOnConversationChange();
+      });
   }
 
   private trackLastUserQuestion(): void {
@@ -888,7 +899,7 @@ export class ChatbotService implements OnDestroy {
       shouldCleanMessages: true
     };
     
-    console.log('🧪 Simulando escenario STOP:', testData);
+    // console.log('🧪 Simulando escenario STOP:', testData);
     this.stopRequested$.next(testData);
   }
   

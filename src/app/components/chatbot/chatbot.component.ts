@@ -65,7 +65,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    console.log('🚀 ChatbotComponent iniciado');
+    // console.log('🚀 ChatbotComponent iniciado');
     this.initialize();
   }
 
@@ -79,14 +79,14 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   private initialize(): void {
     this.loadPredefinedQuestions();
     
-    console.log('🔍 Estado inicial del ChatbotService:', {
-      isConnected: this.chatbotService.isConnected(),
-      canSendMessages: this.chatbotService.canSendMessages(),
-      isProcessing: this.chatbotService.getIsProcessing()
-    });
+    // console.log('🔍 Estado inicial del ChatbotService:', {
+    //   isConnected: this.chatbotService.isConnected(),
+    //   canSendMessages: this.chatbotService.canSendMessages(),
+    //   isProcessing: this.chatbotService.getIsProcessing()
+    // });
     
     const initialMessages = this.chatbotService.getMessages();
-    console.log('📩 Mensajes iniciales:', initialMessages.length);
+    // console.log('📩 Mensajes iniciales:', initialMessages.length);
     
     this.setupSubscriptions();
     this.setupStopListener();
@@ -118,13 +118,13 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       conversations,
       lang 
     }) => {
-      console.log('📥 Suscripción actualizada:', {
-        messagesCount: messages?.length || 0,
-        processing,
-        connection,
-        currentConversationId: currentConversation?.id,
-        conversationsCount: conversations?.length || 0
-      });
+      // console.log('📥 Suscripción actualizada:', {
+      //   messagesCount: messages?.length || 0,
+      //   processing,
+      //   connection,
+      //   currentConversationId: currentConversation?.id,
+      //   conversationsCount: conversations?.length || 0
+      // });
       
       this.updateComponentState(messages, processing, connection, currentConversation, conversations, lang);
     });
@@ -135,11 +135,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.chatbotService.onStopRequested$
       .pipe(takeUntil(this.destroy$))
       .subscribe((stopData: StopRequestData) => {
-        console.log('📬 ChatbotComponent: Evento STOP recibido:', {
-          questionType: stopData.questionType,
-          shouldRestoreToInput: stopData.shouldRestoreToInput,
-          contentPreview: stopData.questionContent?.substring(0, 50)
-        });
+        // console.log('📬 ChatbotComponent: Evento STOP recibido:', {
+        //   questionType: stopData.questionType,
+        //   shouldRestoreToInput: stopData.shouldRestoreToInput,
+        //   contentPreview: stopData.questionContent?.substring(0, 50)
+        // });
         
         this.handleStopRequest(stopData);
       });
@@ -156,9 +156,9 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     const originalCount = messages?.length || 0;
     const filteredMessages = this.filterPlaceholderMessages(messages || []);
     
-    if (originalCount > filteredMessages.length) {
-      console.log('🗑️ Mensajes filtrados:', originalCount - filteredMessages.length);
-    }
+    // if (originalCount > filteredMessages.length) {
+    //   console.log('🗑️ Mensajes filtrados:', originalCount - filteredMessages.length);
+    // }
     
     this.messages = filteredMessages;
     this.isProcessing = processing;
@@ -184,15 +184,15 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ CORRECCIÓN CRÍTICA: MANEJO DE STOP UNIFICADO ============
 
   private handleStopRequest(stopData: StopRequestData): void {
-    console.log('🛑 ChatbotComponent: Procesando STOP request:', {
-      questionType: stopData.questionType,
-      shouldRestoreToInput: stopData.shouldRestoreToInput,
-      questionContent: stopData.questionContent?.substring(0, 50)
-    });
+    // console.log('🛑 ChatbotComponent: Procesando STOP request:', {
+    //   questionType: stopData.questionType,
+    //   shouldRestoreToInput: stopData.shouldRestoreToInput,
+    //   questionContent: stopData.questionContent?.substring(0, 50)
+    // });
     
     // Evitar múltiples STOPs simultáneos
     if (this.isHandlingStop) {
-      console.log('⏸️ Ya se está procesando un STOP, ignorando...');
+      // console.log('⏸️ Ya se está procesando un STOP, ignorando...');
       return;
     }
     
@@ -218,7 +218,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     // 3. Forzar actualización de UI
     this.cdr.detectChanges();
     
-    console.log('✅ ChatbotComponent: STOP procesado exitosamente');
+    // console.log('✅ ChatbotComponent: STOP procesado exitosamente');
     
     // Liberar el lock después de un tiempo
     this.stopDebounceTimeout = setTimeout(() => {
@@ -229,12 +229,12 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ CORRECCIÓN: STOP PARA PREGUNTAS DE USUARIO ============
   
   private handleUserQuestionStop(stopData: StopRequestData): void {
-    console.log('👤 Procesando STOP para pregunta de usuario');
+    // console.log('👤 Procesando STOP para pregunta de usuario');
     
     if (stopData.shouldRestoreToInput && stopData.questionContent) {
       // 1. Restaurar pregunta al input para edición
       this.newMessage = stopData.questionContent;
-      console.log('↩️ Pregunta de usuario restaurada al input:', stopData.questionContent.substring(0, 50));
+      // console.log('↩️ Pregunta de usuario restaurada al input:', stopData.questionContent.substring(0, 50));
       
       // 2. Borrar la pregunta y respuesta del área principal
       this.removeQuestionAndResponseFromMainArea(stopData.questionContent, 'user');
@@ -250,7 +250,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ CORRECCIÓN: STOP PARA PREGUNTAS PREDEFINIDAS ============
   
   private handlePredefinedQuestionStop(stopData: StopRequestData): void {
-    console.log('🔖 Procesando STOP para pregunta predefinida');
+    // console.log('🔖 Procesando STOP para pregunta predefinida');
     
     // CORRECCIÓN: Para preguntas predefinidas, el input se mantiene vacío
     this.newMessage = '';
@@ -260,14 +260,14 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       this.removeQuestionAndResponseFromMainArea(stopData.questionContent, 'predefined');
     }
     
-    console.log('🗑️ Pregunta predefinida removida del área principal');
+    // console.log('🗑️ Pregunta predefinida removida del área principal');
     
     // Actualizar UI
     this.scheduleScroll();
   }
 
   private handleGenericStop(stopData: StopRequestData): void {
-    console.log('🌀 Procesando STOP genérico');
+    // console.log('🌀 Procesando STOP genérico');
     
     // Limpieza básica
     this.cleanupStreamingMessagesLocally();
@@ -275,14 +275,14 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     // No restaurar nada al input
     this.newMessage = '';
     
-    console.log('🧹 STOP genérico completado');
+    // console.log('🧹 STOP genérico completado');
   }
 
   // ============ NUEVO MÉTODO: REMOVER PREGUNTA Y RESPUESTA DEL ÁREA PRINCIPAL ============
   
   private removeQuestionAndResponseFromMainArea(questionContent: string, questionType: 'user' | 'predefined'): void {
-    console.log(`🗑️ Removiendo pregunta (${questionType}) del área principal:`, 
-                questionContent.substring(0, 50));
+    // console.log(`🗑️ Removiendo pregunta (${questionType}) del área principal:`, 
+    //             questionContent.substring(0, 50));
     
     // 1. Encontrar la pregunta en los mensajes
     const questionMessage = this.messages.find(m => 
@@ -291,22 +291,22 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     );
     
     if (!questionMessage) {
-      console.warn('⚠️ No se encontró la pregunta en los mensajes:', questionContent.substring(0, 30));
+      // console.warn('⚠️ No se encontró la pregunta en los mensajes:', questionContent.substring(0, 30));
       return;
     }
     
     const questionIndex = this.messages.indexOf(questionMessage);
     if (questionIndex === -1) {
-      console.error('❌ No se pudo encontrar el índice de la pregunta');
+      // console.error('❌ No se pudo encontrar el índice de la pregunta');
       return;
     }
     
-    console.log('📝 Pregunta encontrada:', {
-      id: questionMessage.id,
-      index: questionIndex,
-      type: questionType,
-      isPredefined: (questionMessage as any)._isPredefinedQuestion
-    });
+    // console.log('📝 Pregunta encontrada:', {
+    //   id: questionMessage.id,
+    //   index: questionIndex,
+    //   type: questionType,
+    //   isPredefined: (questionMessage as any)._isPredefinedQuestion
+    // });
     
     // 2. Determinar qué mensajes borrar
     const messagesToRemove: ChatMessage[] = [];
@@ -337,22 +337,22 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       }
     }
     
-    console.log('📋 Mensajes a borrar:', {
-      total: messagesToRemove.length,
-      incluyePregunta: questionType === 'predefined',
-      respuestas: messagesToRemove.filter(m => m.sender === 'bot').length
-    });
+    // console.log('📋 Mensajes a borrar:', {
+    //   total: messagesToRemove.length,
+    //   incluyePregunta: questionType === 'predefined',
+    //   respuestas: messagesToRemove.filter(m => m.sender === 'bot').length
+    // });
     
     // 4. Filtrar para remover los mensajes
     if (messagesToRemove.length > 0) {
       const originalCount = this.messages.length;
       this.messages = this.messages.filter(msg => !messagesToRemove.includes(msg));
       
-      console.log('✅ Mensajes removidos del área principal:', {
-        antes: originalCount,
-        después: this.messages.length,
-        borrados: originalCount - this.messages.length
-      });
+      // console.log('✅ Mensajes removidos del área principal:', {
+      //   antes: originalCount,
+      //   después: this.messages.length,
+      //   borrados: originalCount - this.messages.length
+      // });
       
       // 5. Actualizar conversación en ConversationService
       if (this.currentConversation) {
@@ -373,7 +373,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
           conversationMessages
         );
         
-        console.log('💾 Conversación actualizada en ConversationService');
+        // console.log('💾 Conversación actualizada en ConversationService');
       }
       
       // 6. Actualizar cache de última pregunta
@@ -407,10 +407,10 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         timestamp: Date.now()
       };
       
-      console.log('💾 Nuevo cache de última pregunta:', {
-        type: this.lastUserQuestionForRestoration.type,
-        content: this.lastUserQuestionForRestoration.content.substring(0, 30)
-      });
+      // console.log('💾 Nuevo cache de última pregunta:', {
+      //   type: this.lastUserQuestionForRestoration.type,
+      //   content: this.lastUserQuestionForRestoration.content.substring(0, 30)
+      // });
     } else {
       this.lastUserQuestionForRestoration = null;
     }
@@ -437,17 +437,17 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         timestamp: Date.now()
       };
       
-      console.log('💾 Última pregunta cacheada:', {
-        type: this.lastUserQuestionForRestoration.type,
-        content: this.lastUserQuestionForRestoration.content.substring(0, 30)
-      });
+      // console.log('💾 Última pregunta cacheada:', {
+      //   type: this.lastUserQuestionForRestoration.type,
+      //   content: this.lastUserQuestionForRestoration.content.substring(0, 30)
+      // });
     } else {
       this.lastUserQuestionForRestoration = null;
     }
   }
 
   private cleanupStreamingMessagesLocally(): void {
-    console.log('🧹 Limpiando mensajes de streaming localmente...');
+    // console.log('🧹 Limpiando mensajes de streaming localmente...');
     
     const originalCount = this.messages.length;
     let keptWithContent = 0;
@@ -462,11 +462,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         
         if (hasContent) {
           // Mantener el mensaje pero cambiar isStreaming a false
-          console.log('💾 Manteniendo contenido de streaming:', {
-            id: message.id?.substring(0, 20),
-            contentLength: message.content?.length,
-            preview: message.content?.substring(0, 100)
-          });
+          // console.log('💾 Manteniendo contenido de streaming:', {
+          //   id: message.id?.substring(0, 20),
+          //   contentLength: message.content?.length,
+          //   preview: message.content?.substring(0, 100)
+          // });
           keptWithContent++;
           return {
             ...message,
@@ -475,9 +475,9 @@ export class ChatbotComponent implements OnInit, OnDestroy {
           };
         } else {
           // Marcar para eliminación si no tiene contenido
-          console.log('🗑️ Marcando para eliminación mensaje vacío:', {
-            id: message.id?.substring(0, 20)
-          });
+          // console.log('🗑️ Marcando para eliminación mensaje vacío:', {
+          //   id: message.id?.substring(0, 20)
+          // });
           removedEmpty++;
           return null as any;
         }
@@ -486,12 +486,12 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       return message;
     }).filter(m => m !== null);
     
-    console.log('✅ Mensajes limpiados localmente:', {
-      antes: originalCount,
-      después: this.messages.length,
-      mantenidosConContenido: keptWithContent,
-      eliminadosVacios: removedEmpty
-    });
+    // console.log('✅ Mensajes limpiados localmente:', {
+    //   antes: originalCount,
+    //   después: this.messages.length,
+    //   mantenidosConContenido: keptWithContent,
+    //   eliminadosVacios: removedEmpty
+    // });
   }
 
   // ============ MANEJO DE CONVERSACIONES ============
@@ -555,8 +555,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
     const message = this.newMessage.trim();
     this.newMessage = '';
-
-    this.conversationService.addMessage(message, 'user');
     
     this.chatbotService.sendUserQuestion(message)
       .catch(error => {
@@ -568,8 +566,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   onSuggestedQuestionClick(question: string): void {
     if (!this.chatbotService.canSendMessages()) return;
-
-    this.conversationService.addMessage(question, 'user');
     
     this.chatbotService.loadQuestionFromSidebar(question)
       .catch(error => {
@@ -582,7 +578,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   onQuickSuggestionClick(suggestion: string): void {
     if (!this.chatbotService.canSendMessages()) return;
 
-    this.conversationService.addMessage(suggestion, 'user');
     this.chatbotService.sendUserQuestion(suggestion)
       .catch(error => {
         console.error('Error sending quick suggestion:', error);
@@ -802,10 +797,10 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ MÉTODOS DE CONTROL DEL CHAT - CORREGIDOS ============
 
   onStopFromMessages(event: any): void {
-    console.log('════════════════════════════════════════════════');
-    console.log('🛑 onStopFromMessages RECIBIDO EN CHATBOT COMPONENT');
-    console.log('Event:', event);
-    console.log('Event keys:', event ? Object.keys(event) : 'event is null');
+    // console.log('════════════════════════════════════════════════');
+    // console.log('🛑 onStopFromMessages RECIBIDO EN CHATBOT COMPONENT');
+    // console.log('Event:', event);
+    // console.log('Event keys:', event ? Object.keys(event) : 'event is null');
     
     if (!event) {
       console.error('❌ Evento STOP es null/undefined');
@@ -824,31 +819,31 @@ export class ChatbotComponent implements OnInit, OnDestroy {
                            (event?.message?.content || event?.message?.text) ||
                            this.lastUserQuestionForRestoration?.content;
     
-    console.log('⚙️ STOP PROCESADO:', {
-      questionType,
-      hasQuestionContent: !!questionContent,
-      contentPreview: questionContent?.substring(0, 50),
-      eventKeys: Object.keys(event || {})
-    });
+    // console.log('⚙️ STOP PROCESADO:', {
+    //   questionType,
+    //   hasQuestionContent: !!questionContent,
+    //   contentPreview: questionContent?.substring(0, 50),
+    //   eventKeys: Object.keys(event || {})
+    // });
     
     // Usar el sistema unificado de STOP
-    console.log('📞 Llamando a emergencyStop()...');
+    // console.log('📞 Llamando a emergencyStop()...');
     this.chatbotService.emergencyStop({
       questionType: questionType,
       shouldRestoreToInput: false, // No restaurar al input en STOP directo
       questionContent: questionContent
     }).then(stopData => {
-      console.log('✅ STOP ejecutado exitosamente:', stopData);
-      console.log('════════════════════════════════════════════════');
+      // console.log('✅ STOP ejecutado exitosamente:', stopData);
+      // console.log('════════════════════════════════════════════════');
     }).catch(error => {
       console.error('❌ Error ejecutando STOP:', error);
-      console.log('════════════════════════════════════════════════');
+      // console.log('════════════════════════════════════════════════');
     });
   }
 
   onRegenerateFromMessages(event: any): void {
     const botMessage: ChatMessage = event;
-    console.log('🔄 ChatbotComponent: Regeneración solicitada para:', botMessage?.id);
+    // console.log('🔄 ChatbotComponent: Regeneración solicitada para:', botMessage?.id);
 
     if (!botMessage || botMessage.isUser || botMessage.isStreaming) {
       console.warn('❌ Regenerar solo aplica a mensajes de bot completos');
@@ -878,20 +873,20 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
     // Parar el streaming y enviar la pregunta del usuario correspondiente
     this.isProcessing = true; // Mostrar indicador visual
-    console.log('🔄 Ejecutando emergencyStop para regeneración...');
+    // console.log('🔄 Ejecutando emergencyStop para regeneración...');
     this.chatbotService.emergencyStop({
       questionType: (userMessage as any)._isPredefinedQuestion ? 'predefined' : 'user',
       shouldRestoreToInput: false,
       questionContent: userMessage.content
     }).then(() => {
-      console.log('✅ emergencyStop completado, regenerando...');
+      // console.log('✅ emergencyStop completado, regenerando...');
       
       // Forzar reset del WebSocket para evitar estado sucio
       this.chatbotService.websocket.forceReset();
 
       // Pequeño delay para asegurar que el estado se resetee completamente
       setTimeout(() => {
-        console.log('🔄 Reenviando pregunta existente con regenerateResponse...');
+        // console.log('🔄 Reenviando pregunta existente con regenerateResponse...');
         
         // Usar regenerateResponse para reutilizar el ID del mensaje existente
         const questionType = (userMessage as any)._isPredefinedQuestion ? 'predefined' : 'user';
@@ -917,7 +912,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   private sendMessage(message: string): void {
-    this.conversationService.addMessage(message, 'user');
     this.chatbotService.sendUserQuestion(message)
       .catch(error => {
         console.error('Error sending message:', error);
@@ -930,7 +924,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
    * Método de emergencia para forzar STOP si algo sale mal
    */
   emergencyStop(): void {
-    console.log('🚨 EMERGENCY STOP manual desde componente');
+    // console.log('🚨 EMERGENCY STOP manual desde componente');
     
     // Usar cache local si hay
     const questionType = this.lastUserQuestionForRestoration?.type || 'user';
@@ -944,7 +938,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       shouldRestoreToInput: shouldRestoreToInput,
       questionContent: questionContent
     }).then(stopData => {
-      console.log('✅ EMERGENCY STOP completado:', stopData);
+      // console.log('✅ EMERGENCY STOP completado:', stopData);
       
       // Forzar actualización visual inmediata
       this.cleanupStreamingMessagesLocally();
@@ -967,7 +961,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       chatbotServiceDebug: this.chatbotService.getDebugState()
     };
     
-    console.log('🐛 DEBUG ChatbotComponent:', debugInfo);
+    // console.log('🐛 DEBUG ChatbotComponent:', debugInfo);
   }
 
   /**
@@ -976,31 +970,12 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   restoreLastQuestionToInput(): void {
     if (this.lastUserQuestionForRestoration) {
       this.newMessage = this.lastUserQuestionForRestoration.content;
-      console.log('↩️ Última pregunta restaurada manualmente:', {
-        type: this.lastUserQuestionForRestoration.type,
-        content: this.lastUserQuestionForRestoration.content.substring(0, 50)
-      });
+      // console.log('↩️ Última pregunta restaurada manualmente:', {
+      //   type: this.lastUserQuestionForRestoration.type,
+      //   content: this.lastUserQuestionForRestoration.content.substring(0, 50)
+      // });
     } else {
       console.warn('⚠️ No hay pregunta para restaurar');
-    }
-  }
-
-  // ============ NUEVO: MÉTODO PARA DEBUG DE STOP ============
-  
-  /**
-   * Método para debug: mostrar qué se borraría al presionar STOP
-   */
-  debugStopInfo(): void {
-    console.log('🔍 DEBUG - Información de STOP:');
-    console.log('💾 Última pregunta cacheada:', this.lastUserQuestionForRestoration);
-    console.log('📝 Mensajes actuales:', this.messages.length);
-    console.log('🔄 isProcessing:', this.isProcessing);
-    
-    if (this.lastUserQuestionForRestoration) {
-      console.log('🎯 La próxima acción STOP haría:');
-      console.log('   Tipo:', this.lastUserQuestionForRestoration.type);
-      console.log('   Restaurar al input:', this.lastUserQuestionForRestoration.type === 'user');
-      console.log('   Contenido:', this.lastUserQuestionForRestoration.content.substring(0, 50));
     }
   }
 }

@@ -14,5 +14,5 @@ if (process.env.NODE_ENV === 'production') {
   );
   
   fs.writeFileSync(envPath, content, 'utf8');
-  console.log('✅ Environment variables injected for production');
+  // console.log('✅ Environment variables injected for production');
 }

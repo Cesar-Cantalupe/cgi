@@ -44,7 +44,7 @@ export class LinkGeneratorComponent implements OnInit {
       if (params['treatment_family']) this.treatmentFamily = params['treatment_family'];
       if (params['treatment_response']) this.treatmentResponse = params['treatment_response'];
 
-      console.log('🔍 Valores pre-cargados en Link Generator:', params);
+      // console.log('🔍 Valores pre-cargados en Link Generator:', params);
     });
   }
 
@@ -62,7 +62,7 @@ export class LinkGeneratorComponent implements OnInit {
     if (this.treatmentFamily) queryParams.treatment_family = this.treatmentFamily;
     if (this.treatmentResponse) queryParams.treatment_response = this.treatmentResponse;
 
-    console.log('Navegando al Chat con filters:', queryParams);
+    // console.log('Navegando al Chat con filters:', queryParams);
 
     // ✅ Ir directamente al Chat con los filters
     this.router.navigate(['/chat'], { queryParams: queryParams });

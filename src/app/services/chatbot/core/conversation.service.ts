@@ -29,7 +29,11 @@ export class ConversationService {
   }
 
   createConversation(firstMessage?: string): Conversation {
-    console.log('🆕 ConversationService: Creando nueva conversación');
+    // console.log('🆕 ConversationService: Creando nueva conversación');
+    const previousActive = this.getActiveConversation();
+    if (previousActive) {
+      this.conversationBlurred.emit(previousActive);
+    }
     
     // Crear nueva conversación
     const conversation = this.buildConversation(firstMessage);
@@ -48,7 +52,7 @@ export class ConversationService {
     // Guardar en storage
     this.saveToStorage();
     
-    console.log('✅ Nueva conversación creada con ID:', conversation.id);
+    // console.log('✅ Nueva conversación creada con ID:', conversation.id);
     return conversation;
   }
 
@@ -75,7 +79,7 @@ export class ConversationService {
     // Guardar cambios
     this.saveToStorage();
     
-    console.log('✅ Conversación seleccionada:', id);
+    // console.log('✅ Conversación seleccionada:', id);
     return true;
   }
 
@@ -83,7 +87,7 @@ export class ConversationService {
     const active = this.getActiveConversation();
     
     if (!active) {
-      console.log('📝 No hay conversación activa, creando nueva...');
+      // console.log('📝 No hay conversación activa, creando nueva...');
       this.createConversation(sender === 'user' ? content : undefined);
       
       if (sender === 'bot') {
@@ -164,7 +168,7 @@ export class ConversationService {
     this.conversations.next([]);
     this.activeConversation.next(null);
     localStorage.removeItem(this.STORAGE_KEY);
-    console.log('🧹 Todas las conversaciones eliminadas');
+    // console.log('🧹 Todas las conversaciones eliminadas');
   }
 
   getStats() {
@@ -182,12 +186,12 @@ export class ConversationService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (!stored) {
-        console.log('📂 No hay conversaciones almacenadas');
+        // console.log('📂 No hay conversaciones almacenadas');
         return;
       }
 
       const data: { conversations: StoredConversation[] } = JSON.parse(stored);
-      console.log('📥 Cargando', data.conversations.length, 'conversaciones del storage');
+      // console.log('📥 Cargando', data.conversations.length, 'conversaciones del storage');
       
       const conversations = data.conversations.map(this.normalizeStoredConversation.bind(this));
       
@@ -232,7 +236,7 @@ export class ConversationService {
       };
       
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(saveData));
-      console.log('💾 Guardadas', storedConversations.length, 'conversaciones');
+      // console.log('💾 Guardadas', storedConversations.length, 'conversaciones');
       
     } catch (error) {
       console.error('❌ Error saving conversations:', error);

@@ -198,7 +198,7 @@ export class WebsocketService implements OnDestroy {
     const pongTime = this.lastPongTime;
     const latency = pongTime - pingTime;
     
-    console.log('✅ PONG recibido con latencia:', latency, 'ms');
+    // console.log('✅ PONG recibido con latencia:', latency, 'ms');
     
     this.messageSubject.next({
       type: 'pong',
@@ -219,7 +219,7 @@ export class WebsocketService implements OnDestroy {
       return;
     }
     
-    console.log('⏳ Setup PONG timeout - esperando respuesta del servidor...');
+    // console.log('⏳ Setup PONG timeout - esperando respuesta del servidor...');
     
     this.pingPongTimeoutId = setTimeout(() => {
       console.warn('⚠️ ERRORS.PONG_TIMEOUT', this.PONG_TIMEOUT, 'ms');

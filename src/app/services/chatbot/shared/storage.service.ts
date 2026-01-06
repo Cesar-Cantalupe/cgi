@@ -398,11 +398,11 @@ saveConversations(conversations: Conversation[]): void {
       // Marcar como migrado
       localStorage.setItem(this.MIGRATION_FLAG_KEY, 'true');
       
-      console.log('ERRORS.HISTORY_MIGRATION_COMPLETE', {
-        oldItems: oldHistory.length,
-        userConversations: userConversations.length,
-        newConversations: conversations.length
-      });
+      // console.log('ERRORS.HISTORY_MIGRATION_COMPLETE', {
+      //   oldItems: oldHistory.length,
+      //   userConversations: userConversations.length,
+      //   newConversations: conversations.length
+      // });
       
       return conversations;
       
