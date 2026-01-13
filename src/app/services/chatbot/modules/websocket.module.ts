@@ -18,6 +18,7 @@ export class WebsocketModule implements OnDestroy {
   private readonly WS_URL = this.buildWebsocketUrl();
   private isInitialized = false;
   private currentQuestion = '';
+  private currentQuestionType: 'user' | 'predefined' = 'user';
   private streamingActive = false;
   
   public connectionStatus$ = this.connectionStatus.asObservable();
@@ -55,7 +56,7 @@ export class WebsocketModule implements OnDestroy {
     });
   }
 
-  sendQuery(query: string, filters: any = {}): void {
+  sendQuery(query: string, filters: any = {}, questionType: 'user' | 'predefined' = 'user'): void {
     if (!this.isConnected()) {
       console.error('❌ ERROR: WebSocket no conectado');
       throw new Error('WebSocket not connected');
@@ -63,6 +64,7 @@ export class WebsocketModule implements OnDestroy {
     
     // Preparar nuevo estado
     this.currentQuestion = query;
+    this.currentQuestionType = questionType;
     this.streamingActive = true;
     
     const message = {
@@ -193,13 +195,21 @@ export class WebsocketModule implements OnDestroy {
     
     if (!this.streaming.isStreaming()) {
       // console.log('✅ Iniciando nuevo stream para:', this.currentQuestion);
-      this.streaming.startStream(this.currentQuestion);
+      this.streaming.startStream(this.currentQuestion, this.currentQuestionType);
     } else {
       console.warn('⚠️ Ya hay un stream activo, ignorando nuevo stream_start');
     }
   }
 
   private handleStreamChunk(event: WebsocketEvent): void {
+    console.log('📦 CHUNK recibido:', {
+      timestamp: new Date().toISOString(),
+      chunk_length: event['chunk']?.length || 0,
+      chunk_preview: event['chunk']?.substring(0, 100),
+      streamingActive: this.streamingActive,
+      isStreaming: this.streaming.isStreaming()
+    });
+    
     if (!this.streamingActive) {
       console.warn('⚠️ stream_chunk recibido pero streamingActive=false, ignorando:', {
         chunk_preview: event['chunk']?.substring(0, 50),
@@ -216,36 +226,36 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private handleStreamEnd(event: WebsocketEvent): void {
-    // console.log('📨 Stream END recibido:', {
-    //   streamingActive: this.streamingActive,
-    //   isStreaming: this.streaming.isStreaming(),
-    //   fullResponse_length: event['full_response']?.length || 0,
-    //   currentQuestion: this.currentQuestion?.substring(0, 50)
-    // });
+    console.log('📨 [WEBSOCKET MODULE] Stream END recibido:', {
+      streamingActive: this.streamingActive,
+      isStreaming: this.streaming.isStreaming(),
+      fullResponse_length: event['full_response']?.length || 0,
+      currentQuestion: this.currentQuestion?.substring(0, 50)
+    });
     
     // Verificar si hay un stream activo en streaming.module
     const hasActiveStream = this.streaming.isStreaming();
     
     if (!this.streamingActive && !hasActiveStream) {
-      // console.warn('⚠️ Stream END recibido pero no hay stream activo (streamingActive=false e isStreaming=false)');
+      console.warn('⚠️ [WEBSOCKET MODULE] Stream END recibido pero no hay stream activo');
       return;
     }
     
     const fullResponse = event['full_response'] || '';
     const sources = event['sources'] || [];
     
-    // console.log('✅ Completando stream con respuesta:', {
-    //   length: fullResponse.length,
-    //   sourcesCount: sources.length
-    // });
+    console.log('✅ [WEBSOCKET MODULE] Completando stream con respuesta:', {
+      length: fullResponse.length,
+      sourcesCount: sources.length
+    });
     
     this.streaming.completeStream(fullResponse, sources)
       .then(() => {
-        // console.log('✅ completeStream() completado, reseteando stream state');
+        console.log('✅ [WEBSOCKET MODULE] completeStream() completado, reseteando stream state');
         this.resetStreamState();
       })
       .catch(error => {
-        console.error('💥 Error completando stream:', error);
+        console.error('💥 [WEBSOCKET MODULE] Error completando stream:', error);
         this.resetStreamState();
       });
   }
@@ -273,6 +283,7 @@ export class WebsocketModule implements OnDestroy {
     // });
     this.streamingActive = false;
     this.currentQuestion = '';
+    this.currentQuestionType = 'user';
     this.state.setProcessing(false);
     this.state.setClientId(null);
     // console.log('✅ Stream state reseteado:', {

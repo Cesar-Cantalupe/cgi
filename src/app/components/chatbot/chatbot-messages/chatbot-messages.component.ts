@@ -79,8 +79,6 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // console.log('🔧 ChatbotMessagesComponent inicializado');
-    
     // Inicializar con los mensajes recibidos
     this.updateFilteredMessages();
     
@@ -95,17 +93,21 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
     
     // Trackear última pregunta del usuario
     this.trackLastUserQuestion();
+    
+    // Suscribirse a cambios de mensajes del estado para forzar detección
+    this.state.messages$.subscribe((messages) => {
+      this.cdr.markForCheck();
+    });
+    
+    // ⚠️ CRÍTICO: Escuchar cuando termina el streaming para actualizar la UI inmediatamente
+    this.state.streamingCompleted$.subscribe((message) => {
+      // Usar detectChanges() en lugar de markForCheck() para forzar re-evaluación del template
+      this.cdr.detectChanges();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // console.log('🔄 ngOnChanges llamado', Object.keys(changes));
-    
     if (changes['messages']) {
-      // console.log('📥 Mensajes actualizados:', {
-      //   oldCount: changes['messages'].previousValue?.length || 0,
-      //   newCount: changes['messages'].currentValue?.length || 0
-      // });
-      
       // Limpiar estados de streaming obsoletos
       this.cleanupOldStreamingStates();
       
@@ -129,7 +131,6 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
     }
     
     if (changes['isProcessing']) {
-      // console.log('⚙️ Estado procesamiento:', this.isProcessing);
       this.cdr.markForCheck();
     }
   }
@@ -138,11 +139,8 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
    // ============ SISTEMA UNIFICADO DE STOP MEJORADO ============
   
 onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
-  // console.log('🛑 STOP button clicked - Usando sistema unificado', event);
-  
   // Evitar múltiples STOPs simultáneos
   if (this.isStopInProgress) {
-    // console.log('⏸️ STOP ya en progreso, ignorando...');
     return;
   }
   
@@ -167,13 +165,6 @@ onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
       questionContent: lastUserMessage?.content || ''
     };
     
-    // console.log('📤 Emitiendo evento STOP para sistema unificado:', {
-    //   questionType: stopData.questionType,
-    //   shouldRestoreToInput: stopData.shouldRestoreToInput,
-    //   contentPreview: stopData.questionContent?.substring(0, 50),
-    //   hasStreamingMessage: !!streamingMessage
-    // });
-    
     // 5. Emitir evento (SIEMPRE, incluso si no hay streamingMessage)
     this.stop.emit(stopData);
     
@@ -189,7 +180,6 @@ onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
     // Reintentar si es necesario
     if (this.stopRetryCount < this.MAX_STOP_RETRIES) {
       this.stopRetryCount++;
-      // console.log(`🔄 Reintentando STOP (intento ${this.stopRetryCount}/${this.MAX_STOP_RETRIES})`);
       setTimeout(() => {
         this.isStopInProgress = false;
         this.onStopResponse(event);
@@ -207,8 +197,6 @@ onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
 // ============ NUEVO MÉTODO: CREAR MENSAJE DE FALLBACK ============
 
 private createFallbackStopMessage(): ChatMessage {
-  // console.log('🔄 Creando mensaje de fallback para STOP');
-  
   // Buscar cualquier mensaje de bot como fallback
   const botMessages = this.filteredMessages.filter(m => 
     this.getMessageSender(m) === 'bot'
@@ -328,19 +316,20 @@ private createFallbackStopMessage(): ChatMessage {
     const lengthChanged = this.filteredMessages.length !== newFilteredMessages.length;
     const idsChanged = this.filteredMessages.some((m, i) => m.id !== newFilteredMessages[i]?.id);
 
-    //Si cambió el content de alguno de los mensajes
+    // Si cambió el content de alguno de los mensajes
     const contentChanged = this.filteredMessages.some((m, i) => {
       const oldContent = m.content || m.text || '';
       const newContent = newFilteredMessages[i]?.content || newFilteredMessages[i]?.text || '';
       return oldContent !== newContent;
     });
     
-    if (lengthChanged || idsChanged || contentChanged) {
+    // ⚠️ CRÍTICO: También verificar si cambió isStreaming en cualquier mensaje
+    const streamingStateChanged = this.filteredMessages.some((m, i) => {
+      return m.isStreaming !== newFilteredMessages[i]?.isStreaming;
+    });
+    
+    if (lengthChanged || idsChanged || contentChanged || streamingStateChanged) {
       this.filteredMessages = newFilteredMessages;
-      // console.log('📊 filteredMessages realmente actualizadas:', {
-      //   total: this.filteredMessages.length,
-      //   streaming: this.filteredMessages.filter(m => m.isStreaming).length
-      // });
     }
   }
   

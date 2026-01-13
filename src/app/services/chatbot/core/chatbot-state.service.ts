@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ChatMessage } from '../interfaces/chat-message.interface';
 import { ConversationService } from './conversation.service';
 
@@ -19,12 +19,14 @@ export class ChatbotStateService {
   private processingSubject = new BehaviorSubject<boolean>(false);
   private streamingMessageSubject = new BehaviorSubject<ChatMessage | null>(null);
   private clientIdSubject = new BehaviorSubject<string | null>(null);
+  private streamingCompletedSubject = new Subject<ChatMessage>(); // ⚠️ Emite cuando streaming termina
   
   // Público
   public messages$ = this.messagesSubject.asObservable();
   public isProcessing$ = this.processingSubject.asObservable();
   public currentStreamingMessage$ = this.streamingMessageSubject.asObservable();
   public currentClientId$ = this.clientIdSubject.asObservable();
+  public streamingCompleted$ = this.streamingCompletedSubject.asObservable();
 
   // Getters síncronos
   get messages(): ChatMessage[] {
@@ -132,6 +134,10 @@ export class ChatbotStateService {
     const deduplicated = this.deduplicateMessages(messages);
     this.messagesSubject.next(deduplicated);
   }
+  
+  notifyStreamingCompleted(message: ChatMessage): void {
+    this.streamingCompletedSubject.next(message);
+  }
 
   setProcessing(value: boolean): void {
     if (this.processingSubject.value !== value) {
@@ -195,6 +201,7 @@ export class ChatbotStateService {
       
       return null;
     }
+
 
     const messages = [...this.messages];
     const updatedMessage = { ...messages[index], ...updates };

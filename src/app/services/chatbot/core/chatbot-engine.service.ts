@@ -137,7 +137,7 @@ export class ChatbotEngineService implements OnDestroy {
       
       const filterConfig = this.filters.getCombinedFilters(customFilters);
       
-      this.websocket.sendQuery(message, filterConfig);
+      this.websocket.sendQuery(message, filterConfig, questionType);
       
       return true;
       
@@ -224,7 +224,7 @@ export class ChatbotEngineService implements OnDestroy {
       
       const filterConfig = this.filters.getCombinedFilters(customFilters);
       
-      this.websocket.sendQuery(message, filterConfig);
+      this.websocket.sendQuery(message, filterConfig, questionType);
       
       return true;
       

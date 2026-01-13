@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WebSocketEvent, QueryRequest, PingMessage } from '../interfaces/websocket-events.interface';
 import { TranslationService } from '../../translation.service';
+import { WEBSOCKET_CONFIG } from '../../../config/websocket.config';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,8 @@ export class WebsocketService implements OnDestroy {
   private pingCount = 0;
   private pongCount = 0;
   private isPingAwaitingPong = false; // Rastrear si hay un PING sin responder
+  
+  private usingMock = WEBSOCKET_CONFIG.USE_MOCK_MODE;
 
   public messages$ = this.messageSubject.asObservable();
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
@@ -47,6 +50,19 @@ export class WebsocketService implements OnDestroy {
 
   connect(url: string): Observable<boolean> {
     this.currentUrl = url;
+    
+    // Si está configurado para usar mock, no conectar al backend real
+    if (this.usingMock) {
+      console.log('🎭 MODO MOCK ACTIVADO (websocket.config.ts)');
+      return new Observable(observer => {
+        this.isConnected = true;
+        this.connectionStatusSubject.next('Connected (Mock)');
+        observer.next(true);
+        observer.complete();
+      });
+    }
+    
+    // Conexión real
     return new Observable(observer => {
       try {
         this.cleanup();
@@ -316,6 +332,13 @@ export class WebsocketService implements OnDestroy {
   }
 
   sendMessage(message: QueryRequest): void {
+    // Si estamos en modo mock, simular respuesta
+    if (this.usingMock) {
+      this.simulateMockResponse(message);
+      return;
+    }
+    
+    // Modo real
     if (!this.isWebSocketConnected()) {
       const errorMsg = this.translationService.instant('ERRORS.WEBSOCKET_NOT_CONNECTED');
       console.error(errorMsg);
@@ -388,7 +411,7 @@ export class WebsocketService implements OnDestroy {
   }
 
   isWebSocketConnected(): boolean {
-    return this.isConnected && this.socket?.readyState === WebSocket.OPEN;
+    return this.usingMock || (this.isConnected && this.socket?.readyState === WebSocket.OPEN);
   }
 
   getPingPongStats(): any {
@@ -420,5 +443,72 @@ export class WebsocketService implements OnDestroy {
     
     this.messageSubject.complete();
     this.connectionStatusSubject.complete();
+  }
+
+  // ============ MÉTODOS MOCK PARA DEBUGGING ============
+
+  private simulateMockResponse(message: QueryRequest): void {
+    console.log('📤 [MOCK] Mensaje recibido:', message);
+
+    const { chunkSize, delayBeforeStart, delayBetweenChunks } = WEBSOCKET_CONFIG.MOCK;
+
+    setTimeout(() => {
+      this.messageSubject.next({
+        type: 'stream_start',
+        client_id: `mock-${Date.now()}`,
+      });
+      console.log('📨 [MOCK] stream_start enviado');
+
+      this.simulateStreamChunks(
+        message.query || 'respuesta por defecto',
+        chunkSize,
+        delayBetweenChunks
+      );
+    }, delayBeforeStart);
+  }
+
+  private simulateStreamChunks(query: string, chunkSize: number, delayBetweenChunks: number): void {
+    const mockResponses: { [key: string]: string } = {
+      default: `Esta es una respuesta simulada del servidor mock. Los chunks llegan progresivamente cada ${delayBetweenChunks}ms para que puedas debugear el streaming correctamente. Esto simula un LLM real que está generando texto en tiempo real. Puedes ajustar la velocidad en websocket.config.ts cambiando delayBetweenChunks.`,
+      hola: `¡Hola! Esta es una prueba de streaming progresivo. Cada fragmento de texto llega de forma gradual para simular una respuesta real del backend.`,
+      ayuda: `Te estoy ayudando con esta prueba de streaming. El mock backend está enviando chunks cada ${delayBetweenChunks}ms. Puedes cambiar esto en websocket.config.ts.`,
+      test: `Test de streaming en progreso. Verás cómo el texto se va mostrando poco a poco con la animación typewriter si está habilitada.`,
+    };
+
+    const responseText = mockResponses[query.toLowerCase()] || mockResponses['default'];
+    const chunks = [];
+
+    for (let i = 0; i < responseText.length; i += chunkSize) {
+      chunks.push(responseText.substring(i, i + chunkSize));
+    }
+
+    console.log(`📊 [MOCK] Enviando ${chunks.length} chunks de ${chunkSize} caracteres cada ${delayBetweenChunks}ms`);
+
+    chunks.forEach((chunk, index) => {
+      setTimeout(() => {
+        this.messageSubject.next({
+          type: 'stream_chunk',
+          chunk: chunk,
+        });
+        console.log(`📦 [MOCK] Chunk ${index + 1}/${chunks.length}: "${chunk.substring(0, 30)}..."`);
+      }, delayBetweenChunks * (index + 1));
+    });
+
+    // Calcular el delay para stream_end: después del último chunk + un delay extra
+    const streamEndDelay = delayBetweenChunks * chunks.length + 300;
+    console.log(`⏰ [MOCK] stream_end programado para ${streamEndDelay}ms`);
+
+    setTimeout(() => {
+      console.log('🏁 [MOCK] Enviando stream_end ahora...');
+      this.messageSubject.next({
+        type: 'stream_end',
+        full_response: responseText,
+        sources: [
+          { title: 'Mock Document 1', url: 'https://mock.example.com/doc1' },
+          { title: 'Mock Document 2', url: 'https://mock.example.com/doc2' },
+        ],
+      });
+      console.log('✅ [MOCK] stream_end enviado con', responseText.length, 'caracteres');
+    }, streamEndDelay);
   }
 }

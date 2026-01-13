@@ -46,7 +46,7 @@ export class StreamingModule implements OnDestroy {
   private readonly MIN_TEXT_FOR_DISPLAY = 1;
   private cancellationTimeout: any = null;
   
-  private readonly TYPEWRITER_ENABLED = false;
+  private readonly TYPEWRITER_ENABLED = true;
 
   constructor(
     private state: ChatbotStateService,
@@ -137,15 +137,31 @@ export class StreamingModule implements OnDestroy {
     this.resetAutoCancellation();
     
     // ACTUALIZAR SIEMPRE
-    if (this.accumulatedText.length > 0) {
-      // ACTUALIZAR EL ESTADO
-      this.updateMessage(this.currentStreamId, {
-        content: this.accumulatedText,
-        text: this.accumulatedText,
-        isStreaming: true,
-        _isProcessingPlaceholder: this.accumulatedText.length < 10,
-        _streamingUpdate: Date.now(),
-        _initialStreaming: false
+    if (this.accumulatedText.length > 0 && this.currentStreamId) {
+      // ACTUALIZAR EL ESTADO con NgZone para forzar detección de cambios
+      this.ngZone.run(() => {
+        // Si typewriter está habilitado, mostrar animación durante el streaming
+        if (this.TYPEWRITER_ENABLED) {
+          // Mostrar el texto acumulado para que el typewriter lo anime progresivamente
+          this.updateMessage(this.currentStreamId!, {
+            content: this.accumulatedText,
+            text: this.accumulatedText,
+            isStreaming: true,
+            _isProcessingPlaceholder: this.accumulatedText.length < 10,
+            _streamingUpdate: Date.now(),
+            _initialStreaming: false
+          });
+        } else {
+          // Sin typewriter, mostrar directamente
+          this.updateMessage(this.currentStreamId!, {
+            content: this.accumulatedText,
+            text: this.accumulatedText,
+            isStreaming: true,
+            _isProcessingPlaceholder: this.accumulatedText.length < 10,
+            _streamingUpdate: Date.now(),
+            _initialStreaming: false
+          });
+        }
       });
     }
   }
@@ -154,12 +170,6 @@ export class StreamingModule implements OnDestroy {
    * Finaliza el stream con el texto completo
    */
   async completeStream(fullResponse: string, sources: any[] = []): Promise<void> {
-    // console.log('🏁 STREAMING: completeStream() - respuesta completa:', {
-    //   length: fullResponse.length,
-    //   questionType: this.lastQuestionType,
-    //   question: this.lastQuestion?.substring(0, 50)
-    // });
-    
     if (this.wasCancelled || !this.currentStreamId) {
       this.cleanupCurrentStream();
       return;
@@ -171,20 +181,34 @@ export class StreamingModule implements OnDestroy {
     this.accumulatedText = fullResponse;
     this.finalSources = this.messageParser.formatSources(sources || []);
     
-    // Primero, actualizar el mensaje con el texto completo (sin animación)
-    this.updateMessage(this.currentStreamId, {
-      content: this.accumulatedText,
-      isStreaming: true,
-      _isProcessingPlaceholder: false,
-      _streamingUpdate: Date.now(),
-      text: this.accumulatedText,
-      sources: this.finalSources
+    // Actualizar el mensaje con el texto completo (sin animación porque ya llegó stream_end)
+    // Si TYPEWRITER_ENABLED, la animación ya ocurrió durante los chunks
+    // IMPORTANTE: Forzar isStreaming = false dentro de ngZone para asegurar detección de cambios
+    this.ngZone.run(() => {
+      
+      this.updateMessage(this.currentStreamId!, {
+        content: this.accumulatedText,
+        isStreaming: false, // ⚠️ CRÍTICO: Marcar como completado, no streaming
+        _isProcessingPlaceholder: false,
+        _streamingUpdate: Date.now(),
+        text: this.accumulatedText,
+        sources: this.finalSources,
+        showFeedbackBox: true // Mostrar feedback box
+      });
+      
+      // Marcar processing como completado
+      this.state.setProcessing(false);
+      
+      // ⚠️ EMITIR EVENTO PARA FORZAR DETECCIÓN DE CAMBIOS
+      if (this.currentStreamId) {
+        const message = this.state.messages.find(m => m.id === this.currentStreamId);
+        if (message) {
+          this.state.notifyStreamingCompleted(message);
+        }
+      }
     });
     
-    // Luego animar si es necesario
-    await this.animateFinalText();
-    
-    // Marcar como completado
+    // Marcar como completado sin animación
     this.finalizeStream();
   }
 
@@ -446,7 +470,7 @@ export class StreamingModule implements OnDestroy {
 
   private finalizeStream(): void {
     if (!this.currentStreamId) {
-      console.error('❌ STREAMING: No hay stream para finalizar');
+      console.error('❌ [STREAMING] No hay stream para finalizar');
       return;
     }
     
@@ -467,17 +491,9 @@ export class StreamingModule implements OnDestroy {
       this.onStreamComplete.next(completionData);
     });
     
-    // console.log('📤 STREAMING: Evento onStreamComplete emitido (completado):', {
-    //   wasCancelled: false,
-    //   questionType: this.lastQuestionType,
-    //   textLength: this.accumulatedText.length
-    // });
-    
     // Limpiar estado
     this.state.setStreamingMessage(null);
     this.currentStreamId = null;
-    
-    // console.log('✅ STREAMING: Stream finalizado exitosamente');
   }
 
   private updateMessage(messageId: string, updates: Partial<ChatMessage>): void {
@@ -490,7 +506,7 @@ export class StreamingModule implements OnDestroy {
       
       this.state.updateMessage(messageId, fullUpdates);
     } catch (error) {
-      console.error('💥 STREAMING: Error actualizando mensaje:', error);
+      console.error('💥 [STREAMING] Error actualizando mensaje:', error);
     }
   }
 

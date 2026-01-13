@@ -61,7 +61,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     private suggestionsService: SuggestionsService,
     private conversationService: ConversationService,
     private feedbackModule: FeedbackModule,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private state: ChatbotStateService
   ) {}
 
   ngOnInit(): void {
@@ -126,8 +127,19 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       //   conversationsCount: conversations?.length || 0
       // });
       
+      // ⚠️ CRÍTICO: Forzar detección de cambios para componentes con OnPush
+      this.cdr.markForCheck();
+      
       this.updateComponentState(messages, processing, connection, currentConversation, conversations, lang);
     });
+    
+    // ⚠️ CRÍTICO: Escuchar cuando termina el streaming para forzar actualización inmediata
+    this.state.streamingCompleted$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Usar detectChanges() en lugar de markForCheck() para forzar evaluación
+        this.cdr.detectChanges();
+      });
   }
 
   private setupStopListener(): void {
