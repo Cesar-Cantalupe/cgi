@@ -49,11 +49,11 @@ export class FeedbackModule {
       return;
     }
 
-    const clientId = this.state.currentClientId;
+    const clientId = this.state.getClientId() || 'unknown';
     const originalQuery = this.findOriginalQuery(message);
 
     // Intentar enviar inmediatamente si hay conexión
-    if (clientId && this.websocket.isConnected()) {
+    if (this.websocket.isConnected()) {
       this.sendFeedbackImmediately(
         message.id,
         clientId,

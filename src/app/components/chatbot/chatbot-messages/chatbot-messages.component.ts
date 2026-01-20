@@ -462,7 +462,7 @@ private createFallbackStopMessage(): ChatMessage {
     this.cdr.markForCheck();
   }
 
-  submitFeedback(message: ChatMessage): void {
+  submitFeedback(message: ChatMessage, commentFromView?: string): void {
     const messageId = this.getMessageId(message);
     const state = this.getOrCreateFeedbackState(messageId);
     
@@ -472,7 +472,7 @@ private createFallbackStopMessage(): ChatMessage {
     
     const rating = state.type === 'like' ? 'up' : 
                    state.type === 'dislike' ? 'down' : null;
-    const comment = state.feedbackText || '';
+    const comment = commentFromView || state.feedbackText || '';
     
     this.feedback.emit({ message, rating, comment });
     
@@ -500,9 +500,8 @@ private createFallbackStopMessage(): ChatMessage {
     const messageId = this.getMessageId(message);
     const state = this.getOrCreateFeedbackState(messageId);
     
-    const hasSubmitted = message.feedback === 'like' || message.feedback === 'dislike';
-    
-    return { ...state, hasSubmitted };
+    (state as any).hasSubmitted = message.feedback === 'like' || message.feedback === 'dislike';
+    return state as FeedbackState & { hasSubmitted: boolean };
   }
 
   shouldShowFeedback(message: ChatMessage): boolean {

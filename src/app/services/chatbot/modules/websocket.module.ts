@@ -169,6 +169,9 @@ export class WebsocketModule implements OnDestroy {
         break;
         
       case 'status':
+        if (event['client_id']) {
+          this.state.setClientId(event['client_id']);
+        }
         break;
         
       case 'error':
@@ -177,6 +180,9 @@ export class WebsocketModule implements OnDestroy {
         break;
         
       case 'pong':
+        if (event['client_id']) {
+          this.state.setClientId(event['client_id']);
+        }
         break;
     }
   }
@@ -305,15 +311,21 @@ export class WebsocketModule implements OnDestroy {
 
   sendFeedback(feedbackData: any): void {
     if (!this.isConnected()) {
+      console.warn('⚠️ WebSocket not connected, feedback not sent');
       return;
     }
-      
+    
+    // Construir mensaje en el formato especificado por la documentación "2025-11-06_front-back-integration [WIP] (3)"
     const message = {
+      client_id: feedbackData.client_id || this.state.currentClientId || '',
       type: 'feedback',
-      ...feedbackData,
+      query: feedbackData.query || '',
+      response: feedbackData.response || '',
+      rating: feedbackData.rating || '',
+      comment: feedbackData.comment || '',
       timestamp: Date.now()
     };
-  
+    
     this.websocket.sendMessage(message);
   }
 
