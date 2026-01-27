@@ -126,7 +126,7 @@
     "SIGNUP_TEXT": "No tens un compte?",
     "SIGNUP_LINK": "Unir-se",
     "ERROR_REQUIRED_FIELDS": "Si us plau, omple tots els camps correctament",
-    "ERROR_INVALID_CREDENTIALS": "Credencials invàlides. Utilitza: test@gmail.com / 20432043",
+    "ERROR_INVALID_CREDENTIALS": "Credencials invàlides",
     "EMAIL_REQUIRED": "L'email és obligatori",
     "EMAIL_INVALID": "Si us plau, introdueix un email vàlid",
     "PASSWORD_REQUIRED": "La contrasenya és obligatòria",

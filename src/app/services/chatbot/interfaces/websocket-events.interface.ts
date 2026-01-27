@@ -17,6 +17,8 @@ export interface QueryRequest {
   query: string;
   filters?: any;
   stream?: boolean;
+  user_type?: string;
+  client_id?: string;
 }
 
 export interface FeedbackRequest {

@@ -6,6 +6,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export interface User {
   email: string;
   name?: string;
+  type?: string;
 }
 
 @Injectable({
@@ -29,28 +30,25 @@ export class AuthService {
   }
 
   login(email: string, password: string): boolean {
-    /*
-    if (email === 'test@gmail.com' && password === '20432043') {
-      const user: User = {
-        email: email,
-        name: 'Usuario Test'
-      };
-            
-      localStorage.setItem('currentUser', JSON.stringify(user));
-            
-      this.currentUserSubject.next(user);
-      this.isAuthenticatedSubject.next(true);
-      
-      return true;
-    }
-    */
+    let user: User = { email: '' };
 
-    if (email === 'test@cgi.com' && password === '20252026') {
-      const user: User = {
+    if (email === 'internal@cgi.com' && password === 'juramento') {
+      user = {
         email: email,
-        name: 'CGI Test'
+        name: 'CGI Internal',
+        type: 'internal'
       };
-            
+    }
+
+    if (email === 'external@cgi.com' && password === 'coraje') {
+      user = {
+        email: email,
+        name: 'CGI External',
+        type: 'external'
+      };
+    }
+
+    if (user.email) {
       localStorage.setItem('currentUser', JSON.stringify(user));
             
       this.currentUserSubject.next(user);
@@ -58,7 +56,7 @@ export class AuthService {
       
       return true;
     }
-       
+
     return false;
   }
 
@@ -72,6 +70,10 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  getCurrentUserType(): string {
+    return this.currentUserSubject.value?.type || 'unknown';
   }
 
   isAuthenticated(): boolean {

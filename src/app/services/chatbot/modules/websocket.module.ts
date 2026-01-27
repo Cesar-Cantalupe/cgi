@@ -20,6 +20,7 @@ export class WebsocketModule implements OnDestroy {
   private currentQuestion = '';
   private currentQuestionType: 'user' | 'predefined' = 'user';
   private streamingActive = false;
+  private ignoreNextStreamEnd = false;
   
   public connectionStatus$ = this.connectionStatus.asObservable();
 
@@ -82,21 +83,15 @@ export class WebsocketModule implements OnDestroy {
     if (!this.streamingActive) {
       return;
     }
+
+    // Marcar que debemos ignorar el próximo stream_end
+    this.ignoreNextStreamEnd = true;
     
-    this.streaming.cancelStream();
-    
-    if (this.isConnected()) {
-      const cancelMessage = {
-        query: 'CANCEL',
-        filters: { reason: 'user_cancelled' },
-        stream: false,
-        timestamp: Date.now()
-      };
-      
-      this.websocket.sendMessage(cancelMessage);
-    }
-    
-    this.resetStreamState();
+    // Cancelar en el streaming module
+    this.streaming.cancelStream('user_request');
+
+    // Poner streamingActive en false para ignorar chunks futuros
+    this.streamingActive = false;
   }
 
   reconnect(): void {
@@ -126,6 +121,13 @@ export class WebsocketModule implements OnDestroy {
 
   isConnected(): boolean {
     return this.websocket.isWebSocketConnected();
+  }
+
+  canSendQuery(): boolean {
+    // No se puede enviar si:
+    // 1. Hay streaming activo
+    // 2. Estamos esperando el stream_end después de STOP
+    return !this.streamingActive && !this.ignoreNextStreamEnd;
   }
 
   // ============ MÉTODOS PRIVADOS ============
@@ -208,20 +210,10 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private handleStreamChunk(event: WebsocketEvent): void {
-    console.log('📦 CHUNK recibido:', {
-      timestamp: new Date().toISOString(),
-      chunk_length: event['chunk']?.length || 0,
-      chunk_preview: event['chunk']?.substring(0, 100),
-      streamingActive: this.streamingActive,
-      isStreaming: this.streaming.isStreaming()
-    });
+    console.log('📦 CHUNK recibido');
     
     if (!this.streamingActive) {
-      console.warn('⚠️ stream_chunk recibido pero streamingActive=false, ignorando:', {
-        chunk_preview: event['chunk']?.substring(0, 50),
-        streamingActive: this.streamingActive,
-        currentQuestion: this.currentQuestion
-      });
+      console.warn('⚠️ IGNORANDO chunk (después de STOP)');
       return;
     }
     
@@ -232,18 +224,22 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private handleStreamEnd(event: WebsocketEvent): void {
-    console.log('📨 [WEBSOCKET MODULE] Stream END recibido:', {
-      streamingActive: this.streamingActive,
-      isStreaming: this.streaming.isStreaming(),
-      fullResponse_length: event['full_response']?.length || 0,
-      currentQuestion: this.currentQuestion?.substring(0, 50)
-    });
-    
-    // Verificar si hay un stream activo en streaming.module
-    const hasActiveStream = this.streaming.isStreaming();
-    
-    if (!this.streamingActive && !hasActiveStream) {
-      console.warn('⚠️ [WEBSOCKET MODULE] Stream END recibido pero no hay stream activo');
+    console.log('📨 Stream END recibido');
+
+    // Si debemos ignorar este stream_end
+    if (this.ignoreNextStreamEnd) {
+      console.warn('⚠️ IGNORANDO stream_end (después de STOP)');
+      
+      // Limpiar el flag
+      this.ignoreNextStreamEnd = false;
+      
+      // Resetear completamente el estado
+      this.resetStreamState();
+      
+      // Limpiar mensajes de streaming del estado
+      this.cleanupStreamingMessages();
+      
+      console.log('✅ Limpieza completada, listo para nueva pregunta');
       return;
     }
     
@@ -282,20 +278,28 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private resetStreamState(): void {
-    // console.log('🔄 Reseteando stream state:', {
-    //   streamingActive_before: this.streamingActive,
-    //   currentQuestion_before: this.currentQuestion,
-    //   isStreaming: this.streaming.isStreaming()
-    // });
     this.streamingActive = false;
     this.currentQuestion = '';
     this.currentQuestionType = 'user';
+    this.ignoreNextStreamEnd = false
     this.state.setProcessing(false);
     this.state.setClientId(null);
-    // console.log('✅ Stream state reseteado:', {
-    //   streamingActive_after: this.streamingActive,
-    //   currentQuestion_after: this.currentQuestion
-    // });
+  }
+
+  private cleanupStreamingMessages(): void {
+    // Eliminar todos los mensajes con isStreaming=true
+    const streamingMessages = this.state.messages.filter(m => m.isStreaming === true);
+    
+    console.log('🧹 Limpiando mensajes de streaming:', streamingMessages.length);
+    
+    streamingMessages.forEach(msg => {
+      if (msg.id) {
+        this.state.removeMessage(m => m.id === msg.id);
+      }
+    });
+    
+    // Limpiar también el currentStreamingMessage
+    this.state.setStreamingMessage(null);
   }
 
   // ============ MÉTODOS UTILITARIOS ============

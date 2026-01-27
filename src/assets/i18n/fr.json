@@ -126,7 +126,7 @@
     "SIGNUP_TEXT": "Vous n'avez pas de compte ?",
     "SIGNUP_LINK": "S'inscrire",
     "ERROR_REQUIRED_FIELDS": "Veuillez remplir tous les champs correctement",
-    "ERROR_INVALID_CREDENTIALS": "Identifiants invalides. Utilisez : test@gmail.com / 20432043",
+    "ERROR_INVALID_CREDENTIALS": "Identifiants invalides",
     "EMAIL_REQUIRED": "L'email est requis",
     "EMAIL_INVALID": "Veuillez entrer un email valide",
     "PASSWORD_REQUIRED": "Le mot de passe est requis",

@@ -112,7 +112,7 @@
               </svg>
             </button>
             
-            <button *ngIf="(!getFeedbackState(message).type && !getFeedbackState(message).hasSubmitted) || (getFeedbackState(message).type === 'dislike' && !getFeedbackState(message).showFeedbackBox)"
+            <button *ngIf="(!getFeedbackState(message).type && !getFeedbackState(message).hasSubmitted) || ((getFeedbackState(message).type === 'dislike' || getFeedbackState(message).type === 'like') && !getFeedbackState(message).showFeedbackBox)"
                     (click)="toggleFeedbackBox(message)" 
                     class="text-xs text-gray-500 hover:text-[#37AAC4] ml-2 transition-colors"
                     [disabled]="getFeedbackState(message).isSubmitting">

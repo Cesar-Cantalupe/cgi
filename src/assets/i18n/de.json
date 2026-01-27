@@ -126,7 +126,7 @@
     "SIGNUP_TEXT": "Noch kein Konto?",
     "SIGNUP_LINK": "Registrieren",
     "ERROR_REQUIRED_FIELDS": "Bitte füllen Sie alle Felder korrekt aus",
-    "ERROR_INVALID_CREDENTIALS": "Ungültige Anmeldedaten. Verwenden Sie: test@gmail.com / 20432043",
+    "ERROR_INVALID_CREDENTIALS": "Ungültige Anmeldedaten",
     "EMAIL_REQUIRED": "E-Mail ist erforderlich",
     "EMAIL_INVALID": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
     "PASSWORD_REQUIRED": "Passwort ist erforderlich",

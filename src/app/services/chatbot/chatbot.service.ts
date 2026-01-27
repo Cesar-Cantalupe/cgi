@@ -121,14 +121,8 @@ export class ChatbotService implements OnDestroy {
   /**
    * MÉTODO PRINCIPAL DE STOP - COORDINA TODO EL SISTEMA
    */
-  async emergencyStop(options?: {
-    messageId?: string;
-    questionType?: 'user' | 'predefined';
-    questionContent?: string;
-    shouldRestoreToInput?: boolean;
-    shouldCleanMessages?: boolean;
-  }): Promise<StopRequestData> {
-    // console.log('🚨 EMERGENCY STOP ejecutado con opciones:', options);
+  async emergencyStop(options?: StopRequestData): Promise<StopRequestData> {
+    console.log('🚨 EMERGENCY STOP llamado', options);
     
     // 1. Obtener información actual
     const currentData = await this.collectCurrentStopData(options);
@@ -151,12 +145,12 @@ export class ChatbotService implements OnDestroy {
     // 7. Cachear datos para referencia
     this.lastStopData = currentData;
     
-    // console.log('✅ EMERGENCY STOP completado:', {
-    //   tipo: currentData.questionType,
-    //   limpiarMensajes: currentData.shouldCleanMessages,
-    //   restaurarInput: currentData.shouldRestoreToInput,
-    //   contenidoPregunta: currentData.questionContent?.substring(0, 50)
-    // });
+    console.log('✅ EMERGENCY STOP completado:', {
+      tipo: currentData.questionType,
+      limpiarMensajes: currentData.shouldCleanMessages,
+      restaurarInput: currentData.shouldRestoreToInput,
+      contenidoPregunta: currentData.questionContent?.substring(0, 50)
+    });
     
     return currentData;
   }
@@ -734,10 +728,22 @@ export class ChatbotService implements OnDestroy {
   }
 
   sendPredefinedQuestion(question: string, customFilters: any = null): Promise<boolean> {
+    // Verificar si puede enviar
+    if (!this.websocketModule.canSendQuery()) {
+      console.warn('⚠️ No se puede enviar pregunta ahora, esperando limpieza...');
+      return Promise.resolve(false);
+    }
+
     return this.sendMessage(question, customFilters, false, 'predefined');
   }
 
   sendUserQuestion(question: string, customFilters: any = null): Promise<boolean> {
+    // Verificar si puede enviar
+    if (!this.websocketModule.canSendQuery()) {
+      console.warn('⚠️ No se puede enviar pregunta ahora, esperando limpieza...');
+      return Promise.resolve(false);
+    }
+
     return this.sendMessage(question, customFilters, false, 'user');
   }
 

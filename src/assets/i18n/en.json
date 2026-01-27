@@ -126,7 +126,7 @@
     "SIGNUP_TEXT": "Don't have an account?",
     "SIGNUP_LINK": "Join",
     "ERROR_REQUIRED_FIELDS": "Please fill all fields correctly",
-    "ERROR_INVALID_CREDENTIALS": "Invalid credentials. Use: test@gmail.com / 20432043",
+    "ERROR_INVALID_CREDENTIALS": "Invalid credentials",
     "EMAIL_REQUIRED": "Email is required",
     "EMAIL_INVALID": "Please enter a valid email",
     "PASSWORD_REQUIRED": "Password is required",

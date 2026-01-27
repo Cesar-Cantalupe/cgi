@@ -126,7 +126,7 @@
     "SIGNUP_TEXT": "¿No tienes una cuenta?",
     "SIGNUP_LINK": "Únete",
     "ERROR_REQUIRED_FIELDS": "Por favor completa todos los campos correctamente",
-    "ERROR_INVALID_CREDENTIALS": "Credenciales inválidas. Usa: test@gmail.com / 20432043",
+    "ERROR_INVALID_CREDENTIALS": "Credenciales inválidas",
     "EMAIL_REQUIRED": "El email es requerido",
     "EMAIL_INVALID": "Por favor ingresa un email válido",
     "PASSWORD_REQUIRED": "La contraseña es requerida",

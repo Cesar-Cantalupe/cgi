@@ -300,7 +300,7 @@ private createFallbackStopMessage(): ChatMessage {
         
         // 3c. Si es placeholder vacío, ocultar
         if (message._isProcessingPlaceholder && !hasContent) {
-          return false;
+          return message.isStreaming === true;
         }
         
         // 3d. Si está en streaming con contenido, mostrar
@@ -439,12 +439,7 @@ private createFallbackStopMessage(): ChatMessage {
       state.showFeedbackBox = false;
     } else {
       state.type = type;
-      if (type === 'dislike') {
-        state.showFeedbackBox = true;
-      } else {
-        this.submitFeedback(message);
-        return;
-      }
+      state.showFeedbackBox = true;
     }
     
     this.cdr.markForCheck();

@@ -126,7 +126,7 @@
     "SIGNUP_TEXT": "Δεν έχετε λογαριασμό;",
     "SIGNUP_LINK": "Εγγραφή",
     "ERROR_REQUIRED_FIELDS": "Παρακαλώ συμπληρώστε όλα τα πεδία σωστά",
-    "ERROR_INVALID_CREDENTIALS": "Μη έγκυρα διαπιστευτήρια. Χρησιμοποιήστε: test@gmail.com / 20432043",
+    "ERROR_INVALID_CREDENTIALS": "Μη έγκυρα διαπιστευτήρια",
     "EMAIL_REQUIRED": "Το email απαιτείται",
     "EMAIL_INVALID": "Παρακαλώ εισάγετε ένα έγκυρο email",
     "PASSWORD_REQUIRED": "Ο κωδικός απαιτείται",

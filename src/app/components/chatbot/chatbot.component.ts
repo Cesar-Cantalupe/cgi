@@ -713,8 +713,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         return true;
       }
       
-      if (message._isProcessingPlaceholder && !message.content && !message.text) {
-        return false;
+      if (message._isProcessingPlaceholder) {
+        return message.isStreaming === true;
       }
       
       return true;
@@ -841,15 +841,16 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     // Usar el sistema unificado de STOP
     // console.log('📞 Llamando a emergencyStop()...');
     this.chatbotService.emergencyStop({
+      messageId: event?.message?.id,
       questionType: questionType,
+      questionContent: questionContent,
       shouldRestoreToInput: false, // No restaurar al input en STOP directo
-      questionContent: questionContent
     }).then(stopData => {
-      // console.log('✅ STOP ejecutado exitosamente:', stopData);
-      // console.log('════════════════════════════════════════════════');
+      console.log('✅ STOP ejecutado exitosamente:', stopData);
+      console.log('════════════════════════════════════════════════');
     }).catch(error => {
       console.error('❌ Error ejecutando STOP:', error);
-      // console.log('════════════════════════════════════════════════');
+      console.log('════════════════════════════════════════════════');
     });
   }
 

@@ -4,6 +4,7 @@ import { takeUntil } from 'rxjs/operators';
 import { WebSocketEvent, QueryRequest, PingMessage } from '../interfaces/websocket-events.interface';
 import { TranslationService } from '../../translation.service';
 import { WEBSOCKET_CONFIG } from '../../../config/websocket.config';
+import { AuthService } from '../../auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +39,7 @@ export class WebsocketService implements OnDestroy {
   public messages$ = this.messageSubject.asObservable();
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
 
-  constructor(private translationService: TranslationService) {
+  constructor(private translationService: TranslationService, private authService: AuthService) {
     this.generateClientId();
   }
 
@@ -332,6 +333,10 @@ export class WebsocketService implements OnDestroy {
   }
 
   sendMessage(message: QueryRequest): void {
+    // Campos comunes a todos los mensajes
+    message.client_id = message.client_id || this.clientId;
+    message.user_type = this.authService.getCurrentUserType();
+
     // Si estamos en modo mock, simular respuesta
     if (this.usingMock) {
       this.simulateMockResponse(message);

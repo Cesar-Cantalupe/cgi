@@ -140,28 +140,15 @@ export class StreamingModule implements OnDestroy {
     if (this.accumulatedText.length > 0 && this.currentStreamId) {
       // ACTUALIZAR EL ESTADO con NgZone para forzar detección de cambios
       this.ngZone.run(() => {
-        // Si typewriter está habilitado, mostrar animación durante el streaming
-        if (this.TYPEWRITER_ENABLED) {
-          // Mostrar el texto acumulado para que el typewriter lo anime progresivamente
-          this.updateMessage(this.currentStreamId!, {
-            content: this.accumulatedText,
-            text: this.accumulatedText,
-            isStreaming: true,
-            _isProcessingPlaceholder: this.accumulatedText.length < 10,
-            _streamingUpdate: Date.now(),
-            _initialStreaming: false
-          });
-        } else {
-          // Sin typewriter, mostrar directamente
-          this.updateMessage(this.currentStreamId!, {
-            content: this.accumulatedText,
-            text: this.accumulatedText,
-            isStreaming: true,
-            _isProcessingPlaceholder: this.accumulatedText.length < 10,
-            _streamingUpdate: Date.now(),
-            _initialStreaming: false
-          });
-        }
+        // Mostrar el texto acumulado para que el typewriter lo anime progresivamente
+        this.updateMessage(this.currentStreamId!, {
+          content: this.accumulatedText,
+          text: this.accumulatedText,
+          isStreaming: true,
+          _isProcessingPlaceholder: this.accumulatedText.length < 10,
+          _streamingUpdate: Date.now(),
+          _initialStreaming: false
+        });
       });
     }
   }
