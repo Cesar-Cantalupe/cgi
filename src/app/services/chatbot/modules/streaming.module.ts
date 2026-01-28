@@ -62,7 +62,7 @@ export class StreamingModule implements OnDestroy {
   /**
    * Inicia un nuevo stream
    */
-  startStream(question?: string, questionType?: 'user' | 'predefined'): ChatMessage {
+  startStream(question?: string, questionType?: 'user' | 'predefined', ignorePlaceholder: boolean = false): ChatMessage {
     // console.log('🚀 STREAMING: startStream() - pregunta:', {
     //   content: question?.substring(0, 50),
     //   type: questionType
@@ -96,7 +96,7 @@ export class StreamingModule implements OnDestroy {
       isStreaming: true,
       sources: [],
       // Propiedades para control interno
-      _isProcessingPlaceholder: true,
+      _isProcessingPlaceholder: !ignorePlaceholder,
       _streamingUpdate: Date.now(),
       _initialStreaming: true,
       _originalQuestionType: questionType,

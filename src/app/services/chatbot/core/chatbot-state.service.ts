@@ -17,6 +17,7 @@ export class ChatbotStateService {
   // Estado privado
   private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
   private processingSubject = new BehaviorSubject<boolean>(false);
+  private isStoppingSubject = new BehaviorSubject<boolean>(false);
   private streamingMessageSubject = new BehaviorSubject<ChatMessage | null>(null);
   private clientIdSubject = new BehaviorSubject<string | null>(null);
   private streamingCompletedSubject = new Subject<ChatMessage>(); // ⚠️ Emite cuando streaming termina
@@ -24,6 +25,7 @@ export class ChatbotStateService {
   // Público
   public messages$ = this.messagesSubject.asObservable();
   public isProcessing$ = this.processingSubject.asObservable();
+  public isStopping$ = this.isStoppingSubject.asObservable();
   public currentStreamingMessage$ = this.streamingMessageSubject.asObservable();
   public currentClientId$ = this.clientIdSubject.asObservable();
   public streamingCompleted$ = this.streamingCompletedSubject.asObservable();
@@ -37,6 +39,10 @@ export class ChatbotStateService {
     return this.processingSubject.value;
   }
 
+  get isStopping(): boolean {
+    return this.isStoppingSubject.value;
+  }
+
   get currentStreamingMessage(): ChatMessage | null {
     return this.streamingMessageSubject.value;
   }
@@ -44,6 +50,8 @@ export class ChatbotStateService {
   get currentClientId(): string | null {
     return this.clientIdSubject.value;
   }
+
+  setStopping(val: boolean) { this.isStoppingSubject.next(val); }
 
   constructor(private conversationService: ConversationService) {
     this.setupConversationSync();

@@ -41,6 +41,7 @@
     "TYPING": "en train d'écrire",
     "CONNECTING": "Connexion...",
     "PROCESSING": "Traitement...",
+    "STOPPING": "Arrêt...",
     "TYPE_YOUR_QUESTION": "Écrivez votre question ici...",
     "SEND_MESSAGE": "Envoyer le message"
   },

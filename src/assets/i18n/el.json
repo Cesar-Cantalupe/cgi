@@ -41,6 +41,7 @@
     "TYPING": "γράφει",
     "CONNECTING": "Σύνδεση...",
     "PROCESSING": "Επεξεργασία...",
+    "STOPPING": "Διακοπή...",
     "TYPE_YOUR_QUESTION": "Γράψτε την ερώτησή σας εδώ...",
     "SEND_MESSAGE": "Αποστολή μηνύματος"
   },

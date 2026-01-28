@@ -23,6 +23,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   connectionStatus = '';
   predefinedQuestions: string[] = [];
   isProcessing = false;
+  isStopping = false;
   isWebSocketConnected = false;
   showTitleEditor = false;
   editingTitle = '';
@@ -147,11 +148,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.chatbotService.onStopRequested$
       .pipe(takeUntil(this.destroy$))
       .subscribe((stopData: StopRequestData) => {
-        // console.log('📬 ChatbotComponent: Evento STOP recibido:', {
-        //   questionType: stopData.questionType,
-        //   shouldRestoreToInput: stopData.shouldRestoreToInput,
-        //   contentPreview: stopData.questionContent?.substring(0, 50)
-        // });
+        console.log('📬 ChatbotComponent: Evento STOP recibido:', {
+          questionType: stopData.questionType,
+          shouldRestoreToInput: stopData.shouldRestoreToInput,
+          contentPreview: stopData.questionContent?.substring(0, 50)
+        });
         
         this.handleStopRequest(stopData);
       });
@@ -196,11 +197,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ CORRECCIÓN CRÍTICA: MANEJO DE STOP UNIFICADO ============
 
   private handleStopRequest(stopData: StopRequestData): void {
-    // console.log('🛑 ChatbotComponent: Procesando STOP request:', {
-    //   questionType: stopData.questionType,
-    //   shouldRestoreToInput: stopData.shouldRestoreToInput,
-    //   questionContent: stopData.questionContent?.substring(0, 50)
-    // });
+    console.log('🛑 ChatbotComponent: Procesando STOP request:', {
+      questionType: stopData.questionType,
+      shouldRestoreToInput: stopData.shouldRestoreToInput,
+      questionContent: stopData.questionContent?.substring(0, 50)
+    });
     
     // Evitar múltiples STOPs simultáneos
     if (this.isHandlingStop) {
@@ -215,10 +216,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       clearTimeout(this.stopDebounceTimeout);
     }
     
-    // 1. Limpiar mensajes de streaming localmente para feedback inmediato
-    this.cleanupStreamingMessagesLocally();
-    
-    // 2. Manejar según el tipo de pregunta - CORREGIDO
+    // Stop según el tipo de pregunta
     if (stopData.questionType === 'user' && stopData.questionContent) {
       this.handleUserQuestionStop(stopData);
     } else if (stopData.questionType === 'predefined' && stopData.questionContent) {
@@ -230,7 +228,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     // 3. Forzar actualización de UI
     this.cdr.detectChanges();
     
-    // console.log('✅ ChatbotComponent: STOP procesado exitosamente');
+    console.log('✅ ChatbotComponent: STOP procesado exitosamente');
     
     // Liberar el lock después de un tiempo
     this.stopDebounceTimeout = setTimeout(() => {
@@ -818,6 +816,9 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       console.error('❌ Evento STOP es null/undefined');
       return;
     }
+
+    this.isProcessing = true; // Mostrar indicador visual
+    this.isStopping = true; // Mostrar indicador visual
     
     // El evento puede venir de dos formas:
     // 1. Desde el sistema unificado: {message, questionType, shouldRestoreToInput, questionContent}

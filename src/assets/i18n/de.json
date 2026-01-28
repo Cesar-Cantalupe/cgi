@@ -41,6 +41,7 @@
     "TYPING": "tippt",
     "CONNECTING": "Verbinde...",
     "PROCESSING": "Verarbeitung...",
+    "STOPPING": "Stoppe...",
     "TYPE_YOUR_QUESTION": "Schreiben Sie Ihre Frage hier...",
     "SEND_MESSAGE": "Nachricht senden"
   },

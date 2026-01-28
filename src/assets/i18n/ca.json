@@ -41,6 +41,7 @@
     "TYPING": "escrivint",
     "CONNECTING": "Connectant...",
     "PROCESSING": "Processant...",
+    "STOPPING": "Aturant...",
     "TYPE_YOUR_QUESTION": "Escriu la teva pregunta aquí...",
     "SEND_MESSAGE": "Envia missatge"
   },

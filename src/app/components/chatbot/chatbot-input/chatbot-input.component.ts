@@ -30,9 +30,11 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
   @Output() quickSuggestion = new EventEmitter<string>();
   
   isProcessing = false;
+  isStopping = false;
   isWebSocketConnected = false;
   
   private processingSubscription?: Subscription;
+  private stoppingSubscription?: Subscription;
   private connectionSubscription?: Subscription;
   
   constructor(
@@ -52,7 +54,14 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
       (processing: boolean) => {
         this.safeUpdateState('isProcessing', processing);
       }
-    );  
+    );
+    
+    this.stoppingSubscription = this.chatbotService.isStopping$.subscribe(
+      (stopping: boolean) => {
+        console.log('🔄 isStopping changed:', stopping);
+        this.safeUpdateState('isStopping', stopping);
+      }
+    );
     
     this.connectionSubscription = this.chatbotService.getConnectionStatus().subscribe(
       (status: string) => {
@@ -77,7 +86,7 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
   return 'Cannot send';
 }
 
-  private safeUpdateState(property: 'isProcessing' | 'isWebSocketConnected', value: boolean): void {
+  private safeUpdateState(property: 'isProcessing' | 'isWebSocketConnected' | 'isStopping', value: boolean): void {
     if (this[property] !== value) {
       setTimeout(() => {
         this.ngZone.run(() => {
@@ -146,6 +155,9 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.processingSubscription) {
       this.processingSubscription.unsubscribe();
+    }
+    if (this.stoppingSubscription) {
+      this.stoppingSubscription.unsubscribe();
     }
     if (this.connectionSubscription) {
       this.connectionSubscription.unsubscribe();

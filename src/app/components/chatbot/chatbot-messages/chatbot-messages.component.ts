@@ -68,6 +68,7 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
   private isStopInProgress = false;
   private stopRetryCount = 0;
   private readonly MAX_STOP_RETRIES = 3;
+  public isStopping = false;
 
   constructor(
     private chatbotService: ChatbotService,
@@ -76,7 +77,12 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
     private typewriterModule: TypewriterModule,
     private cdr: ChangeDetectorRef,
     private state: ChatbotStateService
-  ) {}
+  ) {
+    this.chatbotService.isStopping$.subscribe(val => {
+      this.isStopping = val;
+      this.cdr.markForCheck();
+    });
+  }
 
   ngOnInit() {
     // Inicializar con los mensajes recibidos

@@ -31,6 +31,7 @@ export class ChatbotService implements OnDestroy {
   // Observables del estado
   public messages$: Observable<ChatMessage[]>;
   public isProcessing$: Observable<boolean>;
+  public isStopping$: Observable<boolean>;
   public currentStreamingMessage$: Observable<ChatMessage | null>;
   public currentClientId$: Observable<string | null>;
   public connectionStatus$: Observable<string>;
@@ -78,6 +79,7 @@ export class ChatbotService implements OnDestroy {
     // Observables del estado
     this.messages$ = this.state.messages$;
     this.isProcessing$ = this.state.isProcessing$;
+    this.isStopping$ = this.state.isStopping$;
     this.currentStreamingMessage$ = this.state.currentStreamingMessage$;
     this.currentClientId$ = this.state.currentClientId$;
     this.connectionStatus$ = this.websocketModule.connectionStatus$;
@@ -123,6 +125,8 @@ export class ChatbotService implements OnDestroy {
    */
   async emergencyStop(options?: StopRequestData): Promise<StopRequestData> {
     console.log('🚨 EMERGENCY STOP llamado', options);
+
+    this.state.setStopping(true);
     
     // 1. Obtener información actual
     const currentData = await this.collectCurrentStopData(options);
@@ -131,16 +135,16 @@ export class ChatbotService implements OnDestroy {
     this.stopRequested$.next(currentData);
     
     // 3. Detener todos los procesos activos
-    this.stopAllActiveProcesses();
+    this.stopAllActiveProcesses(); //Previene que la respuesta llegue
     
     // 4. Limpiar mensajes según el tipo de pregunta
-    await this.cleanupMessagesByQuestionType(currentData);
+    // await this.cleanupMessagesByQuestionType(currentData);
     
     // 5. Actualizar conversación si es necesario
-    this.updateConversationAfterStop(currentData);
+    // this.updateConversationAfterStop(currentData);
     
     // 6. Resetear estado interno
-    this.resetInternalState();
+    // this.resetInternalState();
     
     // 7. Cachear datos para referencia
     this.lastStopData = currentData;
@@ -233,17 +237,17 @@ export class ChatbotService implements OnDestroy {
     // console.log('⏹️ Deteniendo todos los procesos activos...');
     
     // 1. Detener streaming
-    this.streamingModule.cancelStream();
+    this.streamingModule.cancelStream(); //Saca el PROCESANDO...
     
     // 2. Cancelar consulta WebSocket
     this.websocketModule.cancelCurrentQuery();
     
     // 3. Detener motor
-    this.engine.stopCurrentRequest();
+    // this.engine.stopCurrentRequest();
     
     // 4. Resetear estado
-    this.state.setProcessing(false);
-    this.state.setStreamingMessage(null);
+    // this.state.setProcessing(false);
+    // this.state.setStreamingMessage(null);
     
     // 5. Resetear tiempos
     this.processingMessageId = null;
@@ -686,6 +690,10 @@ export class ChatbotService implements OnDestroy {
 
   getIsProcessing(): boolean {
     return this.state.isProcessing;
+  }
+
+  getIsStopping(): boolean {
+    return this.state.isStopping;
   }
 
   getCurrentFilters(): any {

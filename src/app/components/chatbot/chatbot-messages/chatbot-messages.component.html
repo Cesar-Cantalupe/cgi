@@ -25,8 +25,9 @@
             </div>
             <span class="text-xs italic">
               <!-- Solo mostrar si es streaming activo reciente -->
-              <span *ngIf="message.isStreaming && isProcessingState(message)">{{ 'CHAT.PROCESSING' | translate }}</span>
-              <span *ngIf="message.isStreaming && !isProcessingState(message) && hasRecentStreamingUpdate(message)">{{ 'CHAT.TYPING' | translate }}</span>
+              <span *ngIf="isStopping && message.isStreaming">{{ 'CHAT.STOPPING' | translate }}</span>
+              <span *ngIf="!isStopping && message.isStreaming && isProcessingState(message)">{{ 'CHAT.PROCESSING' | translate }}</span>
+              <span *ngIf="!isStopping && message.isStreaming && !isProcessingState(message) && hasRecentStreamingUpdate(message)">{{ 'CHAT.TYPING' | translate }}</span>
               <!-- Si es streaming pero muy viejo, no mostrar indicador -->
             </span>
           </div>

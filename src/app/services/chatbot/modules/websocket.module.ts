@@ -203,7 +203,7 @@ export class WebsocketModule implements OnDestroy {
     
     if (!this.streaming.isStreaming()) {
       // console.log('✅ Iniciando nuevo stream para:', this.currentQuestion);
-      this.streaming.startStream(this.currentQuestion, this.currentQuestionType);
+      this.streaming.startStream(this.currentQuestion, this.currentQuestionType, this.ignoreNextStreamEnd);
     } else {
       console.warn('⚠️ Ya hay un stream activo, ignorando nuevo stream_start');
     }
@@ -238,6 +238,8 @@ export class WebsocketModule implements OnDestroy {
       
       // Limpiar mensajes de streaming del estado
       this.cleanupStreamingMessages();
+      
+      this.state.setStopping(false);
       
       console.log('✅ Limpieza completada, listo para nueva pregunta');
       return;
