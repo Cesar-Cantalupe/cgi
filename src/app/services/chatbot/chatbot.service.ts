@@ -133,21 +133,27 @@ export class ChatbotService implements OnDestroy {
     
     // 2. Emitir evento de STOP para que los componentes sepan
     this.stopRequested$.next(currentData);
+
+    // 2.1 Marcar el mensaje de streaming como detenido para ocultar el botón inmediatamente
+    this.markStreamingMessageAsStopped();
     
     // 3. Detener todos los procesos activos
-    this.stopAllActiveProcesses(); //Previene que la respuesta llegue
+    this.stopAllActiveProcesses();
     
     // 4. Limpiar mensajes según el tipo de pregunta
-    // await this.cleanupMessagesByQuestionType(currentData);
+    await this.cleanupMessagesByQuestionType(currentData);
     
     // 5. Actualizar conversación si es necesario
-    // this.updateConversationAfterStop(currentData);
+    this.updateConversationAfterStop(currentData);
     
     // 6. Resetear estado interno
-    // this.resetInternalState();
+    this.resetInternalState();
     
     // 7. Cachear datos para referencia
     this.lastStopData = currentData;
+    
+    // 8. Resetear estado de stopping
+    this.state.setStopping(false);
     
     console.log('✅ EMERGENCY STOP completado:', {
       tipo: currentData.questionType,
@@ -252,6 +258,31 @@ export class ChatbotService implements OnDestroy {
     // 5. Resetear tiempos
     this.processingMessageId = null;
     this.lastProcessingStartTime = 0;
+  }
+
+  private markStreamingMessageAsStopped(): void {
+    const streamingMessage = this.state.currentStreamingMessage ||
+      this.state.messages.find(m => m.isStreaming === true) ||
+      null;
+
+    if (!streamingMessage || !streamingMessage.id) {
+      return;
+    }
+
+    const hasContent = !!(streamingMessage.content?.trim() || streamingMessage.text?.trim());
+
+    if (hasContent) {
+      this.state.updateMessage(streamingMessage.id, {
+        isStreaming: false,
+        _isProcessingPlaceholder: false,
+        _streamingUpdate: Date.now()
+      });
+    } else {
+      this.state.removeMessage(m => m.id === streamingMessage.id);
+    }
+
+    this.state.setStreamingMessage(null);
+    this.state.setProcessing(false);
   }
 
   private async cleanupMessagesByQuestionType(data: StopRequestData): Promise<void> {
@@ -613,8 +644,10 @@ export class ChatbotService implements OnDestroy {
     if (now - this.lastCanSendCheck < this.CAN_SEND_CHECK_INTERVAL) {
       return !this.state.isProcessing && 
              !this.streamingModule.getIsAnimating() && 
+             !this.state.isStopping &&
              this.initializationComplete &&
-             this.engine.canSendMessage();
+             this.engine.canSendMessage() &&
+             this.websocketModule.canSendQuery();
     }
     
     this.lastCanSendCheck = now;
@@ -625,6 +658,8 @@ export class ChatbotService implements OnDestroy {
     const isStateProcessing = this.state.isProcessing;
     const isStreamingAnimating = this.streamingModule.getIsAnimating();
     const isConnected = this.engine.isConnected();
+    const isStopping = this.state.isStopping;
+    const canSendQuery = this.websocketModule.canSendQuery();
     
     // Detectar streaming activo
     const actuallyStreaming = hasActiveStreaming || isStreamingAnimating;
@@ -646,7 +681,7 @@ export class ChatbotService implements OnDestroy {
       }, 0);
     }
     
-    const result = isEngineReady && isServiceReady && !isStateProcessing && isConnected;
+    const result = isEngineReady && isServiceReady && !isStateProcessing && !isStopping && isConnected && canSendQuery;
     
     return result;
   }
@@ -722,7 +757,7 @@ export class ChatbotService implements OnDestroy {
   }
 
   loadPredefinedQuestion(question: string): void {
-    if (!this.state.isProcessing) {
+    if (!this.state.isProcessing && !this.state.isStopping) {
       this.sendPredefinedQuestion(question, {});
     }
   }

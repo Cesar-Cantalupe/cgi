@@ -58,7 +58,7 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
     
     this.stoppingSubscription = this.chatbotService.isStopping$.subscribe(
       (stopping: boolean) => {
-        console.log('🔄 isStopping changed:', stopping);
+        // console.log('🔄 isStopping changed:', stopping);
         this.safeUpdateState('isStopping', stopping);
       }
     );

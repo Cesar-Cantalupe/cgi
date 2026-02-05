@@ -870,31 +870,8 @@ private createFallbackStopMessage(): ChatMessage {
   shouldShowStopButton(message: ChatMessage): boolean {
     const isBotMessage = this.getMessageSender(message) === 'bot';
     const isStreaming = message.isStreaming === true;
-    
-    // MOSTRAR EL BOTÓN POR MÁS TIEMPO
-    // Incluso si el streaming acaba de terminar
-    const lastUpdate = message._streamingUpdate || message.timestamp?.getTime() || 0;
-    const timeSinceUpdate = Date.now() - lastUpdate;
-    
-    // Mostrar el botón si:
-    // 1. Es mensaje de bot Y está en streaming
-    // 2. O era mensaje de streaming hace menos de 5 segundos (para casos donde el streaming termina rápido)
-    const wasRecentlyStreaming = isBotMessage && timeSinceUpdate < 5000;
-    
-    const result = isBotMessage && (isStreaming || wasRecentlyStreaming);
-    
-    // if (result) {
-    //   console.log('🛑 STOP Button SHOULD SHOW for:', {
-    //     id: message.id?.substring(0, 20),
-    //     isBotMessage,
-    //     isStreaming,
-    //     wasRecentlyStreaming,
-    //     timeSinceUpdate: Math.round(timeSinceUpdate / 1000) + 's',
-    //     contentLength: message.content?.length
-    //   });
-    // }
-    
-    return result;
+
+    return isBotMessage && isStreaming && this.isProcessing && !this.isStopping;
   }
 
   canSendMessages(): boolean {

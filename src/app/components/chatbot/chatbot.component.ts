@@ -102,6 +102,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     combineLatest({
       messages: this.chatbotService.messages$,
       processing: this.chatbotService.isProcessing$,
+      stopping: this.chatbotService.isStopping$,
       connection: this.chatbotService.connectionStatus$,
       currentConversation: this.conversationService.activeConversation$,
       conversations: this.conversationService.conversations$,
@@ -115,6 +116,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     .subscribe(({
       messages, 
       processing, 
+      stopping,
       connection, 
       currentConversation, 
       conversations,
@@ -131,7 +133,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       // ⚠️ CRÍTICO: Forzar detección de cambios para componentes con OnPush
       this.cdr.markForCheck();
       
-      this.updateComponentState(messages, processing, connection, currentConversation, conversations, lang);
+      this.updateComponentState(messages, processing, stopping, connection, currentConversation, conversations, lang);
     });
     
     // ⚠️ CRÍTICO: Escuchar cuando termina el streaming para forzar actualización inmediata
@@ -161,20 +163,17 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   private updateComponentState(
     messages: ChatMessage[],
     processing: boolean,
+    stopping: boolean,
     connection: string,
     currentConversation: Conversation | null,
     conversations: Conversation[],
     lang: string
   ): void {
-    const originalCount = messages?.length || 0;
     const filteredMessages = this.filterPlaceholderMessages(messages || []);
-    
-    // if (originalCount > filteredMessages.length) {
-    //   console.log('🗑️ Mensajes filtrados:', originalCount - filteredMessages.length);
-    // }
     
     this.messages = filteredMessages;
     this.isProcessing = processing;
+    this.isStopping = stopping;
     this.isWebSocketConnected = this.chatbotService.isConnected();
     this.connectionStatus = this.getTranslatedConnectionStatus(connection);
     this.currentConversation = currentConversation;
@@ -194,7 +193,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  // ============ CORRECCIÓN CRÍTICA: MANEJO DE STOP UNIFICADO ============
+  // ============ MANEJO DE STOP UNIFICADO ============
 
   private handleStopRequest(stopData: StopRequestData): void {
     console.log('🛑 ChatbotComponent: Procesando STOP request:', {
@@ -260,8 +259,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ CORRECCIÓN: STOP PARA PREGUNTAS PREDEFINIDAS ============
   
   private handlePredefinedQuestionStop(stopData: StopRequestData): void {
-    // console.log('🔖 Procesando STOP para pregunta predefinida');
-    
     // CORRECCIÓN: Para preguntas predefinidas, el input se mantiene vacío
     this.newMessage = '';
     
@@ -277,8 +274,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   private handleGenericStop(stopData: StopRequestData): void {
-    // console.log('🌀 Procesando STOP genérico');
-    
     // Limpieza básica
     this.cleanupStreamingMessagesLocally();
     
@@ -291,9 +286,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ NUEVO MÉTODO: REMOVER PREGUNTA Y RESPUESTA DEL ÁREA PRINCIPAL ============
   
   private removeQuestionAndResponseFromMainArea(questionContent: string, questionType: 'user' | 'predefined'): void {
-    // console.log(`🗑️ Removiendo pregunta (${questionType}) del área principal:`, 
-    //             questionContent.substring(0, 50));
-    
     // 1. Encontrar la pregunta en los mensajes
     const questionMessage = this.messages.find(m => 
       (m.sender === 'user' || m.isUser) && 
@@ -310,13 +302,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       // console.error('❌ No se pudo encontrar el índice de la pregunta');
       return;
     }
-    
-    // console.log('📝 Pregunta encontrada:', {
-    //   id: questionMessage.id,
-    //   index: questionIndex,
-    //   type: questionType,
-    //   isPredefined: (questionMessage as any)._isPredefinedQuestion
-    // });
     
     // 2. Determinar qué mensajes borrar
     const messagesToRemove: ChatMessage[] = [];
@@ -347,22 +332,10 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       }
     }
     
-    // console.log('📋 Mensajes a borrar:', {
-    //   total: messagesToRemove.length,
-    //   incluyePregunta: questionType === 'predefined',
-    //   respuestas: messagesToRemove.filter(m => m.sender === 'bot').length
-    // });
-    
     // 4. Filtrar para remover los mensajes
     if (messagesToRemove.length > 0) {
       const originalCount = this.messages.length;
       this.messages = this.messages.filter(msg => !messagesToRemove.includes(msg));
-      
-      // console.log('✅ Mensajes removidos del área principal:', {
-      //   antes: originalCount,
-      //   después: this.messages.length,
-      //   borrados: originalCount - this.messages.length
-      // });
       
       // 5. Actualizar conversación en ConversationService
       if (this.currentConversation) {
@@ -382,8 +355,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
           this.currentConversation.id,
           conversationMessages
         );
-        
-        // console.log('💾 Conversación actualizada en ConversationService');
       }
       
       // 6. Actualizar cache de última pregunta
@@ -767,7 +738,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   canSendMessages(): boolean {
-    return this.chatbotService.canSendMessages() && this.newMessage.trim().length > 0;
+    return this.chatbotService.canSendMessages() && !this.chatbotService.getIsStopping() && this.newMessage.trim().length > 0;
   }
 
   shouldShowPredefinedQuestions(): boolean {
@@ -807,18 +778,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // ============ MÉTODOS DE CONTROL DEL CHAT - CORREGIDOS ============
 
   onStopFromMessages(event: any): void {
-    // console.log('════════════════════════════════════════════════');
-    // console.log('🛑 onStopFromMessages RECIBIDO EN CHATBOT COMPONENT');
-    // console.log('Event:', event);
-    // console.log('Event keys:', event ? Object.keys(event) : 'event is null');
-    
     if (!event) {
       console.error('❌ Evento STOP es null/undefined');
       return;
     }
-
     this.isProcessing = true; // Mostrar indicador visual
-    this.isStopping = true; // Mostrar indicador visual
     
     // El evento puede venir de dos formas:
     // 1. Desde el sistema unificado: {message, questionType, shouldRestoreToInput, questionContent}
