@@ -351,6 +351,8 @@ export class WebsocketService implements OnDestroy {
     }
 
     try {
+      message.query = message.query.replace(/\n/g, '. '); // Reemplazar saltos de línea por puntos para evitar error en backend: "Error in streaming query: 1 validation error for NamedVector\nvector\n  Input should be a valid list [type=list_type, input_value=None, input_type=NoneType]\n
+
       const messageString = JSON.stringify(message);
       this.socket?.send(messageString);
     } catch (error) {

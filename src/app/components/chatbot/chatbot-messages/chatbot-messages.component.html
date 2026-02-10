@@ -8,7 +8,7 @@
       
       <!-- Mensaje del usuario -->
       <div *ngIf="getMessageSender(message) === 'user'" class="bg-[#37AAC4] text-white rounded-2xl px-4 py-3 max-w-2xl">
-        <p class="text-sm md:text-base">{{ getMessageText(message) }}</p>
+        <p class="text-sm md:text-base whitespace-pre-wrap break-words">{{ getMessageText(message) }}</p>
       </div>
 
       <!-- Mensaje del bot -->

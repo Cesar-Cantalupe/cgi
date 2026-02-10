@@ -16,6 +16,7 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
     if (this._newMessage !== value) {
       this._newMessage = value;
       setTimeout(() => {
+        this.autoResize();
         this.cdr.markForCheck();
       }, 0);
     }
@@ -152,6 +153,10 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
       this._newMessage = '';
       this.newMessageChange.emit('');
       this.cdr.markForCheck();
+      
+      setTimeout(() => {
+        this.autoResize();
+      }, 0);
     });
   }
 
@@ -161,6 +166,7 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
       this.newMessageChange.emit(value);
       
       setTimeout(() => {
+        this.autoResize();
         this.cdr.markForCheck();
       }, 0);
     });
