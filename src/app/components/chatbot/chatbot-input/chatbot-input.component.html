@@ -1,17 +1,21 @@
 <div class="bg-white border-t border-gray-100 relative z-20 flex-shrink-0 sticky bottom-0 left-0">
   <div class="flex items-center justify-center mb-2 px-4 pt-1 pb-1">
-    <div class="flex items-center space-x-3 w-full max-w-4xl">
-      <input type="text" 
-             [ngModel]="newMessage"
-             (ngModelChange)="onInputChange($event)"
-             (keydown)="onKeyPress($event)" 
-             [disabled]="!isWebSocketConnected || isProcessing || isStopping"
-             class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-[#37AAC4] focus:ring-1 focus:ring-[#37AAC4] text-sm bg-white disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-             [placeholder]="!isWebSocketConnected ? 
-              ('CHAT.CONNECTING' | translate) : 
-              (isStopping ? ('CHAT.STOPPING' | translate) : 
-              (isProcessing ? ('CHAT.PROCESSING' | translate) : 
-              ('CHAT.TYPE_YOUR_QUESTION' | translate)))">
+    <div class="flex items-center space-x-3 w-full max-w-4xl gap-3">
+      <textarea #messageInput
+                [ngModel]="newMessage"
+                (ngModelChange)="onInputChange($event)"
+                (input)="autoResize()"
+                (keydown)="onKeyPress($event)" 
+                [disabled]="!isWebSocketConnected || isProcessing || isStopping"
+                [class.overflow-y-auto]="newMessage.length > 0"
+                [class.overflow-y-hidden]="newMessage.length === 0"
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#37AAC4] focus:ring-1 focus:ring-[#37AAC4] text-sm bg-white disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 resize-none max-h-32"
+                [placeholder]="!isWebSocketConnected ? 
+                 ('CHAT.CONNECTING' | translate) : 
+                 (isStopping ? ('CHAT.STOPPING' | translate) : 
+                 (isProcessing ? ('CHAT.PROCESSING' | translate) : 
+                 ('CHAT.TYPE_YOUR_QUESTION' | translate)))"
+                rows="1"></textarea>
       
       <button (click)="onSend()"
               [disabled]="!canSend()"

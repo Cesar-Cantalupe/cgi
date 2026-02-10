@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectorRef, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectorRef, NgZone, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ChatbotService } from '../../../services/chatbot/chatbot.service';
 import { Subscription } from 'rxjs';
 
@@ -7,6 +7,8 @@ import { Subscription } from 'rxjs';
   templateUrl: './chatbot-input.component.html'
 })
 export class ChatbotInputComponent implements OnInit, OnDestroy {
+  @ViewChild('messageInput') messageInput?: ElementRef<HTMLTextAreaElement>;
+  
   private _newMessage = '';
 
   @Input() 
@@ -111,9 +113,21 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
   }
 
   onKeyPress(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && this.canSend()) {
-      event.preventDefault();
-      this.onSend();
+    if (event.key === 'Enter') {
+      // Si es Shift+Enter, permite nueva línea (comportamiento por defecto)
+      if (!event.shiftKey && this.canSend()) {
+        event.preventDefault();
+        this.onSend();
+      }
+    }
+  }
+
+  autoResize(): void {
+    if (this.messageInput?.nativeElement) {
+      const textarea = this.messageInput.nativeElement;
+      textarea.style.height = 'auto';
+      const newHeight = Math.min(textarea.scrollHeight, 128); // 128px = max-h-32
+      textarea.style.height = newHeight + 'px';
     }
   }
 
