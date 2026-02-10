@@ -237,5 +237,15 @@
     "STOP_TOOLTIP": "Arrêter la génération de réponse actuelle",
     "REGENERATING": "Régénération...",
     "STOPPING": "Arrêt..."
+  },
+  "LEGAL": {
+    "TERMS_TITLE": "Termes et Conditions",
+    "PRIVACY_TITLE": "Politique de Confidentialité",
+    "COOKIES_TITLE": "Politique de Cookies",
+    "LEGAL_NOTICE_TITLE": "Mention Légale",
+    "DEFAULT_TITLE": "Information Légale",
+    "UNDER_REVISION": "Texte en révision",
+    "PLACEHOLDER_TEXT": "Ce contenu est en cours de révision et sera disponible prochainement.",
+    "BACK_HOME": "Retour à l'accueil"
   }
 }

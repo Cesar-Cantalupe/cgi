@@ -237,5 +237,15 @@
     "STOP_TOOLTIP": "Aktuelle Antwortgenerierung stoppen",
     "REGENERATING": "Regeneriere...",
     "STOPPING": "Stoppe..."
+  },
+  "LEGAL": {
+    "TERMS_TITLE": "Allgemeine Geschäftsbedingungen",
+    "PRIVACY_TITLE": "Datenschutzrichtlinie",
+    "COOKIES_TITLE": "Cookie-Richtlinie",
+    "LEGAL_NOTICE_TITLE": "Rechtlicher Hinweis",
+    "DEFAULT_TITLE": "Rechtliche Informationen",
+    "UNDER_REVISION": "Text in Überprüfung",
+    "PLACEHOLDER_TEXT": "Dieser Inhalt wird derzeit überprüft und wird in Kürze verfügbar sein.",
+    "BACK_HOME": "Zurück zur Startseite"
   }
 }

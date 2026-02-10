@@ -18,30 +18,19 @@
           </p>
         </div>
       </div>
-
       
       <!-- Links Center -->
       <div class="col-span-1 flex items-center justify-center">
         <p class="text-sm text-gray-600 text-center px-4">
           {{ 'FOOTER.TERMS_TEXT' | translate }}
-          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
-            {{ 'FOOTER.TERMS' | translate }}
-          </a> 
+          <a routerLink="/legal/terms" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">{{ 'FOOTER.TERMS' | translate }}</a> 
           {{ 'FOOTER.AND_READ' | translate }}
-          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
-            {{ 'FOOTER.PRIVACY' | translate }}
-          </a> 
-          {{ 'FOOTER.AND' | translate }}
-          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
-            {{ 'FOOTER.COOKIES' | translate }}
-          </a>
+          <a routerLink="/legal/privacy" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">{{ 'FOOTER.PRIVACY' | translate }}</a>,
+          <a routerLink="/legal/cookies" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">{{ 'FOOTER.COOKIES' | translate }}</a>
           <span class="mx-1">{{ 'FOOTER.AND' | translate }}</span>
-          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
-            {{ 'FOOTER.LEGAL_NOTICE' | translate }}
-          </a>
+          <a routerLink="/legal/legal-notice" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">{{ 'FOOTER.LEGAL_NOTICE' | translate }}</a>
         </p>
       </div>
-
       
       <!-- Empty Right column for balance -->
       <div class="space-y-3 col-span-1">

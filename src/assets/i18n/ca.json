@@ -237,5 +237,15 @@
     "STOP_TOOLTIP": "Aturar la generació de resposta actual",
     "REGENERATING": "Regenerant...",
     "STOPPING": "Aturant..."
+  },
+  "LEGAL": {
+    "TERMS_TITLE": "Termes i Condicions",
+    "PRIVACY_TITLE": "Política de Privadesa",
+    "COOKIES_TITLE": "Política de Cookies",
+    "LEGAL_NOTICE_TITLE": "Avís Legal",
+    "DEFAULT_TITLE": "Informació Legal",
+    "UNDER_REVISION": "Text en revisió",
+    "PLACEHOLDER_TEXT": "Aquest contingut està sent revisat i estarà disponible pròximament.",
+    "BACK_HOME": "Tornar a l'inici"
   }
 }

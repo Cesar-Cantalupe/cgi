@@ -1,0 +1,31 @@
+<div class="min-h-screen bg-gray-50 py-12">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="bg-white rounded-lg shadow-md p-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">
+        {{ getTitle() | translate }}
+      </h1>
+      
+      <div class="prose prose-gray max-w-none">
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+          <p class="text-yellow-700 font-medium">
+            {{ 'LEGAL.UNDER_REVISION' | translate }}
+          </p>
+        </div>
+        
+        <p class="text-gray-600 italic">
+          {{ 'LEGAL.PLACEHOLDER_TEXT' | translate }}
+        </p>
+      </div>
+      
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <a routerLink="/home" 
+           class="inline-flex items-center text-[#37AAC4] hover:text-[#CE3262] font-medium transition-colors duration-200">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          {{ 'LEGAL.BACK_HOME' | translate }}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
