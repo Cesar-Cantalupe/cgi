@@ -13,9 +13,7 @@
           {{ 'HEADER.LOGOUT' | translate }}
         </button>
                 
-        <div class="relative group">
-          
-          <div class="absolute inset-0 -bottom-2 h-8 bg-transparent pointer-events-none group-hover:pointer-events-auto"></div>
+        <div class="relative" (mouseenter)="onMouseEnter()">
           
           <button class="flex items-center justify-center space-x-2 text-[#37AAC4] font-medium text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 relative z-10 w-20">
             <span>{{ currentLanguage }}</span>
@@ -25,7 +23,13 @@
             </svg>
           </button>
                    
-          <div class="absolute right-0 mt-0 bg-white rounded-md shadow-lg border-2 border-[#37AAC4] overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 w-20">
+          <div class="absolute right-0 -mt-1 bg-white rounded-md shadow-lg border-2 border-[#37AAC4] overflow-hidden z-50 w-20 transition-all duration-200"
+               [class.opacity-0]="!isDropdownOpen"
+               [class.invisible]="!isDropdownOpen"
+               [class.opacity-100]="isDropdownOpen"
+               [class.visible]="isDropdownOpen"
+               style="top: 100%;"
+               (mouseleave)="onMouseLeave()">
             <button 
               *ngFor="let lang of getAvailableLanguages()"
               (click)="selectLanguage(lang)"

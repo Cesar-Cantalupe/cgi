@@ -11,6 +11,7 @@ import { TranslationService } from '../../services/translation.service';
 export class HeaderComponent {
   currentLanguage: string = 'EN';
   languages = ['EN', 'ES', 'FR', 'CA', 'DE', 'EL'];
+  isDropdownOpen: boolean = false;
   
   constructor(
     private authService: AuthService,
@@ -27,6 +28,7 @@ export class HeaderComponent {
   selectLanguage(language: string) {
     const langCode = language.toLowerCase();
     this.translationService.setLanguage(langCode);
+    this.isDropdownOpen = false;
   }
 
   getAvailableLanguages(): string[] {
@@ -36,5 +38,13 @@ export class HeaderComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  onMouseEnter() {
+    this.isDropdownOpen = true;
+  }
+
+  onMouseLeave() {
+    this.isDropdownOpen = false;
   }
 }

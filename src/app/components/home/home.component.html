@@ -23,7 +23,7 @@
           <p [innerHTML]="'HOME.DESCRIPTION_1' | translate"></p>
           <p [innerHTML]="'HOME.DESCRIPTION_2' | translate"></p>
           <p class="text-sm mt-6">
-            {{ 'HOME.AGREEMENT_TEXT' | translate }}
+            <span [innerHTML]="getAgreementTextWithLink('HOME.AGREEMENT_TEXT' | translate)"></span>
             <button (click)="openAgreementPopup()" class="text-blue-600 hover:text-blue-800 underline font-medium">
               {{ 'HOME.AGREEMENT_LINK' | translate }}
             </button>.

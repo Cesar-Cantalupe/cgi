@@ -4,16 +4,23 @@
     
     <div class="grid grid-cols-3 gap-6 items-center">
       
+      <!-- Logos (EU + CGI-Clinics) - Left side -->
       <div class="space-y-3 col-span-1">
-        <div class="flex flex-col items-center justify-start h-full">
-          <img src="assets/home/EN_FundedbytheEU_RGB_POS.png" alt="Funded by the European Union" class="h-12 w-auto object-contain">
-          <p class="text-sm italic cursor-pointer underline-offset-2 text-left transition-colors mt-2 text-[#37AAC4] hover:text-[#CE3262]" (click)="openModal()">
+        <div class="flex flex-col items-start justify-start h-full gap-4">
+          <div class="flex items-center gap-3">
+            <img src="assets/home/EN_FundedbytheEU_RGB_POS.png" alt="Funded by the European Union" class="h-12 w-auto object-contain">
+            <a href="https://www.cgiclinics.eu/" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-105">
+              <img src="assets/home/marca_CGI-Clinics-01.png" alt="CGI-Clinics Cancer Genome Interpreter" class="h-12 w-auto object-contain">
+            </a>
+          </div>
+          <p class="text-sm italic cursor-pointer underline-offset-2 text-left transition-colors text-[#37AAC4] hover:text-[#CE3262]" (click)="openModal()">
             {{ 'FOOTER.GRANT_NUMBER' | translate }}
           </p>
         </div>
       </div>
 
       
+      <!-- Links Center -->
       <div class="col-span-1 flex items-center justify-center">
         <p class="text-sm text-gray-600 text-center px-4">
           {{ 'FOOTER.TERMS_TEXT' | translate }}
@@ -28,16 +35,17 @@
           <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
             {{ 'FOOTER.COOKIES' | translate }}
           </a>
+          <span class="mx-1">{{ 'FOOTER.AND' | translate }}</span>
+          <a href="#" class="font-semibold hover:underline transition-colors duration-300" style="color: #46A8C6;">
+            {{ 'FOOTER.LEGAL_NOTICE' | translate }}
+          </a>
         </p>
       </div>
 
       
+      <!-- Empty Right column for balance -->
       <div class="space-y-3 col-span-1">
-        <div class="flex items-center justify-center h-full">
-          <a href="https://www.cgiclinics.eu/" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-105">
-            <img src="assets/home/marca_CGI-Clinics-01.png" alt="CGI-Clinics Cancer Genome Interpreter" class="h-16 w-auto object-contain">
-          </a>
-        </div>
+        <!-- Space for layout balance -->
       </div>
     </div>
   </div>

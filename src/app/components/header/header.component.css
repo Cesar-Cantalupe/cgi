@@ -1,4 +1,4 @@
-header{
-  z-index: 1;
+header {
+  z-index: 1000;
   position: relative;
 }
