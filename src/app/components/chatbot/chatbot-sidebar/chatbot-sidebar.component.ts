@@ -270,6 +270,10 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
     return this.chatbotService.canSendMessages();
   }
 
+  canClearHistory(): boolean {
+    return this.chatbotService.canSendMessages();
+  }
+
   // ============ MÉTODOS DE UTILIDAD ============
 
   getConversationPreview(conversation: Conversation): string {

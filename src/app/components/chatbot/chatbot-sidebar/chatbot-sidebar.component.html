@@ -162,9 +162,10 @@
 
       <!-- Botón Limpiar Historial -->
       <button (click)="clearHistory.emit()"
-              class="w-full mt-4 border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg px-4 py-2 flex items-center justify-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors group">
+              [disabled]="!canClearHistory()"
+              class="w-full mt-4 border-2 border-[#37AAC4] text-[#37AAC4] rounded-lg px-4 py-2 flex items-center justify-center hover:border-[#CE3262] hover:text-[#CE3262] transition-colors group disabled:opacity-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-300 disabled:hover:border-gray-300 disabled:hover:text-gray-300">
         
-        <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors flex-shrink-0" 
+        <svg class="w-4 h-4 mr-2 group-hover:text-[#CE3262] transition-colors flex-shrink-0 disabled:text-gray-300" 
              fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
