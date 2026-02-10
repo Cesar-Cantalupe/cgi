@@ -18,7 +18,7 @@ import { filter } from 'rxjs/operators';
       <div *ngIf="(authService.isAuthenticated$ | async) === true; else loginLayout"
           class="min-h-screen bg-white flex flex-col">
         
-        <app-header *ngIf="!isChatRoute"></app-header>
+        <app-header></app-header>
         
         <main class="flex-grow">
           <router-outlet></router-outlet>
