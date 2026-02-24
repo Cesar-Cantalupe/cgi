@@ -71,7 +71,7 @@ export class WebsocketModule implements OnDestroy {
     const message = {
       query: query,
       filters: filters,
-      stream: true,
+      stream: false, //Si recibirá el contenido en chunks o entero
       timestamp: Date.now()
     };
     
@@ -169,6 +169,14 @@ export class WebsocketModule implements OnDestroy {
       case 'stream_end':
         this.handleStreamEnd(event);
         break;
+
+      case 'response': //Se recibe la Respuesta entera (usado cuando stream=false en el envío de la query)
+        this.handleResponse(event);
+        break;
+
+      case 'follow_up': //Preguntas sugeridas de seguimiento
+        this.handleFollowUp(event);
+        break;
         
       case 'status':
         if (event['client_id']) {
@@ -245,14 +253,14 @@ export class WebsocketModule implements OnDestroy {
       return;
     }
     
-    const fullResponse = event['full_response'] || '';
+    const fullResponse = event['full_response'] || event['response'] || '';
     const sources = event['sources'] || [];
-    
+
     console.log('✅ [WEBSOCKET MODULE] Completando stream con respuesta:', {
       length: fullResponse.length,
       sourcesCount: sources.length
     });
-    
+
     this.streaming.completeStream(fullResponse, sources)
       .then(() => {
         console.log('✅ [WEBSOCKET MODULE] completeStream() completado, reseteando stream state');
@@ -262,6 +270,51 @@ export class WebsocketModule implements OnDestroy {
         console.error('💥 [WEBSOCKET MODULE] Error completando stream:', error);
         this.resetStreamState();
       });
+  }
+
+  private handleResponse(event: WebsocketEvent): void {
+    // Si el usuario canceló mientras esperaba la respuesta, ignorarla
+    if (this.ignoreNextStreamEnd) {
+      console.warn('⚠️ IGNORANDO response (después de STOP)');
+      this.ignoreNextStreamEnd = false;
+      this.resetStreamState();
+      this.cleanupStreamingMessages();
+      this.state.setStopping(false);
+      return;
+    }
+
+    if (!this.streamingActive) {
+      console.warn('⚠️ IGNORANDO response (streamingActive=false)');
+      return;
+    }
+
+    const clientId = event['metadata']?.['client_id'] || event['client_id'];
+    if (clientId) {
+      this.state.setClientId(clientId);
+    }
+
+    const fullResponse = event['response'] || '';
+    const sources = event['sources'] || [];
+
+    // Iniciar stream solo si no hay uno activo ya (el engine pudo haberlo iniciado)
+    if (!this.streaming.isStreaming()) {
+      this.streaming.startStream(this.currentQuestion, this.currentQuestionType, false);
+    }
+    this.streaming.completeStream(fullResponse, sources)
+      .then(() => {
+        this.resetStreamState();
+      })
+      .catch(error => {
+        console.error('💥 [WEBSOCKET MODULE] Error completando response:', error);
+        this.resetStreamState();
+      });
+  }
+
+  private handleFollowUp(event: WebsocketEvent): void {
+    const questions: string[] = event['questions'] || [];
+    if (!questions.length) return;
+
+    this.state.setFollowUpQuestions(questions);
   }
 
   private handleErrorEvent(event: WebsocketEvent): void {

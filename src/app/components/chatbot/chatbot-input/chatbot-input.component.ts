@@ -28,9 +28,11 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
 
   @Output() newMessageChange = new EventEmitter<string>();
   @Input() showQuickSuggestions = false;
-    
+  @Input() followUpQuestions: string[] = [];
+
   @Output() sendMessage = new EventEmitter<void>();
   @Output() quickSuggestion = new EventEmitter<string>();
+  @Output() followUpSelected = new EventEmitter<string>();
   
   isProcessing = false;
   isStopping = false;
@@ -140,6 +142,10 @@ export class ChatbotInputComponent implements OnInit, OnDestroy {
   
   onQuickSuggestionClick(suggestion: string): void {
     this.quickSuggestion.emit(suggestion);
+  }
+
+  onFollowUpClick(question: string): void {
+    this.followUpSelected.emit(question);
   }
 
   canSend(): boolean {

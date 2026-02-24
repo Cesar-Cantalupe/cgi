@@ -72,10 +72,12 @@
       <!-- Input del chat -->
       <div class="bg-white/80 backdrop-blur-sm border-t border-gray-200">
         <app-chatbot-input
-          [(newMessage)]="newMessage"  
+          [(newMessage)]="newMessage"
           [showQuickSuggestions]="!shouldShowPredefinedQuestions()"
+          [followUpQuestions]="followUpQuestions"
           (sendMessage)="send()"
-          (quickSuggestion)="onQuickSuggestionClick($event)">
+          (quickSuggestion)="onQuickSuggestionClick($event)"
+          (followUpSelected)="onFollowUpQuestionClick($event)">
         </app-chatbot-input>
       </div>
     </div>

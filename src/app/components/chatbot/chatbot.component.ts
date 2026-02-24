@@ -27,6 +27,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   isWebSocketConnected = false;
   showTitleEditor = false;
   editingTitle = '';
+  followUpQuestions: string[] = [];
   
   // Estado para feedback de texto
   showTextFeedbackFor: ChatMessage | null = null;
@@ -143,6 +144,14 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         // Usar detectChanges() en lugar de markForCheck() para forzar evaluación
         this.cdr.detectChanges();
       });
+
+    // Preguntas de seguimiento del servidor
+    this.state.followUpQuestions$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(questions => {
+        this.followUpQuestions = questions;
+        this.cdr.markForCheck();
+      });
   }
 
   private setupStopListener(): void {
@@ -170,7 +179,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     lang: string
   ): void {
     const filteredMessages = this.filterPlaceholderMessages(messages || []);
-    
+
     this.messages = filteredMessages;
     this.isProcessing = processing;
     this.isStopping = stopping;
@@ -486,6 +495,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       this.chatbotService.newChat();
       this.newMessage = '';
       this.lastUserQuestionForRestoration = null;
+      this.state.clearFollowUpQuestions();
       this.handleMobileSidebar();
     } catch (error) {
       console.error('Error creating new chat:', error);
@@ -494,6 +504,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   loadConversation(conversationId: string): void {
     if (this.conversationService.selectConversation(conversationId)) {
+      this.state.clearFollowUpQuestions();
       this.handleMobileSidebar();
       this.scheduleScroll();
     }
@@ -536,7 +547,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
     const message = this.newMessage.trim();
     this.newMessage = '';
-    
+    this.state.clearFollowUpQuestions();
+
     this.chatbotService.sendUserQuestion(message)
       .catch(error => {
         console.error('Error sending message:', error);
@@ -547,7 +559,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   onSuggestedQuestionClick(question: string): void {
     if (!this.chatbotService.canSendMessages()) return;
-    
+    this.state.clearFollowUpQuestions();
+
     this.chatbotService.loadQuestionFromSidebar(question)
       .catch(error => {
         console.error('Error loading predefined question:', error);
@@ -558,10 +571,23 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   onQuickSuggestionClick(suggestion: string): void {
     if (!this.chatbotService.canSendMessages()) return;
+    this.state.clearFollowUpQuestions();
 
     this.chatbotService.sendUserQuestion(suggestion)
       .catch(error => {
         console.error('Error sending quick suggestion:', error);
+      });
+
+    this.handleUserAction();
+  }
+
+  onFollowUpQuestionClick(question: string): void {
+    if (!this.chatbotService.canSendMessages()) return;
+    this.state.clearFollowUpQuestions();
+
+    this.chatbotService.sendUserQuestion(question)
+      .catch(error => {
+        console.error('Error sending follow-up question:', error);
       });
 
     this.handleUserAction();
@@ -727,6 +753,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.chatbotService.clearHistory();
     this.newMessage = '';
     this.lastUserQuestionForRestoration = null;
+    this.state.clearFollowUpQuestions();
   }
 
   onHealthProfileToggle(enabled: boolean): void {
@@ -852,8 +879,10 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     // Parar el streaming y enviar la pregunta del usuario correspondiente
     this.isProcessing = true; // Mostrar indicador visual
     // console.log('🔄 Ejecutando emergencyStop para regeneración...');
+    // Always use 'user' questionType when regenerating: we want to KEEP the user question
+    // and only remove the bot response. Using 'predefined' would delete the question too.
     this.chatbotService.emergencyStop({
-      questionType: (userMessage as any)._isPredefinedQuestion ? 'predefined' : 'user',
+      questionType: 'user',
       shouldRestoreToInput: false,
       questionContent: userMessage.content
     }).then(() => {

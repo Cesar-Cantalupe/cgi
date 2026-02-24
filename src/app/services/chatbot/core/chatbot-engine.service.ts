@@ -105,36 +105,15 @@ export class ChatbotEngineService implements OnDestroy {
       const userMessage = this.addUserMessage(message, questionType);
       this.lastUserMessageObject = userMessage;
       
-      const streamingMessageId = `stream-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // console.log('📝 Creando mensaje de streaming placeholder:', streamingMessageId);
-      const placeholderMessage: ChatMessage = {
-        id: streamingMessageId,
-        content: '',
-        text: '', // Asegurar que text también esté presente
-        sender: 'bot',
-        isUser: false,
-        isStreaming: true,
-        timestamp: new Date(),
-        _streamingUpdate: Date.now(),
-        _isProcessingPlaceholder: true, // Solo placeholder al inicio
-        _originalQuestionType: questionType,
-        showFeedbackBox: false
-      };
-      
-      this.state.addMessage(placeholderMessage);
-      
-      this.currentBotMessageId = streamingMessageId;
-      this.currentStreamingMessageId = streamingMessageId;
-      
-      this.state.setStreamingMessage(placeholderMessage);
-      
-      this.streaming.setLastQuestion(message);
+      const placeholderMessage = this.streaming.startStream(message, questionType, false);
+      this.currentBotMessageId = placeholderMessage.id;
+      this.currentStreamingMessageId = placeholderMessage.id;
+
       this.isStreamingActive = true;
       this.streamStartTime = Date.now();
       this.stopRequested = false;
       this.isHandlingStop = false;
-      
+
       const filterConfig = this.filters.getCombinedFilters(customFilters);
       
       this.websocket.sendQuery(message, filterConfig, questionType);
@@ -192,36 +171,17 @@ export class ChatbotEngineService implements OnDestroy {
       
       this.state.setProcessing(true);
       
-      const streamingMessageId = `stream-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      // console.log('📝 Creando nuevo mensaje de streaming para regeneración:', streamingMessageId);
-      const placeholderMessage: ChatMessage = {
-        id: streamingMessageId,
-        content: '',
-        text: '',
-        sender: 'bot',
-        isUser: false,
-        isStreaming: true,
-        timestamp: new Date(),
-        _streamingUpdate: Date.now(),
-        _isProcessingPlaceholder: true,
-        _originalQuestionType: questionType,
-        showFeedbackBox: false
-      };
-      
-      this.state.addMessage(placeholderMessage);
-      
-      this.currentBotMessageId = streamingMessageId;
-      this.currentStreamingMessageId = streamingMessageId;
-      
+      const placeholderMessage = this.streaming.startStream(message, questionType, false);
+      this.currentBotMessageId = placeholderMessage.id;
+      this.currentStreamingMessageId = placeholderMessage.id;
+
       this.state.setStreamingMessage(placeholderMessage);
-      
-      this.streaming.setLastQuestion(message);
+
       this.isStreamingActive = true;
       this.streamStartTime = Date.now();
       this.stopRequested = false;
       this.isHandlingStop = false;
-      
+
       const filterConfig = this.filters.getCombinedFilters(customFilters);
       
       this.websocket.sendQuery(message, filterConfig, questionType);

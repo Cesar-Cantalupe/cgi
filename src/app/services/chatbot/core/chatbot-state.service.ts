@@ -21,7 +21,8 @@ export class ChatbotStateService {
   private streamingMessageSubject = new BehaviorSubject<ChatMessage | null>(null);
   private clientIdSubject = new BehaviorSubject<string | null>(null);
   private streamingCompletedSubject = new Subject<ChatMessage>(); // ⚠️ Emite cuando streaming termina
-  
+  private followUpQuestionsSubject = new BehaviorSubject<string[]>([]);
+
   // Público
   public messages$ = this.messagesSubject.asObservable();
   public isProcessing$ = this.processingSubject.asObservable();
@@ -29,6 +30,7 @@ export class ChatbotStateService {
   public currentStreamingMessage$ = this.streamingMessageSubject.asObservable();
   public currentClientId$ = this.clientIdSubject.asObservable();
   public streamingCompleted$ = this.streamingCompletedSubject.asObservable();
+  public followUpQuestions$ = this.followUpQuestionsSubject.asObservable();
 
   // Getters síncronos
   get messages(): ChatMessage[] {
@@ -52,6 +54,8 @@ export class ChatbotStateService {
   }
 
   setStopping(val: boolean) { this.isStoppingSubject.next(val); }
+  setFollowUpQuestions(questions: string[]): void { this.followUpQuestionsSubject.next(questions); }
+  clearFollowUpQuestions(): void { this.followUpQuestionsSubject.next([]); }
 
   constructor(private conversationService: ConversationService) {
     this.setupConversationSync();
@@ -140,6 +144,13 @@ export class ChatbotStateService {
 
   setMessages(messages: ChatMessage[]): void {
     const deduplicated = this.deduplicateMessages(messages);
+    const currentUserMsgs = this.messages.filter(m => m.sender === 'user' || m.isUser);
+    const newUserMsgs = deduplicated.filter(m => m.sender === 'user' || m.isUser);
+    if (currentUserMsgs.length > newUserMsgs.length) {
+      console.warn('🚨 DEBUG: setMessages reduce mensajes de usuario de', currentUserMsgs.length, 'a', newUserMsgs.length);
+      console.warn('  Perdidos:', currentUserMsgs.filter(cu => !newUserMsgs.find(nu => nu.id === cu.id)).map(m => ({id: m.id, content: m.content?.substring(0,40)})));
+      console.trace('🚨 Stack trace de setMessages');
+    }
     this.messagesSubject.next(deduplicated);
   }
   
@@ -236,6 +247,12 @@ export class ChatbotStateService {
   }
 
   removeMessage(predicate: (msg: ChatMessage) => boolean): void {
+    const removed = this.messages.filter(msg => predicate(msg));
+    const userMsgRemoved = removed.filter(m => m.sender === 'user' || m.isUser);
+    if (userMsgRemoved.length > 0) {
+      console.warn('🚨 DEBUG: removeMessage está eliminando mensaje(s) de USUARIO:', userMsgRemoved.map(m => ({id: m.id, content: m.content?.substring(0,40), sender: m.sender, isUser: m.isUser})));
+      console.trace('🚨 Stack trace de removeMessage eliminando usuario');
+    }
     const messages = this.messages.filter(msg => !predicate(msg));
     this.messagesSubject.next(messages);
   }

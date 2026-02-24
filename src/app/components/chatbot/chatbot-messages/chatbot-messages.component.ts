@@ -855,13 +855,16 @@ private createFallbackStopMessage(): ChatMessage {
     const isComplete = !message.isStreaming;
     const hasContent = !!this.getMessageText(message);
     const isNotSystemMessage = this.getMessageSender(message) !== 'system';
-    const isNotError = !message.content?.includes('ERRORS.') && 
+    const isNotError = !message.content?.includes('ERRORS.') &&
                       !message.text?.includes('ERRORS.');
-    
+
     const canRegenerateNow = this.canSendMessages() && !this.isProcessing;
-    
-    const result = isBotMessage && isComplete && hasContent && isNotSystemMessage && isNotError && canRegenerateNow;
-    
+
+    const lastBotMessage = [...this.filteredMessages].reverse().find(m => this.getMessageSender(m) === 'bot');
+    const isLastBotMessage = lastBotMessage?.id === message.id;
+
+    const result = isBotMessage && isComplete && hasContent && isNotSystemMessage && isNotError && canRegenerateNow && isLastBotMessage;
+
     return result;
   }
 

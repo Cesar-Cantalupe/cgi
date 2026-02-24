@@ -33,15 +33,16 @@ import { ChatbotService } from './services/chatbot/chatbot.service';
   imports: [
     BrowserModule,
     HttpClientModule,
-    FormsModule,        
-    AppRoutingModule,   
-    SharedModule
+    FormsModule,
+    AppRoutingModule,
+    SharedModule,
+    ChatbotModule
   ],
   providers: [
-    AuthService,        
+    AuthService,
     AuthGuard,
-    TranslationService,     
-    ChatbotService  
+    TranslationService,
+    ChatbotService
   ],
   bootstrap: [AppComponent]
 })

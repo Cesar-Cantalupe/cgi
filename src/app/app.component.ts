@@ -15,7 +15,7 @@ import { filter } from 'rxjs/operators';
     </div>
 
     <div *ngIf="translationsReady">
-      <div *ngIf="(authService.isAuthenticated$ | async) === true; else loginLayout"
+      <div *ngIf="!isLoginRoute; else loginLayout"
           class="min-h-screen bg-white flex flex-col">
         
         <app-header></app-header>
@@ -48,9 +48,16 @@ import { filter } from 'rxjs/operators';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  isChatRoute: boolean = false;
   translationsReady = false;
   currentRoute: string = '';
+
+  get isChatRoute(): boolean {
+    return this.router.url.includes('/chat') || window.location.pathname.includes('/chat');
+  }
+
+  get isLoginRoute(): boolean {
+    return this.router.url === '/login' || window.location.pathname === '/login';
+  }
 
   constructor(
     public authService: AuthService,
@@ -62,9 +69,8 @@ export class AppComponent implements OnInit {
         filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd)
       )
       .subscribe((event: NavigationEnd) => {
-        this.isChatRoute = event.url.includes('/chat');
         this.currentRoute = event.url;
-        
+
         setTimeout(() => {
           this.forceLayoutUpdate();
         }, 100);

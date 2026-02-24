@@ -167,12 +167,12 @@ export class StreamingModule implements OnDestroy {
     
     this.accumulatedText = fullResponse;
     this.finalSources = this.messageParser.formatSources(sources || []);
-    
+
     // Actualizar el mensaje con el texto completo (sin animación porque ya llegó stream_end)
     // Si TYPEWRITER_ENABLED, la animación ya ocurrió durante los chunks
     // IMPORTANTE: Forzar isStreaming = false dentro de ngZone para asegurar detección de cambios
     this.ngZone.run(() => {
-      
+
       this.updateMessage(this.currentStreamId!, {
         content: this.accumulatedText,
         isStreaming: false, // ⚠️ CRÍTICO: Marcar como completado, no streaming
