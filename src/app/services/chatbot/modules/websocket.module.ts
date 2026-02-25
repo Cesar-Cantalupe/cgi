@@ -173,10 +173,6 @@ export class WebsocketModule implements OnDestroy {
       case 'response': //Se recibe la Respuesta entera (usado cuando stream=false en el envío de la query)
         this.handleResponse(event);
         break;
-
-      case 'follow_up': //Preguntas sugeridas de seguimiento
-        this.handleFollowUp(event);
-        break;
         
       case 'status':
         if (event['client_id']) {

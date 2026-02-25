@@ -578,12 +578,6 @@ private createFallbackStopMessage(): ChatMessage {
       shouldRestoreToInput: false
     };
     
-    // console.log('📤 EMITIENDO EVENTO STOP CON DATOS:', {
-    //   messageId: stopEvent.message.id,
-    //   questionType: stopEvent.questionType,
-    //   contentPreview: stopEvent.questionContent?.substring(0, 50)
-    // });
-    
     // Emitir el evento
     this.stop.emit(stopEvent);
   }
@@ -594,12 +588,6 @@ private createFallbackStopMessage(): ChatMessage {
     streamingMessage: ChatMessage | null, 
     questionType: 'user' | 'predefined'
   ): void {
-    // console.log('🎨 Realizando limpieza visual inmediata...', {
-    //   hasStreamingMessage: !!streamingMessage,
-    //   questionType,
-    //   streamingMessageContent: streamingMessage?.content?.substring(0, 50)
-    // });
-    
     const beforeCount = this.filteredMessages.length;
     
     // CORRECCIÓN: NO eliminar el mensaje de streaming
@@ -607,11 +595,6 @@ private createFallbackStopMessage(): ChatMessage {
     
     // 1. Si hay mensaje de streaming con contenido, mantenerlo pero marcar como NO streaming
     if (streamingMessage && streamingMessage.content && streamingMessage.content.trim()) {
-      // console.log('💾 Manteniendo contenido del mensaje de streaming:', {
-      //   id: streamingMessage.id,
-      //   contentLength: streamingMessage.content.length,
-      //   preview: streamingMessage.content.substring(0, 100)
-      // });
       
       // Buscar el mensaje en filteredMessages y actualizar su estado
       const messageIndex = this.filteredMessages.findIndex(m => m.id === streamingMessage.id);
@@ -621,12 +604,10 @@ private createFallbackStopMessage(): ChatMessage {
           isStreaming: false,
           _isProcessingPlaceholder: false
         };
-        // console.log('✅ Mensaje actualizado a NO streaming pero con contenido preservado');
       }
     } else {
       // Solo si NO hay contenido, entonces eliminar el mensaje
       if (streamingMessage) {
-        // console.log('🗑️ Eliminando mensaje de streaming vacío');
         this.filteredMessages = this.filteredMessages.filter(m => 
           m.id !== streamingMessage.id
         );
@@ -646,7 +627,6 @@ private createFallbackStopMessage(): ChatMessage {
       });
       
       if (messagesToRemove.length > 0) {
-        // console.log('🗑️ Mensajes de streaming vacíos removidos:', messagesToRemove);
       }
     }
     
@@ -654,7 +634,6 @@ private createFallbackStopMessage(): ChatMessage {
     if (questionType === 'predefined') {
       const lastUserMessage = this.findLastUserMessage();
       if (lastUserMessage && (lastUserMessage as any)._isPredefinedQuestion) {
-        // console.log('🗑️ Removiendo pregunta predefinida del chat:', lastUserMessage.id);
         this.filteredMessages = this.filteredMessages.filter(m => 
           m.id !== lastUserMessage.id
         );
@@ -665,8 +644,6 @@ private createFallbackStopMessage(): ChatMessage {
     
     // 3. Forzar actualización de UI
     this.cdr.detectChanges();
-    
-    // console.log('✅ Limpieza visual completada. Mensajes removidos:', removedCount);
   }
   
   private trackLastUserQuestion(): void {
@@ -693,12 +670,6 @@ private createFallbackStopMessage(): ChatMessage {
       messageId: lastUserMessage.id || '',
       timestamp: Date.now()
     };
-    
-    // console.log('💾 Última pregunta cacheada:', {
-    //   type: this.lastUserQuestion.type,
-    //   content: this.lastUserQuestion.content.substring(0, 50),
-    //   id: this.lastUserQuestion.messageId
-    // });
   }
   
   private findLastUserMessage(): ChatMessage | null {
@@ -720,13 +691,7 @@ private createFallbackStopMessage(): ChatMessage {
       (this.getMessageSender(m) === 'bot' || !m.isUser) && 
       m.isStreaming === true
     );
-    
-    // console.log('🔍 Buscando mensajes de streaming:', {
-    //   totalFiltered: this.filteredMessages.length,
-    //   streamingFound: streamingMessages.length,
-    //   streamingIds: streamingMessages.map(m => ({id: m.id, contentLength: m.content?.length}))
-    // });
-    
+
     if (streamingMessages.length === 0) {
       return null;
     }
@@ -736,13 +701,6 @@ private createFallbackStopMessage(): ChatMessage {
       const currentTime = current._streamingUpdate || current.timestamp?.getTime() || 0;
       return currentTime > latestTime ? current : latest;
     });
-    
-    // console.log('🎯 Último mensaje de streaming encontrado:', {
-    //   id: latest.id,
-    //   contentLength: latest.content?.length,
-    //   timestamp: latest.timestamp,
-    //   _streamingUpdate: latest._streamingUpdate
-    // });
     
     return latest;
   }
@@ -790,10 +748,6 @@ private createFallbackStopMessage(): ChatMessage {
         }
       }
     });
-    
-    if (foundOldStreaming) {
-      // console.log('🔧 Recomendación: Los mensajes con isStreaming:true y sin actualización reciente deberían tener isStreaming:false');
-    }
   }
 
   // ============ MÉTODOS DE DETERMINACIÓN DE TIPO DE PREGUNTA ============
@@ -809,13 +763,11 @@ private createFallbackStopMessage(): ChatMessage {
     
     // Prioridad 1: Usar cache local
     if (this.lastUserQuestion) {
-      // console.log('📋 Usando lastUserQuestion cacheado:', this.lastUserQuestion.type);
       return this.lastUserQuestion.type;
     }
     
     // Prioridad 2: Usar _originalQuestionType
     if ((message as any)._originalQuestionType) {
-      // console.log('📋 Usando _originalQuestionType:', (message as any)._originalQuestionType);
       return (message as any)._originalQuestionType;
     }
     
@@ -827,10 +779,6 @@ private createFallbackStopMessage(): ChatMessage {
           const prevMessage = this.messages[i];
           if (prevMessage.sender === 'user' || prevMessage.isUser) {
             const isPredefined = (prevMessage as any)._isPredefinedQuestion;
-            // console.log('🔍 Tipo determinado desde mensaje previo:', {
-            //   isPredefined,
-            //   content: prevMessage.content?.substring(0, 50)
-            // });
             return isPredefined ? 'predefined' : 'user';
           }
         }
@@ -840,11 +788,9 @@ private createFallbackStopMessage(): ChatMessage {
     // Prioridad 4: Buscar en el mensaje actual (si es usuario)
     if (message.sender === 'user' || message.isUser) {
       const isPredefined = (message as any)._isPredefinedQuestion;
-      // console.log('🔍 Tipo determinado desde mensaje actual:', isPredefined ? 'predefined' : 'user');
       return isPredefined ? 'predefined' : 'user';
     }
     
-    // console.log('❓ No se pudo determinar el tipo de pregunta');
     return undefined;
   }
 
