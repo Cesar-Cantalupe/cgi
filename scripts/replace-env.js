@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'production') {
   try {
     let content = fs.readFileSync(envPath, 'utf8');
 
-    const placeholder = 'API_KEY_PROD';
+    const placeholder = 'API_KEY_PLACEHOLDER';
 
     if (!content.includes(placeholder)) {
       console.error(`❌ No se encontró el placeholder "${placeholder}" en ${envPath}.`);

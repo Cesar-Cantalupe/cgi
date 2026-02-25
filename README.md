@@ -23,33 +23,35 @@ npm install
 
 ### Desarrollo
 
-Edita `src/environments/environment.ts` con los valores reales del entorno de desarrollo:
+Copiar `src/environments/environment.example.ts` a `src/environments/environment.ts` y editar con los valores reales del entorno de desarrollo:
 
 ```ts
 export const environment = {
   production: false,
-  websocketUrl: 'wss://BACKEND-CHATBOT-DEV.net/ws/query',
-  apiKey: 'TU_API_KEY_DEV'
+  websocketUrl: 'wss://BACKEND-CHATBOT-DEV.net/ws/query', // Ingresar URL del backend para el chatbot DEV
+  apiKey: 'TU_API_KEY_DEV' // Ingresar apiKey del backend para el chatbot DEV
 };
 ```
 
-> **Nota:** Este archivo **no debe commitearse** con claves reales. Agregalo a `.gitignore` o usá un archivo de ejemplo.
-
 ### Producción
 
-Edita `src/environments/environment.prod.ts` con los valores reales del entorno de producción manteniendo el placeholder para `apiKey`, ya que este es reemplazado por la variable de entorno `API_KEY`:
+Editar `src/environments/environment.prod.ts` con los valores reales del entorno de producción manteniendo el placeholder para `apiKey`, ya que este es reemplazado por la variable de entorno `API_KEY`:
 
 ```ts
 export const environment = {
   production: true,
-  websocketUrl: 'wss://BACKEND-CHATBOT-PRODUCTIVO.net/ws/query',
-  apiKey: 'API_KEY_PLACEHOLDER' <-- No modificar! Se reemplazará automáticamente por la variable de entorno `API_KEY`
+  websocketUrl: 'wss://BACKEND-CHATBOT-PRODUCTIVO.net/ws/query', // Ingresar URL del backend para el chatbot PRODUCTIVO
+  apiKey: 'API_KEY_PLACEHOLDER' // ¡No modificar! Se reemplazará automáticamente por la variable de entorno `API_KEY`
 };
 ```
 
-Antes del build de producción, el script `scripts/replace-env.js` detecta `NODE_ENV=production` y reemplaza `API_KEY_PLACEHOLDER` con el valor de la variable de entorno `API_KEY` definida en la configuración del entorno de AWS (ej: variables de entorno en EC2, ECS, Elastic Beanstalk o Systems Manager Parameter Store).
+Al momento de compilar la versión productiva con `npm run build`:
+- Se leerá la variable de entorno `API_KEY` definida en la configuración del entorno de AWS (ej: variables de entorno en EC2, ECS, Elastic Beanstalk o Systems Manager Parameter Store)
+- Se escribirá en `src/environments/environment.prod.ts`
+- Se compilará
+- Se restaurará el `API_KEY_PLACEHOLDER` en `src/environments/environment.prod.ts` para futuros builds.
 
-**El placeholder nunca se reemplaza en desarrollo** — solo se ejecuta cuando `NODE_ENV === 'production'`.
+**El placeholder no se reemplaza automáticamente en DEV**.
 
 ## Servidor de desarrollo
 
