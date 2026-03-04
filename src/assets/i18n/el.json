@@ -93,6 +93,7 @@
     "SEARCH_PLACEHOLDER": "Αναζήτηση...",
     "CLEAR_HISTORY": "Εκκαθάριση ιστορικού",
     "HEALTH_PROFILE": "Το προφίλ υγείας μου",
+    "HEALTH_PROFILE_TOOLTIP": "Δείτε το προφίλ υγείας σας",
     "KNOW_MORE": "Μάθετε περισσότερα",
     "ABOUT_US": "Σχετικά με εμάς",
     "FAQS": "Συχνές ερωτήσεις",
@@ -101,7 +102,12 @@
     "NO_MATCHING_QUESTIONS": "Δεν βρέθηκαν ερωτήσεις που να ταιριάζουν με",
     "YOUR_CONVERSATIONS": "Οι συνομιλίες σας...",
     "ALL_QUESTIONS_ANSWERED": "Όλες οι προτεινόμενες ερωτήσεις έχουν απαντηθεί",
-    "DELETE_CONVERSATION_CONFIRM": "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη συνομιλία;"
+    "DELETE_CONVERSATION_CONFIRM": "Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτήν τη συνομιλία;",
+    "HEALTH_PROFILE_INFO": "Αυτές οι πληροφορίες περιεχομένου θα χρησιμοποιηθούν ως φίλτρο στο eduCGI",
+    "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Εναλλαγή εισαγωγής του προφίλ υγείας στο chat",
+    "HEALTH_PARAM_TUMOR_TYPE": "Τύπος όγκου",
+    "HEALTH_PARAM_TUMOR_ALTERATION": "Μεταβολή όγκου",
+    "HEALTH_PARAM_TREATMENT": "Θεραπεία"
   },
   "WELCOME": {
     "HELLO": "Γεια σας",

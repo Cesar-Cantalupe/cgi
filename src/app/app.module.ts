@@ -13,7 +13,6 @@ import { SharedModule } from './shared/shared.module';
 import { AuthService } from './services/auth.service';
 import { AuthGuard } from './guards/auth.guard';
 import { TranslationService } from './services/translation.service';
-import { LinkGeneratorComponent } from './components/link-generator/link-generator.component';
 import { LegalPageComponent } from './components/legal-page/legal-page.component';
 
 
@@ -27,7 +26,6 @@ import { ChatbotService } from './services/chatbot/chatbot.service';
     FooterComponent,
     HomeComponent,
     LoginFormComponent,
-    LinkGeneratorComponent,
     LegalPageComponent
   ],
   imports: [

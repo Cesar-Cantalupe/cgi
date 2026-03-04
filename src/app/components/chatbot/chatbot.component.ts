@@ -758,6 +758,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   onHealthProfileToggle(enabled: boolean): void {
     this.healthProfileEnabled = enabled;
+    this.chatbotService.setHealthProfileEnabled(enabled);
   }
 
   onConversationSelected(conversationId: string): void {

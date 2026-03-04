@@ -93,6 +93,7 @@
     "SEARCH_PLACEHOLDER": "Cercar...",
     "CLEAR_HISTORY": "Esborrar historial",
     "HEALTH_PROFILE": "El meu perfil de salut",
+    "HEALTH_PROFILE_TOOLTIP": "Veure el teu perfil de salut",
     "KNOW_MORE": "Saber més",
     "ABOUT_US": "Sobre nosaltres",
     "FAQS": "PMF",
@@ -101,7 +102,12 @@
     "NO_MATCHING_QUESTIONS": "No s'han trobat preguntes coincidents amb",
     "YOUR_CONVERSATIONS": "Les teves converses...",
     "ALL_QUESTIONS_ANSWERED": "Totes les preguntes suggerides han estat respostes",
-    "DELETE_CONVERSATION_CONFIRM": "Segur que vols eliminar aquesta conversa?"
+    "DELETE_CONVERSATION_CONFIRM": "Estàs segur que vols eliminar aquesta conversa?",
+    "HEALTH_PROFILE_INFO": "Aquesta informació de context s'utilitzarà com a filtre a eduCGI",
+    "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Incloure o excloure el perfil de salut al xat",
+    "HEALTH_PARAM_TUMOR_TYPE": "Tipus de tumor",
+    "HEALTH_PARAM_TUMOR_ALTERATION": "Alteració del tumor",
+    "HEALTH_PARAM_TREATMENT": "Tractament"
   },
   "WELCOME": {
     "HELLO": "Hola",

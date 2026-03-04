@@ -28,7 +28,11 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   activeConversationId: string | null = null;
   searchQuery = '';
   isConnected = false;
-  
+  showHealthProfilePopup = false;
+  popupPosition = { top: 0, left: 0 };
+  private healthInfoBtnEl: HTMLElement | null = null;
+  private scrollListener: (() => void) | null = null;
+
   // Predefined questions
   predefinedQuestions: any[] = [];
   
@@ -129,8 +133,8 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   }
 
   private detectMedicalParams(params: any): void {
-    const hasMedicalParams = params['tumor_type'] || params['gene'] || params['treatment_drug'];
-    
+    const hasMedicalParams = params['tumor_type'] || params['tumor_alteration'] || params['treatment'];
+
     if (hasMedicalParams && !this.healthProfileEnabled) {
       this.healthProfileEnabled = true;
       this.healthProfileToggled.emit(true);
@@ -182,6 +186,47 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   onHealthProfileIconClick(): void {
     this.healthProfileEnabled = !this.healthProfileEnabled;
     this.healthProfileToggled.emit(this.healthProfileEnabled);
+  }
+
+  onHealthInfoBtnClick(event: MouseEvent): void {
+    this.showHealthProfilePopup = !this.showHealthProfilePopup;
+    if (this.showHealthProfilePopup) {
+      this.healthInfoBtnEl = event.currentTarget as HTMLElement;
+      this.updatePopupPosition();
+      this.scrollListener = () => this.updatePopupPosition();
+      window.addEventListener('scroll', this.scrollListener, true);
+      window.addEventListener('resize', this.scrollListener, true);
+    } else {
+      this.removeScrollListener();
+    }
+  }
+
+  private updatePopupPosition(): void {
+    if (!this.healthInfoBtnEl) return;
+    const rect = this.healthInfoBtnEl.getBoundingClientRect();
+    this.popupPosition = { top: rect.top - 12, left: rect.right + 10 };
+  }
+
+  private removeScrollListener(): void {
+    if (this.scrollListener) {
+      window.removeEventListener('scroll', this.scrollListener, true);
+      this.scrollListener = null;
+    }
+  }
+
+  getHealthParamGroups(): { label: string; entries: { value: string }[] }[] {
+    const filters = this.chatbotService.getCurrentFilters();
+    const groups = [
+      { labelKey: 'SIDEBAR.HEALTH_PARAM_TUMOR_TYPE',       keys: ['tumor_type'] },
+      { labelKey: 'SIDEBAR.HEALTH_PARAM_TUMOR_ALTERATION', keys: ['tumor_alteration'] },
+      { labelKey: 'SIDEBAR.HEALTH_PARAM_TREATMENT',        keys: ['treatment'] }
+    ];
+    return groups
+      .map(g => ({
+        label: this.translationService.instant(g.labelKey),
+        entries: g.keys.filter(k => filters[k]).map(k => ({ value: filters[k] }))
+      }))
+      .filter(g => g.entries.length > 0);
   }
 
   onConversationClick(conversation: Conversation): void {
@@ -343,5 +388,6 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.removeScrollListener();
   }
 }

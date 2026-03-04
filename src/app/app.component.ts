@@ -16,11 +16,13 @@ import { filter } from 'rxjs/operators';
 
     <div *ngIf="translationsReady">
       <div *ngIf="!isLoginRoute; else loginLayout"
-          class="min-h-screen bg-white flex flex-col">
+          class="h-screen bg-white flex flex-col"
+          [class.overflow-hidden]="isChatRoute">
         
         <app-header></app-header>
         
-        <main class="flex-grow">
+        <main class="flex-grow"
+              [class.overflow-hidden]="isChatRoute">
           <router-outlet></router-outlet>
         </main>
         
@@ -70,11 +72,26 @@ export class AppComponent implements OnInit {
       )
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
+        this.updateBodyClass();
 
         setTimeout(() => {
           this.forceLayoutUpdate();
         }, 100);
       });
+  }
+
+  private updateBodyClass() {
+    if (this.isChatRoute) {
+      document.body.classList.add('chat-route');
+    } else {
+      document.body.classList.remove('chat-route');
+    }
+  }
+
+  async ngOnInit() {
+    await this.translationService.waitForTranslations();
+    this.translationsReady = true;
+    this.updateBodyClass();
   }
 
   getLoginMainClasses(): string {
@@ -85,10 +102,5 @@ export class AppComponent implements OnInit {
     if (document && document.body) {
       document.body.offsetHeight;
     }
-  }
-
-  async ngOnInit() {
-    await this.translationService.waitForTranslations();
-    this.translationsReady = true;
   }
 }

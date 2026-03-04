@@ -21,6 +21,7 @@ export class WebsocketModule implements OnDestroy {
   private currentQuestionType: 'user' | 'predefined' = 'user';
   private streamingActive = false;
   private ignoreNextStreamEnd = false;
+  private healthProfileEnabled = false;
   
   public connectionStatus$ = this.connectionStatus.asObservable();
 
@@ -57,26 +58,37 @@ export class WebsocketModule implements OnDestroy {
     });
   }
 
+  setHealthProfileEnabled(enabled: boolean): void {
+    this.healthProfileEnabled = enabled;
+  }
+
   sendQuery(query: string, filters: any = {}, questionType: 'user' | 'predefined' = 'user'): void {
     if (!this.isConnected()) {
       console.error('❌ ERROR: WebSocket no conectado');
       throw new Error('WebSocket not connected');
     }
-    
+
     // Preparar nuevo estado
     this.currentQuestion = query;
     this.currentQuestionType = questionType;
     this.streamingActive = true;
-    
-    const message = {
+
+    const { tumor_type, tumor_alteration, treatment, ...remainingFilters } = filters;
+
+    const message: any = {
       query: query,
-      filters: filters,
-      stream: false, //Si recibirá el contenido en chunks o entero
+      filters: remainingFilters,
+      stream: false,
       timestamp: Date.now()
     };
-    
+
+    if (this.healthProfileEnabled) {
+      if (tumor_type)       message['tumor_type']       = tumor_type;
+      if (tumor_alteration) message['tumor_alteration'] = tumor_alteration;
+      if (treatment)        message['treatment']        = treatment;
+    }
+
     this.websocket.sendMessage(message);
-    // console.log('✅ Query enviado:', { query, streamingActive: this.streamingActive });
   }
 
   cancelCurrentQuery(): void {

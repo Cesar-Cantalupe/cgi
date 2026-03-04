@@ -478,12 +478,8 @@ export class ChatbotService implements OnDestroy {
         
         const paramMappings: { [key: string]: string } = {
           'tumor_type': 'tumor_type',
-          'cancer_type': 'cancer_type',
-          'gene': 'gene',
-          'mutation_type': 'mutation_type',
-          'treatment_drug': 'treatment_drug',
-          'treatment_family': 'treatment_family',
-          'treatment_response': 'treatment_response'
+          'tumor_alteration': 'tumor_alteration',
+          'treatment': 'treatment'
         };
         
         Object.keys(paramMappings).forEach(paramKey => {
@@ -737,6 +733,10 @@ export class ChatbotService implements OnDestroy {
 
   hasActiveFilters(): boolean {
     return this.filtersModule.hasActiveFilters();
+  }
+
+  setHealthProfileEnabled(enabled: boolean): void {
+    this.websocketModule.setHealthProfileEnabled(enabled);
   }
 
   clearHistory(): void {

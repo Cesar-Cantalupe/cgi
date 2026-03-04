@@ -1,0 +1,21 @@
+/* add space at the top so fixed header doesn’t overlap page content */
+main {
+  padding-top: 4rem; /* adjust if header height changes */
+}
+
+/* for login page layout as well */
+.login, .register, .other-login-routes {
+  padding-top: 4rem;
+}
+
+/* when on the chat route we want to prevent page scrolling */
+body.chat-route {
+  overflow: hidden;
+}
+
+/* sidebar should sit below header and stretch to bottom when page is locked */
+body.chat-route .sidebar-container {
+  top: 4rem; /* header height approximation */
+  bottom: 0;
+  height: auto;
+}

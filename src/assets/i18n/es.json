@@ -93,6 +93,7 @@
     "SEARCH_PLACEHOLDER": "Buscar...",
     "CLEAR_HISTORY": "Limpiar historial",
     "HEALTH_PROFILE": "Mi perfil de salud",
+    "HEALTH_PROFILE_TOOLTIP": "Ver tu perfil de salud",
     "KNOW_MORE": "Saber más",
     "ABOUT_US": "Sobre nosotros",
     "FAQS": "Preguntas frecuentes",
@@ -101,7 +102,12 @@
     "NO_MATCHING_QUESTIONS": "No se encontraron preguntas que coincidan con",
     "YOUR_CONVERSATIONS": "Tus conversaciones...",
     "ALL_QUESTIONS_ANSWERED": "Todas las preguntas sugeridas han sido respondidas",
-    "DELETE_CONVERSATION_CONFIRM": "¿Seguro que quieres eliminar esta conversación?"
+    "DELETE_CONVERSATION_CONFIRM": "¿Seguro que quieres eliminar esta conversación?",
+    "HEALTH_PROFILE_INFO": "Esta información de contexto se usará como filtro en eduCGI",
+    "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Incluir o excluir el perfil de salud en el chat",
+    "HEALTH_PARAM_TUMOR_TYPE": "Tipo de tumor",
+    "HEALTH_PARAM_TUMOR_ALTERATION": "Alteración del tumor",
+    "HEALTH_PARAM_TREATMENT": "Tratamiento"
   },
   "WELCOME": {
     "HELLO": "Hola",

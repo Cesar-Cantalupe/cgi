@@ -50,8 +50,7 @@
             <div *ngIf="isSourcesPopoverVisible(i)"
                  (mouseenter)="showSourcesPopoverFor(i)"
                  (mouseleave)="hideSourcesPopoverFor(i)"
-                 class="absolute left-0 top-full mt-2 z-[99999] w-80 bg-white rounded-lg shadow-xl border-2 border-[#CE3262] p-4">
-              <div class="absolute -top-2 left-4 w-4 h-4 bg-white border-l-2 border-t-2 border-[#CE3262] transform rotate-45"></div>
+                 class="absolute left-0 bottom-full mb-2 z-[99999] w-80 bg-white rounded-lg shadow-xl border-2 border-[#CE3262] p-4">
               
               <div class="relative">
                 <h3 class="text-sm font-bold mb-3" style="color: #CE3262;">{{ 'SOURCES.TITLE' | translate }}</h3>
