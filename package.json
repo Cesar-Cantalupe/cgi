@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "NODE_ENV=production node scripts/replace-env.js && ng build --configuration=production && node scripts/restore-env.js",
+    "build:dev": "NODE_ENV=development ng build --configuration=development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:raw": "ng build --configuration=production"

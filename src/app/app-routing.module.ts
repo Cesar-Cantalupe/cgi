@@ -7,7 +7,7 @@ import { LegalPageComponent } from './components/legal-page/legal-page.component
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/chat', pathMatch: 'full' },
+  { path: '', component: ChatbotComponent, canActivate: [AuthGuard], pathMatch: 'full' },
   { path: 'login', component: LoginFormComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'chat', component: ChatbotComponent, canActivate: [AuthGuard] },
