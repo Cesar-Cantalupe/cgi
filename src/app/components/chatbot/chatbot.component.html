@@ -33,9 +33,9 @@
     </button>
 
     <!-- Contenedor del chat -->
-    <div class="flex flex-col h-full relative z-10">
+    <div class="flex flex-col h-full relative z-10 min-h-0">
       <!-- Área de mensajes -->
-      <div #messagesArea class="flex-1 overflow-y-auto bg-transparent pb-16">
+      <div #messagesArea class="flex-1 overflow-y-auto bg-transparent pb-16 min-h-0">
         <!-- Pantalla de bienvenida -->
         <div class="h-full flex items-center justify-center px-4" 
              *ngIf="shouldShowPredefinedQuestions()">  <!-- ACTUALIZADO -->
