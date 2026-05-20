@@ -47,4 +47,8 @@ proxy.conf.json
 
 # Environment variables
 .env
+.env.local
 src/environments/environment.ts
+
+# Supabase local temp (CLI)
+supabase/.temp/

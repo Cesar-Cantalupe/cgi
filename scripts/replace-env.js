@@ -1,3 +1,6 @@
+/**
+ * @deprecated Usa scripts/sync-env.js --prod --require-api-key (invocado desde npm run build).
+ */
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');

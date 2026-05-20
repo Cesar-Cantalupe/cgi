@@ -3,12 +3,22 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "prestart": "node scripts/sync-env.js",
     "start": "ng serve",
-    "build": "NODE_ENV=production node scripts/replace-env.js && ng build --configuration=production && node scripts/restore-env.js",
+    "prebuild:dev": "node scripts/sync-env.js",
+    "build": "node scripts/sync-env.js --prod --require-api-key && ng build --configuration=production && node scripts/restore-env.js",
     "build:dev": "NODE_ENV=development ng build --configuration=development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build:raw": "ng build --configuration=production"
+    "build:raw": "ng build --configuration=production",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:reset": "npx supabase db reset",
+    "supabase:push": "npx supabase db push",
+    "i18n:seed": "node scripts/generate-i18n-seed.js",
+    "sync-env": "node scripts/sync-env.js",
+    "test:supabase": "node scripts/test-supabase-i18n.js",
+    "i18n:push": "node scripts/push-i18n-seed.js"
   },
   "private": true,
   "dependencies": {
@@ -20,6 +30,7 @@
     "@angular/platform-browser": "^16.2.0",
     "@angular/platform-browser-dynamic": "^16.2.0",
     "@angular/router": "^16.2.0",
+    "@supabase/supabase-js": "^2.106.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
@@ -38,6 +49,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.5.6",
+    "supabase": "^2.100.1",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.1.3"
   }

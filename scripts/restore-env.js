@@ -11,8 +11,9 @@ try {
     return; // Ya tiene el placeholder, nada que restaurar
   }
 
-  // Reemplazar cualquier apiKey por el placeholder
   content = content.replace(/apiKey:\s*'[^']*'/, `apiKey: '${placeholder}'`);
+  content = content.replace(/supabaseUrl:\s*'[^']*'/, `supabaseUrl: ''`);
+  content = content.replace(/supabaseAnonKey:\s*'[^']*'/, `supabaseAnonKey: ''`);
 
   fs.writeFileSync(envPath, content, 'utf8');
 } catch (error) {

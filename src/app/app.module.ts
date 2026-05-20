@@ -14,6 +14,11 @@ import { AuthService } from './services/auth.service';
 import { AuthGuard } from './guards/auth.guard';
 import { TranslationService } from './services/translation.service';
 import { LegalPageComponent } from './components/legal-page/legal-page.component';
+import { AdminLoginComponent } from './components/admin/admin-login/admin-login.component';
+import { I18nAdminComponent } from './components/admin/i18n-admin/i18n-admin.component';
+import { AdminGuard } from './guards/admin.guard';
+import { AdminAuthService } from './services/admin-auth.service';
+import { I18nAdminService } from './services/i18n-admin.service';
 
 
 // ✅ SOLO este servicio necesitas proveer aquí
@@ -26,7 +31,9 @@ import { ChatbotService } from './services/chatbot/chatbot.service';
     FooterComponent,
     HomeComponent,
     LoginFormComponent,
-    LegalPageComponent
+    LegalPageComponent,
+    AdminLoginComponent,
+    I18nAdminComponent
   ],
   imports: [
     BrowserModule,
@@ -39,6 +46,9 @@ import { ChatbotService } from './services/chatbot/chatbot.service';
   providers: [
     AuthService,
     AuthGuard,
+    AdminGuard,
+    AdminAuthService,
+    I18nAdminService,
     TranslationService,
     ChatbotService
   ],

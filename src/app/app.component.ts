@@ -14,7 +14,11 @@ import { filter } from 'rxjs/operators';
       </div>
     </div>
 
-    <div *ngIf="translationsReady">
+    <div *ngIf="translationsReady && isAdminRoute" class="min-h-screen">
+      <router-outlet></router-outlet>
+    </div>
+
+    <div *ngIf="translationsReady && !isAdminRoute">
       <div *ngIf="!isLoginRoute; else loginLayout"
           class="h-screen bg-white flex flex-col"
           [class.overflow-hidden]="isChatRoute">
@@ -61,6 +65,11 @@ export class AppComponent implements OnInit {
     return this.router.url === '/login' || window.location.pathname === '/login';
   }
 
+  get isAdminRoute(): boolean {
+    const path = this.router.url || window.location.pathname;
+    return path.startsWith('/admin');
+  }
+
   constructor(
     public authService: AuthService,
     private router: Router,
@@ -89,6 +98,10 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit() {
+    if (this.isAdminRoute) {
+      this.translationsReady = true;
+      return;
+    }
     await this.translationService.waitForTranslations();
     this.translationsReady = true;
     this.updateBodyClass();

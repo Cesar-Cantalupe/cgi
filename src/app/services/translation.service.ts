@@ -1,10 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { SupabaseService } from './supabase.service';
 
 export interface TranslationDictionary {
   [key: string]: string | TranslationDictionary;
+}
+
+interface I18nRow {
+  namespace: string;
+  key: string;
+  value: string;
 }
 
 @Injectable({
@@ -19,7 +26,10 @@ export class TranslationService {
 
   public translations$ = this.translations.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private supabaseService: SupabaseService
+  ) {
     this.initializeLanguage();
   }
 
@@ -28,15 +38,15 @@ export class TranslationService {
     const browserLang = navigator.language;
     const browserLangShort = browserLang.split('-')[0];
     const defaultLang = 'en';
-    
+
     let langToUse = defaultLang;
-    
+
     if (savedLang && this.isSupportedLanguage(savedLang)) {
       langToUse = savedLang;
     } else if (this.isSupportedLanguage(browserLangShort)) {
       langToUse = browserLangShort;
     }
-    
+
     this.loadTranslations(langToUse).then(() => {
       this.isInitialized = true;
     });
@@ -50,26 +60,95 @@ export class TranslationService {
     }
 
     try {
-      const translations = await this.http.get<TranslationDictionary>(
-        `/assets/i18n/${lang}.json`
-      ).pipe(
-        tap(translations => {
-          this.translationsCache[lang] = translations;
-          this.translations.next(translations);
-          this.currentLang.next(lang);
-        }),
-        catchError(error => {
-          if (lang !== 'en') {
-            return this.loadTranslations('en');
-          }
-          return of({});
-        })
-      ).toPromise();
-
+      let translations = await this.loadFromJson(lang);
+      const remote = await this.loadFromSupabase(lang);
+      if (remote) {
+        translations = this.mergeTranslations(translations, remote);
+      }
+      this.translationsCache[lang] = translations;
+      this.translations.next(translations);
+      this.currentLang.next(lang);
     } catch (error) {
       console.error(this.getErrorMessage('TRANSLATION_LOAD_ERROR'), error);
       throw new Error(this.getErrorMessage('TRANSLATION_LOAD_ERROR'));
     }
+  }
+
+  private async loadFromJson(lang: string): Promise<TranslationDictionary> {
+    try {
+      return await firstValueFrom(
+        this.http.get<TranslationDictionary>(`/assets/i18n/${lang}.json`).pipe(
+          catchError(() => {
+            if (lang !== 'en') {
+              return this.http.get<TranslationDictionary>('/assets/i18n/en.json');
+            }
+            return of({});
+          })
+        )
+      );
+    } catch {
+      if (lang !== 'en') {
+        return this.loadFromJson('en');
+      }
+      return {};
+    }
+  }
+
+  private async loadFromSupabase(lang: string): Promise<TranslationDictionary | null> {
+    if (!this.supabaseService.isConfigured) {
+      return null;
+    }
+
+    try {
+      const { data, error } = await this.supabaseService.supabase
+        .from('i18n_translations')
+        .select('namespace, key, value')
+        .eq('locale', lang);
+
+      if (error) {
+        console.warn('[i18n] Supabase no disponible, usando solo JSON local:', error.message);
+        return null;
+      }
+
+      if (!data?.length) {
+        return null;
+      }
+
+      return this.rowsToDictionary(data as I18nRow[]);
+    } catch (err) {
+      console.warn('[i18n] Error al cargar desde Supabase:', err);
+      return null;
+    }
+  }
+
+  private rowsToDictionary(rows: I18nRow[]): TranslationDictionary {
+    const dict: TranslationDictionary = {};
+    for (const row of rows) {
+      if (!dict[row.namespace]) {
+        dict[row.namespace] = {};
+      }
+      const section = dict[row.namespace] as TranslationDictionary;
+      section[row.key] = row.value;
+    }
+    return dict;
+  }
+
+  private mergeTranslations(
+    base: TranslationDictionary,
+    overlay: TranslationDictionary
+  ): TranslationDictionary {
+    const merged: TranslationDictionary = { ...base };
+    for (const [namespace, keys] of Object.entries(overlay)) {
+      if (typeof keys !== 'object' || keys === null) {
+        continue;
+      }
+      const baseSection = merged[namespace];
+      merged[namespace] =
+        typeof baseSection === 'object' && baseSection !== null
+          ? { ...baseSection, ...keys }
+          : { ...keys };
+    }
+    return merged;
   }
 
   private isSupportedLanguage(lang: string): boolean {
@@ -81,7 +160,7 @@ export class TranslationService {
     if (this.isSupportedLanguage(lang)) {
       localStorage.setItem(this.STORAGE_KEY, lang);
       this.loadTranslations(lang);
-      
+
       setTimeout(() => {
         window.location.reload();
       }, 100);
@@ -98,8 +177,7 @@ export class TranslationService {
 
   instant(key: string): string {
     const currentTranslations = this.translations.value;
-    const lang = this.currentLang.value;
-    
+
     if (!currentTranslations) {
       return key;
     }
@@ -139,7 +217,7 @@ export class TranslationService {
             resolve();
           }
         });
-        
+
         setTimeout(() => {
           if (!this.isInitialized) {
             console.error(this.getErrorMessage('TRANSLATION_TIMEOUT_ERROR'));
