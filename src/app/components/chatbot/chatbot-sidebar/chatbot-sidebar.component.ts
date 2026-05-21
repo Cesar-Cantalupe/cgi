@@ -30,11 +30,13 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   isConnected = false;
   showHealthProfilePopup = false;
   popupPosition = { top: 0, left: 0 };
+  hasUrlParams = false;
   private healthInfoBtnEl: HTMLElement | null = null;
   private scrollListener: (() => void) | null = null;
 
   // Predefined questions
   predefinedQuestions: any[] = [];
+  private autoToggleDone = false;
   
   // Gestión de suscripciones optimizada
   private destroy$ = new Subject<void>();
@@ -134,8 +136,10 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
 
   private detectMedicalParams(params: any): void {
     const hasMedicalParams = params['tumor_type'] || params['tumor_alteration'] || params['treatment'];
+    this.hasUrlParams = !!hasMedicalParams;
 
-    if (hasMedicalParams && !this.healthProfileEnabled) {
+    if (hasMedicalParams && !this.autoToggleDone) {
+      this.autoToggleDone = true;
       this.healthProfileEnabled = true;
       this.healthProfileToggled.emit(true);
     }
@@ -260,7 +264,6 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
   }
 
   onNewChat(): void {
-    this.conversationService.createConversation();
     this.newChat.emit();
     this.handleMobileSidebar();
   }
@@ -343,7 +346,6 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
     return this.activeConversationId === conversationId;
   }
 
-    // En chatbot-sidebar.component.ts
   formatDate(date: Date): string {
     if (!date) return '';
     
@@ -353,16 +355,23 @@ export class ChatbotSidebarComponent implements OnInit, OnDestroy {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Ahora';
-    if (diffMins < 60) return `${diffMins} min`;
-    if (diffHours < 24) return `${diffHours} h`;
-    if (diffDays < 7) return `${diffDays} d`;
+    if (diffMins < 1) return this.translationService.instant('TIME.JUST_NOW');
+    if (diffMins < 60) return this.formatTimeAgo('TIME.MIN_AGO', diffMins);
+    if (diffHours < 24) return this.formatTimeAgo(diffHours === 1 ? 'TIME.HOUR_AGO' : 'TIME.HOURS_AGO', diffHours);
+    if (diffDays < 7) return this.formatTimeAgo(diffDays === 1 ? 'TIME.DAY_AGO' : 'TIME.DAYS_AGO', diffDays);
     
-    // Formato de fecha fijo sin locale
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
+  }
+
+  private formatTimeAgo(key: string, n?: number): string {
+    const template = this.translationService.instant(key);
+    if (n !== undefined) {
+      return template.replace('{n}', String(n));
+    }
+    return template;
   }
 
   private truncateText(text: string, maxLength: number): string {

@@ -49,7 +49,6 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
         this.isStreamingActive = !!streamingMessage?.isStreaming;
         
         if (wasActive !== this.isStreamingActive) {
-          // console.log('🔄 ChatbotControls: Estado streaming cambiado:', this.isStreamingActive);
           this.cdr.detectChanges();
         }
       }
@@ -62,7 +61,6 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
         this.isProcessing = processing;
         
         if (wasProcessing !== this.isProcessing) {
-          // console.log('🔄 ChatbotControls: Estado procesamiento cambiado:', this.isProcessing);
           this.cdr.detectChanges();
         }
       }
@@ -78,7 +76,6 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
         );
         
         if (hasStreamingMessages !== this.isStreamingActive) {
-          // console.log('📥 ChatbotControls: Mensajes actualizados, streaming detectado:', hasStreamingMessages);
           this.isStreamingActive = hasStreamingMessages;
           this.cdr.detectChanges();
         }
@@ -99,8 +96,6 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
   }
 
   onRegenerate(): void {
-    // console.log('🔄 ChatbotControls: onRegenerate llamado');
-    
     if (!this.targetMessage) {
       const lastBotMessage = this.state.getLastCompleteBotMessage();
       if (lastBotMessage) {
@@ -112,13 +107,10 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
   }
 
   onStop(): void {
-    // console.log('🛑 ChatbotControls: onStop llamado');
-    
     const now = Date.now();
     const timeSinceLastStop = now - this.lastStopTime;
     
     if (timeSinceLastStop < this.STOP_COOLDOWN_MS) {
-      // console.log('⏳ ChatbotControls: Cooldown activo, ignorando stop');
       return;
     }
     
@@ -129,7 +121,6 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
       questionType: questionType
     };
     
-    // console.log('📤 ChatbotControls: Emitiendo evento stop:', stopEvent);
     this.stop.emit(stopEvent);
     
     // Forzar actualización de UI
@@ -143,7 +134,6 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
     }
     
     if (this.chatbotService.canSendMessages()) {
-      // console.log('✅ ChatbotControls: Emitiendo regenerate para:', message.id);
       this.regenerate.emit(message);
     } else {
       console.warn('❌ ChatbotControls: No se puede regenerar, chatbot ocupado');
@@ -151,10 +141,7 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
   }
 
   private getCurrentQuestionType(): 'user' | 'predefined' | undefined {
-    // console.log('🔍 ChatbotControls: Determinando tipo de pregunta');
-    
     if (this.targetMessage && (this.targetMessage as any)._originalQuestionType) {
-      // console.log('📋 Usando _originalQuestionType:', (this.targetMessage as any)._originalQuestionType);
       return (this.targetMessage as any)._originalQuestionType;
     }
     
@@ -163,10 +150,8 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
       
       if (lastUserMessage) {
         if ((lastUserMessage as any)._isPredefinedQuestion) {
-          // console.log('🔍 Tipo determinado desde último mensaje usuario (predefined)');
           return 'predefined';
         } else {
-          // console.log('🔍 Tipo determinado desde último mensaje usuario (user)');
           return 'user';
         }
       }
@@ -174,7 +159,6 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
     
     if (this.targetMessage && (this.targetMessage.sender === 'user' || this.targetMessage.isUser)) {
       const isPredefined = (this.targetMessage as any)._isPredefinedQuestion;
-      // console.log('🔍 Tipo determinado desde mensaje actual:', isPredefined ? 'predefined' : 'user');
       return isPredefined ? 'predefined' : 'user';
     }
     
@@ -188,11 +172,9 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
                                        currentMessageContent.length < 100;
     
     if (hasPredefinedMessages && looksLikePredefinedQuestion) {
-      // console.log('🔍 Tipo determinado por análisis de contenido (predefined)');
       return 'predefined';
     }
     
-    // console.log('🔍 Tipo determinado por defecto (user)');
     return 'user';
   }
 
@@ -208,49 +190,31 @@ export class ChatbotControlsComponent implements OnInit, OnDestroy {
     const isNotError = !this.getMessageContent(this.targetMessage).includes('ERRORS.');
     const canRegenerate = this.showRegenerate;
     
-    const result = isBotMessage && isComplete && hasContent && isNotProcessing && isNotError && canRegenerate;
-    
-    if (result) {
-      // console.log('🔄 ChatbotControls: shouldShowRegenerate = TRUE para:', this.targetMessage.id);
-    }
-    
+    const result = isBotMessage && isComplete && hasContent && isNotProcessing && isNotError && canRegenerate;    
     return result;
   }
 
    shouldShowStop(): boolean {
-  // console.log('🛑 ChatbotControls: shouldShowStop evaluando', {
-  //   showStopInput: this.showStop,
-  //   targetMessage: this.targetMessage?.id,
-  //   targetMessageIsStreaming: this.targetMessage?.isStreaming,
-  //   isStreamingActive: this.isStreamingActive,
-  //   isProcessing: this.isProcessing
-  // });
-  
   // PRIORIDAD 1: Si el input showStop es true, mostrar siempre
   if (this.showStop === true) {
-    // console.log('✅ ChatbotControls: Mostrando STOP porque showStop input es TRUE');
     return true;
   }
   
   // PRIORIDAD 2: Si el mensaje objetivo está en streaming
   if (this.targetMessage && this.targetMessage.isStreaming === true) {
-    // console.log('✅ ChatbotControls: Mostrando STOP porque targetMessage.isStreaming es TRUE');
     return true;
   }
   
   // PRIORIDAD 3: Si hay streaming activo en el estado general
   if (this.isStreamingActive === true) {
-    // console.log('✅ ChatbotControls: Mostrando STOP porque isStreamingActive es TRUE');
     return true;
   }
   
   // PRIORIDAD 4: Si hay procesamiento en curso
   if (this.isProcessing === true) {
-    // console.log('✅ ChatbotControls: Mostrando STOP porque isProcessing es TRUE');
     return true;
   }
   
-  // console.log('❌ ChatbotControls: NO mostrando STOP');
   return false;
 }
 

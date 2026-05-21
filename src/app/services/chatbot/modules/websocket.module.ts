@@ -30,7 +30,6 @@ export class WebsocketModule implements OnDestroy {
     private streaming: StreamingModule,
     private state: ChatbotStateService
   ) {
-    // console.log('🔧 WebsocketModule creado');
   }
 
   // ============ API PÚBLICA SIMPLIFICADA ============
@@ -62,6 +61,10 @@ export class WebsocketModule implements OnDestroy {
     this.healthProfileEnabled = enabled;
   }
 
+  getHealthProfileEnabled(): boolean {
+    return this.healthProfileEnabled;
+  }
+
   sendQuery(query: string, filters: any = {}, questionType: 'user' | 'predefined' = 'user'): void {
     if (!this.isConnected()) {
       console.error('❌ ERROR: WebSocket no conectado');
@@ -73,20 +76,35 @@ export class WebsocketModule implements OnDestroy {
     this.currentQuestionType = questionType;
     this.streamingActive = true;
 
-    const { tumor_type, tumor_alteration, treatment, ...remainingFilters } = filters;
-
     const message: any = {
       query: query,
-      filters: remainingFilters,
       stream: false,
       timestamp: Date.now()
     };
 
-    if (this.healthProfileEnabled) {
-      if (tumor_type)       message['tumor_type']       = tumor_type;
-      if (tumor_alteration) message['tumor_alteration'] = tumor_alteration;
-      if (treatment)        message['treatment']        = treatment;
+    this.websocket.sendMessage(message);
+  }
+
+  sendReset(filters: any = {}, history: { role: string; content: string }[] = []): void {
+    if (!this.isConnected()) {
+      console.error('❌ ERROR: WebSocket no conectado');
+      return;
     }
+
+    const resetFilters: any = {};
+
+    // Only include health profile fields if MHP (My Health Profile) toggle is enabled (for new conversation creation)
+    const { tumor_type, tumor_alteration, treatment } = filters;
+    if (tumor_type)       resetFilters['tumor_type']       = tumor_type;
+    if (tumor_alteration) resetFilters['tumor_alteration'] = tumor_alteration;
+    if (treatment)        resetFilters['treatment']        = treatment;
+
+    const message: any = {
+      type: 'reset',
+      filters: resetFilters,
+      history,
+      timestamp: Date.now()
+    };
 
     this.websocket.sendMessage(message);
   }
@@ -114,12 +132,10 @@ export class WebsocketModule implements OnDestroy {
   }
 
   forceReset(): void {
-    // console.log('⚠️ FORCE RESET solicitado en WebsocketModule');
     this.resetStreamState();
     
     // Verificar estado de conexión
     if (!this.isConnected()) {
-      // console.log('⚠️ Conexión caída detectada en forceReset, reconectando...');
       this.reconnect();
     }
   }
@@ -193,7 +209,6 @@ export class WebsocketModule implements OnDestroy {
         break;
         
       case 'error':
-        console.error('💥 Error WebSocket:', event);
         this.handleErrorEvent(event);
         break;
         
@@ -206,19 +221,11 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private handleStreamStart(event: WebsocketEvent): void {
-    // console.log('📨 Stream START recibido:', {
-    //   clientId: event['client_id'],
-    //   currentQuestion: this.currentQuestion,
-    //   isStreaming: this.streaming.isStreaming(),
-    //   streamingActive: this.streamingActive
-    // });
-    
     if (event['client_id']) {
       this.state.setClientId(event['client_id']);
     }
     
     if (!this.streaming.isStreaming()) {
-      // console.log('✅ Iniciando nuevo stream para:', this.currentQuestion);
       this.streaming.startStream(this.currentQuestion, this.currentQuestionType, this.ignoreNextStreamEnd);
     } else {
       console.warn('⚠️ Ya hay un stream activo, ignorando nuevo stream_start');
@@ -326,8 +333,17 @@ export class WebsocketModule implements OnDestroy {
   }
 
   private handleErrorEvent(event: WebsocketEvent): void {
-    console.error('💥 Evento de error WebSocket:', event);
-    
+    const errorMsg = event['message'] || '';
+
+    // Error por tipo de mensaje no soportado (ej: "reset" en backend viejo)
+    // No es fatal, solo loguear y seguir
+    if (errorMsg.includes('Unsupported message type')) {
+      console.warn('⚠️ Tipo de mensaje no soportado por la API:', errorMsg);
+      return;
+    }
+
+    // Errores fatales — cancelar y marcar desconexión
+    console.error('💥 Error fatal WebSocket:', event);
     this.streaming.cancelStream();
     this.resetStreamState();
     this.connectionStatus.next('error');
@@ -344,7 +360,7 @@ export class WebsocketModule implements OnDestroy {
     this.streamingActive = false;
     this.currentQuestion = '';
     this.currentQuestionType = 'user';
-    this.ignoreNextStreamEnd = false
+    this.ignoreNextStreamEnd = false;
     this.state.setProcessing(false);
     this.state.setClientId(null);
   }

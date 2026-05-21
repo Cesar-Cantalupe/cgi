@@ -215,8 +215,6 @@ export class WebsocketService implements OnDestroy {
     const pongTime = this.lastPongTime;
     const latency = pongTime - pingTime;
     
-    // console.log('✅ PONG recibido con latencia:', latency, 'ms');
-    
     this.messageSubject.next({
       type: 'pong',
       client_id: pongData.client_id,
@@ -235,8 +233,6 @@ export class WebsocketService implements OnDestroy {
     if (!this.isPingAwaitingPong) {
       return;
     }
-    
-    // console.log('⏳ Setup PONG timeout - esperando respuesta del servidor...');
     
     this.pingPongTimeoutId = setTimeout(() => {
       console.warn('⚠️ ERRORS.PONG_TIMEOUT', this.PONG_TIMEOUT, 'ms');
@@ -351,7 +347,9 @@ export class WebsocketService implements OnDestroy {
     }
 
     try {
-      message.query = message.query.replace(/\n/g, '. '); // Reemplazar saltos de línea por puntos para evitar error en backend: "Error in streaming query: 1 validation error for NamedVector\nvector\n  Input should be a valid list [type=list_type, input_value=None, input_type=NoneType]\n
+      if (message.query) {
+        message.query = message.query.replace(/\n/g, '. '); // Reemplazar saltos de línea por puntos para evitar error en backend: "Error in streaming query: 1 validation error for NamedVector\nvector\n  Input should be a valid list [type=list_type, input_value=None, input_type=NoneType]\n
+      }
 
       const messageString = JSON.stringify(message);
       this.socket?.send(messageString);

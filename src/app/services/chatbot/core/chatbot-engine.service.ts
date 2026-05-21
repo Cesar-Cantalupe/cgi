@@ -53,7 +53,6 @@ export class ChatbotEngineService implements OnDestroy {
     private filters: FiltersModule,
     private translation: TranslationService
   ) {
-    // console.log('🚀 ChatbotEngineService creado');
     this.setupStreamingCompletionListener();
     this.setupMessageMonitoring();
     this.setupHungStateDetection();
@@ -66,12 +65,6 @@ export class ChatbotEngineService implements OnDestroy {
     fromSidebar: boolean = false,
     questionType: 'user' | 'predefined' = 'user'
   ): Promise<boolean> {
-    // console.log('📤 ChatbotEngineService.sendUserMessage:', {
-    //   message: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
-    //   questionType,
-    //   fromSidebar
-    // });
-    
     if (!this.canSendMessage()) {
       console.warn('❌ No se puede enviar mensaje:', this.translation.instant('ERRORS.ENGINE_CANNOT_SEND_MESSAGE'));
       return false;
@@ -145,12 +138,6 @@ export class ChatbotEngineService implements OnDestroy {
     customFilters: any = null,
     questionType: 'user' | 'predefined' = 'user'
   ): Promise<boolean> {
-    // console.log('🔄 ChatbotEngineService.regenerateResponse:', {
-    //   message: message.substring(0, 50),
-    //   existingUserMessageId,
-    //   questionType
-    // });
-    
     if (!this.canSendMessage()) {
       console.warn('❌ No se puede enviar mensaje para regeneración');
       return false;
@@ -240,17 +227,15 @@ export class ChatbotEngineService implements OnDestroy {
     // Este servicio solo necesita responder a eventos de stop
   }
 
-  // ============ NUEVOS MÉTODOS PARA EL SISTEMA UNIFICADO DE STOP ============
+  // ============ SISTEMA UNIFICADO DE STOP ============
 
   /**
    * Método principal para detener procesos activos
    * Integrado con el sistema unificado del ChatbotService
    */
   stopCurrentRequest(): void {
-    // console.log('⏹️ ChatbotEngineService.stopCurrentRequest() llamado');
     
     if (this.isHandlingStop) {
-      // console.log('🔄 Ya se está manejando un stop');
       return;
     }
     
@@ -273,8 +258,6 @@ export class ChatbotEngineService implements OnDestroy {
     
     // 5. Resetear estado interno
     this.resetEngineStateAfterStop();
-    
-    // console.log('✅ ChatbotEngineService: Stop completado');
   }
 
   /**
@@ -317,8 +300,6 @@ export class ChatbotEngineService implements OnDestroy {
    * Integrado con ChatbotStateService
    */
   cleanupMessagesByQuestionType(questionType: 'user' | 'predefined' | null, questionId?: string): number {
-    // console.log('🧹 ChatbotEngineService.cleanupMessagesByQuestionType:', { questionType, questionId });
-    
     if (!questionType) {
       // Limpieza genérica: solo mensajes de streaming
       return this.state.cleanupActiveStreamingMessages();
@@ -351,7 +332,6 @@ export class ChatbotEngineService implements OnDestroy {
       }
     }
     
-    // console.log(`✅ ChatbotEngineService: Limpiados ${cleanupCount} mensajes`);
     return cleanupCount;
   }
 
@@ -391,13 +371,6 @@ export class ChatbotEngineService implements OnDestroy {
     
     this.streamingCompleteSubscription = this.streaming.onStreamComplete.subscribe({
       next: (result: StreamingCompleteResult) => {
-        // console.log('🎬 Streaming completado:', {
-        //   contentLength: result.content?.length,
-        //   sourcesCount: result.sources?.length,
-        //   wasCancelled: result.wasCancelled,
-        //   question: result.question?.substring(0, 50)
-        // });
-        
         if (result.wasCancelled) {
           if (this.isStreamingActive) {
             this.isStreamingActive = false;
@@ -407,7 +380,6 @@ export class ChatbotEngineService implements OnDestroy {
           // Solo marcar que no estamos procesando
           this.state.setProcessing(false);
           
-          // console.log('📡 Streaming cancelado - limpieza manejada por sistema unificado');
           return;
         }
         
@@ -497,8 +469,6 @@ export class ChatbotEngineService implements OnDestroy {
   }
 
   private resetEngineStateAfterStop(): void {
-    // console.log('🔄 ChatbotEngineService: Reseteando estado después de STOP');
-    
     this.currentBotMessageId = null;
     this.currentStreamingMessageId = null;
     this.currentQuestionType = null;
@@ -516,8 +486,6 @@ export class ChatbotEngineService implements OnDestroy {
     if (!hasActiveStreaming) {
       this.state.setProcessing(false);
     }
-    
-    // console.log('✅ Estado resetado después de STOP');
   }
 
   private resetEngineState(): void {
@@ -809,8 +777,6 @@ export class ChatbotEngineService implements OnDestroy {
   }
   
   forceReset(): void {
-    // console.log('🔄 Forzando reset del engine');
-    
     if (this.isStreamingActive) {
       this.isStreamingActive = false;
     }
@@ -939,8 +905,6 @@ export class ChatbotEngineService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // console.log('🧹 ChatbotEngineService ngOnDestroy');
-    
     if (this.isStreamingActive) {
       this.isStreamingActive = false;
     }

@@ -142,7 +142,6 @@ export class ChatbotMessagesComponent implements OnChanges, OnInit, OnDestroy {
   }
   
   // ============ SISTEMA UNIFICADO DE STOP MEJORADO ============
-   // ============ SISTEMA UNIFICADO DE STOP MEJORADO ============
   
 onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
   // Evitar múltiples STOPs simultáneos
@@ -200,7 +199,7 @@ onStopResponse(event?: {questionType?: 'user' | 'predefined'}): void {
   }
 }
 
-// ============ NUEVO MÉTODO: CREAR MENSAJE DE FALLBACK ============
+// ============ CREAR MENSAJE DE FALLBACK ============
 
 private createFallbackStopMessage(): ChatMessage {
   // Buscar cualquier mensaje de bot como fallback
@@ -224,7 +223,7 @@ private createFallbackStopMessage(): ChatMessage {
   };
 }
   
-  // ============ NUEVO MÉTODO PARA DETERMINAR TIPO DE STOP ============
+  // ============ MÉTODO PARA DETERMINAR TIPO DE STOP ============
   
   private determineStopQuestionType(
     streamingMessage: ChatMessage | null, 
@@ -860,22 +859,12 @@ private createFallbackStopMessage(): ChatMessage {
     
     // Considerar "reciente" si se actualizó en los últimos 15 segundos
     const isRecent = timeSinceUpdate < 15000;
-    
-    // console.log('⏰ Recent streaming check:', {
-    //   id: message.id?.substring(0, 20),
-    //   isStreaming: message.isStreaming,
-    //   lastUpdate,
-    //   timeSinceUpdate: Math.round(timeSinceUpdate / 1000) + 's',
-    //   isRecent
-    // });
-    
     return isRecent;
   }
   
   // ============ MÉTODOS DE EMERGENCIA ============
   
   emergencyStop(): void {
-    // console.log('🚨 EMERGENCY STOP desde ChatbotMessagesComponent');
     this.onStopResponse();
   }
   
@@ -889,8 +878,6 @@ private createFallbackStopMessage(): ChatMessage {
       shouldShowStopButtons: this.filteredMessages.filter(m => this.shouldShowStopButton(m)).length,
       canSendMessages: this.canSendMessages()
     };
-    
-    // console.log('🐛 DEBUG ChatbotMessagesComponent:', debugInfo);
   }
   
   // ============ CLEANUP ============

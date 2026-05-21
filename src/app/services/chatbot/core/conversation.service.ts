@@ -28,15 +28,14 @@ export class ConversationService {
     return this.activeConversation.value;
   }
 
-  createConversation(firstMessage?: string): Conversation {
-    // console.log('🆕 ConversationService: Creando nueva conversación');
+  createConversation(firstMessage?: string, filters?: any): Conversation {
     const previousActive = this.getActiveConversation();
     if (previousActive) {
       this.conversationBlurred.emit(previousActive);
     }
     
     // Crear nueva conversación
-    const conversation = this.buildConversation(firstMessage);
+    const conversation = this.buildConversation(firstMessage, filters);
     
     // Desactivar todas las conversaciones existentes
     this.deactivateAll();
@@ -52,7 +51,6 @@ export class ConversationService {
     // Guardar en storage
     this.saveToStorage();
     
-    // console.log('✅ Nueva conversación creada con ID:', conversation.id);
     return conversation;
   }
 
@@ -78,8 +76,6 @@ export class ConversationService {
     
     // Guardar cambios
     this.saveToStorage();
-    
-    // console.log('✅ Conversación seleccionada:', id);
     return true;
   }
 
@@ -87,7 +83,6 @@ export class ConversationService {
     const active = this.getActiveConversation();
     
     if (!active) {
-      // console.log('📝 No hay conversación activa, creando nueva...');
       this.createConversation(sender === 'user' ? content : undefined);
       
       if (sender === 'bot') {
@@ -168,7 +163,6 @@ export class ConversationService {
     this.conversations.next([]);
     this.activeConversation.next(null);
     localStorage.removeItem(this.STORAGE_KEY);
-    // console.log('🧹 Todas las conversaciones eliminadas');
   }
 
   getStats() {
@@ -186,13 +180,10 @@ export class ConversationService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (!stored) {
-        // console.log('📂 No hay conversaciones almacenadas');
         return;
       }
 
       const data: { conversations: StoredConversation[] } = JSON.parse(stored);
-      // console.log('📥 Cargando', data.conversations.length, 'conversaciones del storage');
-      
       const conversations = data.conversations.map(this.normalizeStoredConversation.bind(this));
       
       this.conversations.next(conversations);
@@ -223,7 +214,8 @@ export class ConversationService {
           createdAt: conv.createdAt.toISOString(),
           updatedAt: conv.updatedAt.toISOString(),
           preview: conv.preview || '',
-          messageCount: conv.messageCount || conv.messages.length
+          messageCount: conv.messageCount || conv.messages.length,
+          filters: conv.filters || []
         };
         
         return storedConv;
@@ -236,14 +228,13 @@ export class ConversationService {
       };
       
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(saveData));
-      // console.log('💾 Guardadas', storedConversations.length, 'conversaciones');
       
     } catch (error) {
       console.error('❌ Error saving conversations:', error);
     }
   }
 
-  private buildConversation(firstMessage?: string): Conversation {
+  private buildConversation(firstMessage?: string, filters?: any): Conversation {
     const now = new Date();
     const id = `conv-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     
@@ -257,6 +248,13 @@ export class ConversationService {
       isStreaming: false
     }] : [];
     
+    const hasFilterValues = filters && Object.values(filters).some(v => v);
+    const savedFilters = hasFilterValues ? [{
+      tumor_type: filters['tumor_type'] || undefined,
+      tumor_alteration: filters['tumor_alteration'] || undefined,
+      treatment: filters['treatment'] || undefined
+    }] : [];
+    
     return {
       id,
       title: firstMessage ? this.generateTitle(firstMessage) : 'New Chat',
@@ -265,7 +263,8 @@ export class ConversationService {
       updatedAt: now,
       preview: firstMessage ? this.truncateText(firstMessage, 100) : '',
       messageCount: messages.length,
-      isActive: true
+      isActive: true,
+      filters: savedFilters
     };
   }
 
@@ -343,6 +342,7 @@ export class ConversationService {
       updatedAt: new Date(stored.updatedAt),
       preview: stored.preview || '',
       messageCount: stored.messageCount || stored.messages.length,
+      filters: stored.filters || [],
       isActive: false
     };
   }
@@ -366,6 +366,15 @@ export class ConversationService {
   private getConversationPreview(messages: any[]): string {
     const lastMessage = messages[messages.length - 1];
     return lastMessage?.content ? this.truncateText(lastMessage.content, 100) : '';
+  }
+
+  formatMessagesForHistory(messages: ChatMessage[]): { role: string; content: string }[] {
+    return messages
+      .filter(m => m.content?.trim())
+      .map(m => ({
+        role: m.sender === 'bot' ? 'assistant' : m.sender,
+        content: m.content
+      }));
   }
 
   private generateTitle(firstMessage: string): string {

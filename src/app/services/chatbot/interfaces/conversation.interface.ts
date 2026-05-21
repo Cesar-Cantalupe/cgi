@@ -1,7 +1,6 @@
-// conversation.interface.ts (archivo unificado)
 import { ChatMessage } from './chat-message.interface';
 
-// Conversación principal (como en DeepSeek)
+// Conversación principal
 export interface Conversation {
   id: string;                      
   title: string;                   
@@ -11,10 +10,14 @@ export interface Conversation {
   preview?: string;                
   messageCount: number;            
   isActive?: boolean;              
-  // Campos adicionales para compatibilidad
-  date?: Date;                    // Para compatibilidad con ChatHistoryItem
-  tags?: string[];                // Para compatibilidad
-  metadata?: any;                 // Para compatibilidad
+  date?: Date;
+  tags?: string[];
+  metadata?: any;
+  filters?: Array<{
+    tumor_type?: string;
+    tumor_alteration?: string[];
+    treatment?: string[];
+  }>;
 }
 
 // Para almacenamiento en localStorage
@@ -35,8 +38,12 @@ export interface StoredConversation {
   updatedAt: string;               
   preview?: string;
   messageCount: number;
-  // Campos adicionales para almacenamiento
   date?: string;
   tags?: string[];
   metadata?: any;
+  filters?: Array<{
+    tumor_type?: string;
+    tumor_alteration?: string[];
+    treatment?: string[];
+  }>;
 }

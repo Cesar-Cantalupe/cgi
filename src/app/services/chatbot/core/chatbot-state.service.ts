@@ -144,13 +144,6 @@ export class ChatbotStateService {
 
   setMessages(messages: ChatMessage[]): void {
     const deduplicated = this.deduplicateMessages(messages);
-    const currentUserMsgs = this.messages.filter(m => m.sender === 'user' || m.isUser);
-    const newUserMsgs = deduplicated.filter(m => m.sender === 'user' || m.isUser);
-    if (currentUserMsgs.length > newUserMsgs.length) {
-      console.warn('🚨 DEBUG: setMessages reduce mensajes de usuario de', currentUserMsgs.length, 'a', newUserMsgs.length);
-      console.warn('  Perdidos:', currentUserMsgs.filter(cu => !newUserMsgs.find(nu => nu.id === cu.id)).map(m => ({id: m.id, content: m.content?.substring(0,40)})));
-      console.trace('🚨 Stack trace de setMessages');
-    }
     this.messagesSubject.next(deduplicated);
   }
   
@@ -160,7 +153,6 @@ export class ChatbotStateService {
 
   setProcessing(value: boolean): void {
     if (this.processingSubject.value !== value) {
-      // console.log('🔄 Estado procesamiento cambiado a:', value);
       this.processingSubject.next(value);
     }
   }
@@ -263,14 +255,12 @@ export class ChatbotStateService {
     this.setProcessing(false);
   }
 
-  // ============ NUEVOS MÉTODOS PARA LIMPIEZA CONTROLADA ============
+  // ============ LIMPIEZA DE MENSAJES ============
 
   /**
    * Método avanzado para limpiar mensajes con opciones específicas
    */
   cleanupMessages(options: MessageCleanupOptions): number {
-    // console.log('🧹 cleanupMessages con opciones:', options);
-    
     const messages = this.messages;
     let messagesToRemove: ChatMessage[] = [];
     
@@ -306,7 +296,6 @@ export class ChatbotStateService {
         this.removeMessage(m => m.id === msg.id);
       });
       
-      // console.log(`✅ Removidos ${messagesToRemove.length} mensajes`);
       return messagesToRemove.length;
     }
     
@@ -329,24 +318,17 @@ export class ChatbotStateService {
         
         if (hasContent) {
           // Mantener el mensaje pero cambiar isStreaming a false
-          // console.log(`💾 Manteniendo contenido de streaming:`, {
-          //   id: msg.id?.substring(0, 20),
-          //   contentLength: msg.content?.length
-          // });
-          
           // Actualizar el mensaje in-place
           msg.isStreaming = false;
           msg._isProcessingPlaceholder = false;
           preserved++;
         } else {
           // Eliminar solo si está vacío
-          // console.log(`🗑️ Eliminando mensaje de streaming vacío:`, msg.id?.substring(0, 20));
           this.removeMessage(m => m.id === msg.id);
           removed++;
         }
       });
       
-      // console.log(`🧹 Limpieza de streaming: ${preserved} preservados, ${removed} eliminados`);
       return removed;
     }
     
@@ -374,7 +356,6 @@ export class ChatbotStateService {
         this.removeMessage(m => m.id === msg.id);
       });
       
-      // console.log(`🤖 Limpiadas ${botResponses.length} respuestas de bot`);
       return botResponses.length;
     }
     
@@ -417,7 +398,6 @@ export class ChatbotStateService {
     // Remover la pregunta misma
     this.removeMessage(m => m.id === questionToRemove!.id);
     
-    // console.log(`🔖 Limpiada pregunta predefinida y ${removedCount - 1} respuestas`);
     return removedCount;
   }
 
@@ -434,7 +414,6 @@ export class ChatbotStateService {
         this.removeMessage(m => m.id === msg.id);
       });
       
-      // console.log(`🤖 Limpiadas ${botMessages.length} respuestas de bot (manteniendo preguntas)`);
       return botMessages.length;
     }
     
@@ -480,9 +459,9 @@ export class ChatbotStateService {
 
   // ============ MÉTODOS DE UTILIDAD ============
 
-  private deduplicateMessages(messages: ChatMessage[]): ChatMessage[] {
+  private deduplicateMessages(msgs: ChatMessage[]): ChatMessage[] {
     const seen = new Set<string>();
-    return messages.filter(msg => {
+    return msgs.filter(msg => {
       const key = msg.id || `${msg.sender}-${msg.content?.substring(0, 50)}-${msg.timestamp?.getTime()}`;
       if (seen.has(key)) return false;
       seen.add(key);

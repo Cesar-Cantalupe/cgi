@@ -45,6 +45,7 @@
     "TYPE_YOUR_QUESTION": "Γράψτε την ερώτησή σας εδώ...",
     "SEND_MESSAGE": "Αποστολή μηνύματος"
   },
+  "LOADING_TRANSLATIONS": "Φόρτωση μεταφράσεων...",
   "FOOTER": {
     "TERMS": "Όροι",
     "PRIVACY": "Απόρρητο",
@@ -94,6 +95,7 @@
     "CLEAR_HISTORY": "Εκκαθάριση ιστορικού",
     "HEALTH_PROFILE": "Το προφίλ υγείας μου",
     "HEALTH_PROFILE_TOOLTIP": "Δείτε το προφίλ υγείας σας",
+    "TOGGLE_SIDEBAR": "Εναλλαγή μενού",
     "KNOW_MORE": "Μάθετε περισσότερα",
     "ABOUT_US": "Σχετικά με εμάς",
     "FAQS": "Συχνές ερωτήσεις",
@@ -107,7 +109,8 @@
     "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Εναλλαγή εισαγωγής του προφίλ υγείας στο chat",
     "HEALTH_PARAM_TUMOR_TYPE": "Τύπος όγκου",
     "HEALTH_PARAM_TUMOR_ALTERATION": "Μεταβολή όγκου",
-    "HEALTH_PARAM_TREATMENT": "Θεραπεία"
+    "HEALTH_PARAM_TREATMENT": "Θεραπεία",
+    "NO_HEALTH_PARAMS": "Δεν υπάρχουν πληροφορίες για το προφίλ υγείας σας"
   },
   "WELCOME": {
     "HELLO": "Γεια σας",
@@ -243,6 +246,14 @@
     "STOP_TOOLTIP": "Διακοπή τρέχουσας δημιουργίας απάντησης",
     "REGENERATING": "Αναπαραγωγή...",
     "STOPPING": "Διακοπή..."
+  },
+  "TIME": {
+    "JUST_NOW": "Μόλις τώρα",
+    "MIN_AGO": "Πριν {n} λεπτά",
+    "HOUR_AGO": "Πριν {n} ώρα",
+    "HOURS_AGO": "Πριν {n} ώρες",
+    "DAY_AGO": "Πριν {n} μέρα",
+    "DAYS_AGO": "Πριν {n} μέρες"
   },
   "LEGAL": {
     "TERMS_TITLE": "Όροι και Προϋποθέσεις",

@@ -52,8 +52,8 @@ export class ChatbotService implements OnDestroy {
   
   private destroy$ = new Subject<void>();
   private initializationComplete = false;
+  private initialResetSent = false;
   private processingMessageId: string | null = null;
-  private debugMode = false;
   private lastCanSendCheck = 0;
   private readonly CAN_SEND_CHECK_INTERVAL = 500;
   private lastProcessingStartTime: number = 0;
@@ -118,14 +118,12 @@ export class ChatbotService implements OnDestroy {
     this.setupConversationChangeStopper();
   }
 
-  // ============ NUEVO: SISTEMA UNIFICADO DE STOP ============
+  // ============ SISTEMA UNIFICADO DE STOP ============
 
   /**
    * MÉTODO PRINCIPAL DE STOP - COORDINA TODO EL SISTEMA
    */
   async emergencyStop(options?: StopRequestData): Promise<StopRequestData> {
-    console.log('🚨 EMERGENCY STOP llamado', options);
-
     this.state.setStopping(true);
     
     // 1. Obtener información actual
@@ -155,13 +153,6 @@ export class ChatbotService implements OnDestroy {
     // 8. Resetear estado de stopping
     this.state.setStopping(false);
     
-    console.log('✅ EMERGENCY STOP completado:', {
-      tipo: currentData.questionType,
-      limpiarMensajes: currentData.shouldCleanMessages,
-      restaurarInput: currentData.shouldRestoreToInput,
-      contenidoPregunta: currentData.questionContent?.substring(0, 50)
-    });
-    
     return currentData;
   }
 
@@ -176,7 +167,6 @@ export class ChatbotService implements OnDestroy {
    * Versión para regeneración
    */
   async stopAndPrepareForRegeneration(message: ChatMessage): Promise<StopRequestData> {
-    // console.log('🔄 STOP para regeneración:', message.id);
     
     const stopData = await this.emergencyStop({
       messageId: message.id,
@@ -240,8 +230,6 @@ export class ChatbotService implements OnDestroy {
   }
 
   private stopAllActiveProcesses(): void {
-    // console.log('⏹️ Deteniendo todos los procesos activos...');
-    
     // 1. Detener streaming
     this.streamingModule.cancelStream(); //Saca el PROCESANDO...
     
@@ -289,8 +277,6 @@ export class ChatbotService implements OnDestroy {
     if (!data.shouldCleanMessages) return;
     
     const messages = this.state.messages;
-    // console.log('🧹 Limpiando mensajes. Tipo:', data.questionType);
-    
     if (data.questionType === 'user' && data.questionContent) {
       // CASO 1: Pregunta de usuario - mantener pregunta, limpiar respuesta
       await this.cleanupForUserQuestion(data, messages);
@@ -304,8 +290,6 @@ export class ChatbotService implements OnDestroy {
   }
 
   private async cleanupForUserQuestion(data: StopRequestData, messages: ChatMessage[]): Promise<void> {
-    // console.log('👤 Limpieza para pregunta de usuario');
-    
     // Encontrar la pregunta del usuario
     const userMessage = messages.find(m => 
       (m.sender === 'user' || m.isUser) && 
@@ -326,14 +310,10 @@ export class ChatbotService implements OnDestroy {
           this.state.removeMessage(m => m.id === msg.id);
         }
       });
-      
-      // console.log(`🗑️ Eliminadas ${botResponses.length} respuestas de bot`);
     }
   }
 
   private async cleanupForPredefinedQuestion(data: StopRequestData, messages: ChatMessage[]): Promise<void> {
-    // console.log('🔖 Limpieza para pregunta predefinida');
-    
     // Para preguntas predefinidas, limpiar pregunta y respuesta
     const predefinedQuestions = messages.filter(m => 
       (m.sender === 'user' || m.isUser) && 
@@ -358,22 +338,16 @@ export class ChatbotService implements OnDestroy {
           this.state.removeMessage(m => m.id === msg.id);
         }
       });
-      
-      // console.log(`🗑️ Eliminada pregunta predefinida y ${botResponses.length} respuestas`);
     }
   }
 
   private cleanupStreamingMessagesOnly(messages: ChatMessage[]): void {
-    // console.log('🌀 Limpieza genérica de mensajes streaming');
-    
     const streamingMessages = messages.filter(m => m.isStreaming);
     streamingMessages.forEach(msg => {
       if (msg.id) {
         this.state.removeMessage(m => m.id === msg.id);
       }
     });
-    
-    // console.log(`🗑️ Eliminados ${streamingMessages.length} mensajes de streaming`);
   }
 
   private updateConversationAfterStop(data: StopRequestData): void {
@@ -415,7 +389,6 @@ export class ChatbotService implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result.wasCancelled) {
-          // console.log('📡 Streaming cancelado, ejecutando limpieza automática');
           // Si fue cancelado, hacer limpieza automática
           setTimeout(() => {
             this.cleanupAfterStreamingCancellation();
@@ -511,6 +484,13 @@ export class ChatbotService implements OnDestroy {
     this.connectionStatus$
       .pipe(takeUntil(this.destroy$))
       .subscribe(status => {
+        if (status === 'connected' && !this.initialResetSent) {
+          this.initialResetSent = true;
+          setTimeout(() => {
+            this.sendResetForActiveConversation();
+          }, 500);
+        }
+
         if ((status === 'disconnected' || status === 'error') && this.initializationComplete) {
           setTimeout(() => {
             if (!this.isConnected()) {
@@ -519,6 +499,18 @@ export class ChatbotService implements OnDestroy {
           }, 3000);
         }
       });
+  }
+
+  private sendResetForActiveConversation(): void {
+    const activeConv = this.conversationService.getActiveConversation();
+    if (!activeConv) return;
+
+    const savedFilters = activeConv.filters && activeConv.filters.length > 0
+      ? activeConv.filters[0]
+      : {};
+
+    const history = this.conversationService.formatMessagesForHistory(activeConv.messages);
+    this.sendResetWithFilters(savedFilters, history);
   }
 
   private setupHungStateDetection(): void {
@@ -541,7 +533,7 @@ export class ChatbotService implements OnDestroy {
     return this.conversationService.getActiveConversation();
   }
 
-  createNewConversation(firstMessage?: string): Conversation {
+  createNewConversation(firstMessage?: string, filters?: any): Conversation {
     // 1. Limpiar estado actual ANTES de crear nueva conversación
     this.engine.clearChat();
     this.state.clearMessages();
@@ -555,7 +547,7 @@ export class ChatbotService implements OnDestroy {
     this.websocket.cancelCurrentQuery();
     
     // 3. Crear nueva conversación
-    const newConversation = this.conversationService.createConversation(firstMessage);
+    const newConversation = this.conversationService.createConversation(firstMessage, filters);
     
     return newConversation;
   }
@@ -615,9 +607,20 @@ export class ChatbotService implements OnDestroy {
     
     // Agregar mensaje a conversación activa
     const currentConversation = this.getCurrentConversation();
+    const healthProfileEnabled = this.websocketModule.getHealthProfileEnabled();
+    const urlFilters = this.getCurrentUrlFilters();
+    const hasUrlParams = Object.keys(urlFilters).length > 0;
+
     if (!currentConversation) {
-      this.conversationService.createConversation(message);
+      this.conversationService.createConversation(message, healthProfileEnabled && hasUrlParams ? urlFilters : undefined);
+
+      // Reset antes del primer mensaje (solo con filtros si toggle está ON)
+      this.sendResetWithFilters(healthProfileEnabled && hasUrlParams ? urlFilters : {}, []);
     } else {
+      // Si es el primer mensaje de una conversación creada con newChat()
+      if (currentConversation.messages.length === 0) {
+        this.sendResetWithFilters(healthProfileEnabled && hasUrlParams ? urlFilters : {}, []);
+      }
       this.conversationService.addMessage(message, 'user');
     }
     
@@ -739,6 +742,29 @@ export class ChatbotService implements OnDestroy {
     this.websocketModule.setHealthProfileEnabled(enabled);
   }
 
+  getCurrentUrlFilters(): any {
+    return this.filtersModule.getUrlFilters();
+  }
+
+  sendResetWithFilters(filters: any, history: { role: string; content: string }[] = []): void {
+    this.websocketModule.sendReset(filters, history);
+  }
+
+  selectConversationWithReset(id: string): void {
+    const conversation = this.conversationService.getConversations().find(c => c.id === id);
+    if (!conversation) return;
+
+    this.conversationService.selectConversation(id);
+
+    const savedFilters = conversation.filters && conversation.filters.length > 0
+      ? conversation.filters[0]
+      : {};
+
+    const history = this.conversationService.formatMessagesForHistory(conversation.messages);
+
+    this.sendResetWithFilters(savedFilters, history);
+  }
+
   clearHistory(): void {
     this.state.clearMessages();
     this.conversationService.clearAll();
@@ -804,10 +830,14 @@ export class ChatbotService implements OnDestroy {
   }
   
   newChat(): void {
-    // 1. Crear nueva conversación
-    const newConversation = this.createNewConversation();
-    
-    // 2. Forzar sincronización del estado
+    const urlFilters = this.getCurrentUrlFilters();
+    const hasUrlParams = Object.keys(urlFilters).length > 0;
+    const healthProfileEnabled = this.websocketModule.getHealthProfileEnabled();
+
+    // Crea una nueva conversación (solo guarda filtros si el toggle de MHP está ON)
+    this.createNewConversation(undefined, healthProfileEnabled && hasUrlParams ? urlFilters : undefined);
+
+    // Fuerza la sincronización del estado (el reset se enviará con el primer mensaje)
     setTimeout(() => {
       this.state.clearMessages();
       this.state.setProcessing(false);
@@ -948,7 +978,6 @@ export class ChatbotService implements OnDestroy {
       shouldCleanMessages: true
     };
     
-    // console.log('🧪 Simulando escenario STOP:', testData);
     this.stopRequested$.next(testData);
   }
   

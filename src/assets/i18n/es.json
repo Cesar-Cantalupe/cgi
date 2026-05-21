@@ -45,6 +45,7 @@
     "TYPE_YOUR_QUESTION": "Escribe tu pregunta aquí...",
     "SEND_MESSAGE": "Enviar mensaje"
   },
+  "LOADING_TRANSLATIONS": "Cargando traducciones...",
   "FOOTER": {
     "TERMS": "Términos",
     "PRIVACY": "Privacidad",
@@ -94,6 +95,7 @@
     "CLEAR_HISTORY": "Limpiar historial",
     "HEALTH_PROFILE": "Mi perfil de salud",
     "HEALTH_PROFILE_TOOLTIP": "Ver tu perfil de salud",
+    "TOGGLE_SIDEBAR": "Alternar menú",
     "KNOW_MORE": "Saber más",
     "ABOUT_US": "Sobre nosotros",
     "FAQS": "Preguntas frecuentes",
@@ -107,7 +109,8 @@
     "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Incluir o excluir el perfil de salud en el chat",
     "HEALTH_PARAM_TUMOR_TYPE": "Tipo de tumor",
     "HEALTH_PARAM_TUMOR_ALTERATION": "Alteración del tumor",
-    "HEALTH_PARAM_TREATMENT": "Tratamiento"
+    "HEALTH_PARAM_TREATMENT": "Tratamiento",
+    "NO_HEALTH_PARAMS": "No hay información sobre su perfil de salud"
   },
   "WELCOME": {
     "HELLO": "Hola",
@@ -243,6 +246,14 @@
     "STOP_TOOLTIP": "Detener la generación de respuesta actual",
     "REGENERATING": "Regenerando...",
     "STOPPING": "Deteniendo..."
+  },
+  "TIME": {
+    "JUST_NOW": "Ahora mismo",
+    "MIN_AGO": "Hace {n} min",
+    "HOUR_AGO": "Hace {n} hora",
+    "HOURS_AGO": "Hace {n} horas",
+    "DAY_AGO": "Hace {n} día",
+    "DAYS_AGO": "Hace {n} días"
   },
   "LEGAL": {
     "TERMS_TITLE": "Términos y Condiciones",

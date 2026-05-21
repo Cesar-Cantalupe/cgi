@@ -2,6 +2,7 @@
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
 import * as ngCore from '@angular/core';
+import { environment } from './environments/environment.prod';
 
 // Opcional: modo producción si no estás depurando
 // import { enableProdMode } from '@angular/core';
@@ -19,6 +20,6 @@ ng?: typeof ngCore;
 }
 }
 
-if (!window.ng) {
+if (!window.ng && !environment.production) {
 window.ng = ngCore;
 }

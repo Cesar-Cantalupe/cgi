@@ -45,6 +45,7 @@
     "TYPE_YOUR_QUESTION": "Schreiben Sie Ihre Frage hier...",
     "SEND_MESSAGE": "Nachricht senden"
   },
+  "LOADING_TRANSLATIONS": "Übersetzungen werden geladen...",
   "FOOTER": {
     "TERMS": "Nutzungsbedingungen",
     "PRIVACY": "Datenschutz",
@@ -94,6 +95,7 @@
     "CLEAR_HISTORY": "Verlauf löschen",
     "HEALTH_PROFILE": "Mein Gesundheitsprofil",
     "HEALTH_PROFILE_TOOLTIP": "Gesundheitsprofil anzeigen",
+    "TOGGLE_SIDEBAR": "Menü umschalten",
     "KNOW_MORE": "Mehr erfahren",
     "ABOUT_US": "Über uns",
     "FAQS": "FAQs",
@@ -107,7 +109,8 @@
     "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Einschluss des Gesundheitsprofils im Chat umschalten",
     "HEALTH_PARAM_TUMOR_TYPE": "Tumortyp",
     "HEALTH_PARAM_TUMOR_ALTERATION": "Tumorveränderung",
-    "HEALTH_PARAM_TREATMENT": "Behandlung"
+    "HEALTH_PARAM_TREATMENT": "Behandlung",
+    "NO_HEALTH_PARAMS": "Keine Informationen zu Ihrem Gesundheitsprofil verfügbar"
   },
   "WELCOME": {
     "HELLO": "Hallo",
@@ -243,6 +246,14 @@
     "STOP_TOOLTIP": "Aktuelle Antwortgenerierung stoppen",
     "REGENERATING": "Regeneriere...",
     "STOPPING": "Stoppe..."
+  },
+  "TIME": {
+    "JUST_NOW": "Gerade eben",
+    "MIN_AGO": "Vor {n} Min",
+    "HOUR_AGO": "Vor {n} Stunde",
+    "HOURS_AGO": "Vor {n} Stunden",
+    "DAY_AGO": "Vor {n} Tag",
+    "DAYS_AGO": "Vor {n} Tagen"
   },
   "LEGAL": {
     "TERMS_TITLE": "Allgemeine Geschäftsbedingungen",

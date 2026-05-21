@@ -23,7 +23,7 @@
     <div class="p-4">
       <button (click)="toggleSidebar.emit()"
               class="hidden md:flex w-7 h-7 items-center justify-center cursor-pointer transition-all duration-300 top-4 right-4 z-10 float-right"
-              title="Alternar menú">
+              title="{{ 'SIDEBAR.TOGGLE_SIDEBAR' | translate }}">
         <svg class="w-4 h-4 text-[#37AAC4]" [class.-scale-x-100]="!sidebarExpanded" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
           <rect x="3" y="5" width="18" height="14" rx="3"></rect>
           <line x1="9" y1="5" x2="9" y2="19"></line>
@@ -32,7 +32,8 @@
       <button (click)="onNewChat()" 
               class="w-full border-2 border-[#37AAC4] rounded-lg px-4 py-3 flex items-center justify-center hover:border-[#CE3262] transition-colors group"
               [class.justify-center]="!sidebarExpanded"
-              [class.p-2]="!sidebarExpanded">
+              [class.p-2]="!sidebarExpanded"
+              title="{{ 'SIDEBAR.NEW_CHAT' | translate }}">
         
         <svg class="w-5 h-5 text-[#37AAC4] group-hover:text-[#CE3262] transition-colors" 
              [class.mr-2]="sidebarExpanded" 
@@ -44,6 +45,62 @@
           {{ 'SIDEBAR.NEW_CHAT' | translate }}
         </span>
       </button>
+
+      <!-- Health Profile inline next to new chat -->
+      <div *ngIf="sidebarExpanded" class="mt-3 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="relative inline-block w-10 mr-1">
+            <input type="checkbox" [(ngModel)]="healthProfileEnabled" 
+                   (ngModelChange)="onHealthProfileToggle($event)"
+                   [disabled]="!hasUrlParams"
+                   class="sr-only peer" id="health-toggle">
+            <label for="health-toggle" 
+                   class="block h-5 w-10 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out"
+                   [class.bg-gray-300]="!healthProfileEnabled"
+                   [class.bg-[#CE3262]]="healthProfileEnabled"
+                   [class.opacity-50]="!hasUrlParams"
+                   [class.cursor-not-allowed]="!hasUrlParams"
+                   [attr.title]="'SIDEBAR.HEALTH_PROFILE_TOGGLE_TOOLTIP' | translate">
+              <span class="block h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out"
+                    [class.translate-x-0]="!healthProfileEnabled"
+                    [class.translate-x-5]="healthProfileEnabled"></span>
+            </label>
+          </div>
+          <span class="text-xs font-medium text-gray-700">{{ 'SIDEBAR.HEALTH_PROFILE' | translate }}</span>
+          <div class="relative">
+            <button (click)="onHealthInfoBtnClick($event)"
+                    class="text-[#CE3262] hover:text-[#37AAC4] transition-colors" id="health-info-btn"
+                    [attr.title]="'SIDEBAR.HEALTH_PROFILE_TOOLTIP' | translate">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+              </svg>
+            </button>
+            <!-- Health Profile Popup -->
+            <div *ngIf="showHealthProfilePopup"
+                 [style.top.px]="popupPosition.top"
+                 [style.left.px]="popupPosition.left"
+                 class="fixed z-[9999] w-64 bg-white border border-[#CE3262] rounded-xl shadow-lg p-3">
+              <div class="absolute -left-2 top-3 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-[#CE3262]"></div>
+              <div class="absolute -left-[6px] top-[14px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[7px] border-r-white"></div>
+              <p class="text-[12px] text-gray-600 mb-3 leading-tight">{{ 'SIDEBAR.HEALTH_PROFILE_INFO' | translate }}</p>
+              <ng-container *ngIf="getHealthParamGroups().length > 0; else noParams">
+                <div *ngFor="let group of getHealthParamGroups()" class="mb-2">
+                  <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">{{ group.label }}</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span *ngFor="let entry of group.entries"
+                          class="px-2 py-0.5 rounded-full bg-[#CE3262]/10 text-[#CE3262] text-[11px] font-medium">
+                      {{ entry.value }}
+                    </span>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-template #noParams>
+                <span class="text-xs text-gray-400">{{ 'SIDEBAR.NO_HEALTH_PARAMS' | translate }}</span>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Historial de Chat y Búsqueda -->
@@ -173,72 +230,14 @@
       </button>
     </div>
 
-    <!-- Perfil de Salud -->
-    <div class="p-6 border-b border-[#37AAC4] relative">
-      
-      <div *ngIf="sidebarExpanded" class="flex items-center justify-between">
-        <h3 class="text-sm font-medium text-gray-700">{{ 'SIDEBAR.HEALTH_PROFILE' | translate }}</h3>
-        <div class="flex items-center space-x-2">
-          
-          <div class="relative inline-block w-10 mr-2">
-            <input type="checkbox" [(ngModel)]="healthProfileEnabled" 
-                   (ngModelChange)="onHealthProfileToggle($event)"
-                   class="sr-only peer" id="health-toggle">
-            <label for="health-toggle" 
-                   class="block h-5 w-10 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out"
-                   [class.bg-gray-300]="!healthProfileEnabled"
-                   [class.bg-[#CE3262]]="healthProfileEnabled"
-                   [attr.title]="'SIDEBAR.HEALTH_PROFILE_TOGGLE_TOOLTIP' | translate">
-              <span class="block h-4 w-4 rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out"
-                    [class.translate-x-0]="!healthProfileEnabled"
-                    [class.translate-x-5]="healthProfileEnabled"></span>
-            </label>
-          </div>
-          
-          <div class="relative">
-            <button (click)="onHealthInfoBtnClick($event)"
-                    class="text-[#CE3262] hover:text-[#37AAC4] transition-colors" id="health-info-btn"
-                    [attr.title]="'SIDEBAR.HEALTH_PROFILE_TOOLTIP' | translate">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-              </svg>
-            </button>
-
-            <!-- Health Profile Popup (fixed, escapes overflow-hidden) -->
-            <div *ngIf="showHealthProfilePopup"
-                 [style.top.px]="popupPosition.top"
-                 [style.left.px]="popupPosition.left"
-                 class="fixed z-[9999] w-64 bg-white border border-[#CE3262] rounded-xl shadow-lg p-3">
-              <!-- Arrow pointing left toward the button -->
-              <div class="absolute -left-2 top-3 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-[#CE3262]"></div>
-              <div class="absolute -left-[6px] top-[14px] w-0 h-0 border-y-[7px] border-y-transparent border-r-[7px] border-r-white"></div>
-              <!-- Title -->
-              <p class="text-[12px] text-gray-600 mb-3 leading-tight">{{ 'SIDEBAR.HEALTH_PROFILE_INFO' | translate }}</p>
-              <!-- Groups -->
-              <ng-container *ngIf="getHealthParamGroups().length > 0; else noParams">
-                <div *ngFor="let group of getHealthParamGroups()" class="mb-2">
-                  <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-1">{{ group.label }}</p>
-                  <div class="flex flex-wrap gap-1">
-                    <span *ngFor="let entry of group.entries"
-                          class="px-2 py-0.5 rounded-full bg-[#CE3262]/10 text-[#CE3262] text-[11px] font-medium">
-                      {{ entry.value }}
-                    </span>
-                  </div>
-                </div>
-              </ng-container>
-              <ng-template #noParams>
-                <span class="text-xs text-gray-400">No parameters available</span>
-              </ng-template>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Versión colapsada -->
-      <div *ngIf="!sidebarExpanded" class="flex justify-center">
+    <!-- Versión colapsada del Health Profile -->
+    <div *ngIf="!sidebarExpanded" class="p-4 border-b border-[#37AAC4]">
+      <div class="flex justify-center">
         <button (click)="onHealthProfileIconClick()"
                 class="w-8 h-8 border-2 border-[#37AAC4] rounded-lg flex items-center justify-center hover:bg-[#CE3262] hover:border-[#CE3262] transition-colors group" 
-                [class.bg-[#CE3262]]="healthProfileEnabled" 
+                [class.bg-[#CE3262]]="healthProfileEnabled"
+                [class.opacity-50]="!hasUrlParams"
+                [class.cursor-not-allowed]="!hasUrlParams"
                 [attr.title]="'SIDEBAR.HEALTH_PROFILE' | translate">
           
           <svg class="w-4 h-4 text-[#37AAC4] group-hover:text-white transition-colors flex-shrink-0" 

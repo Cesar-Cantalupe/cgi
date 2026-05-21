@@ -45,6 +45,7 @@
     "TYPE_YOUR_QUESTION": "Type your question here...",
     "SEND_MESSAGE": "Send message"
   },
+  "LOADING_TRANSLATIONS": "Loading translations...",
   "FOOTER": {
     "TERMS": "Terms",
     "PRIVACY": "Privacy",
@@ -94,6 +95,7 @@
     "CLEAR_HISTORY": "Clear history",
     "HEALTH_PROFILE": "My health profile",
     "HEALTH_PROFILE_TOOLTIP": "View your health profile",
+    "TOGGLE_SIDEBAR": "Toggle menu",
     "KNOW_MORE": "Know more",
     "ABOUT_US": "About us",
     "FAQS": "FAQs",
@@ -107,7 +109,8 @@
     "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Toggle inclusion of health profile in chat",
     "HEALTH_PARAM_TUMOR_TYPE": "Tumor type",
     "HEALTH_PARAM_TUMOR_ALTERATION": "Tumor alteration",
-    "HEALTH_PARAM_TREATMENT": "Treatment"
+    "HEALTH_PARAM_TREATMENT": "Treatment",
+    "NO_HEALTH_PARAMS": "No information available about your health profile"
   },
   "WELCOME": {
     "HELLO": "Hello",
@@ -243,6 +246,14 @@
     "STOP_TOOLTIP": "Stop the current response generation",
     "REGENERATING": "Regenerating...",
     "STOPPING": "Stopping..."
+  },
+  "TIME": {
+    "JUST_NOW": "Just now",
+    "MIN_AGO": "{n} min ago",
+    "HOUR_AGO": "{n} hour ago",
+    "HOURS_AGO": "{n} hours ago",
+    "DAY_AGO": "{n} day ago",
+    "DAYS_AGO": "{n} days ago"
   },
   "LEGAL": {
     "TERMS_TITLE": "Terms and Conditions",

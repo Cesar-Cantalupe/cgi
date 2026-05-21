@@ -54,7 +54,6 @@ export class StreamingModule implements OnDestroy {
     private ngZone: NgZone,
     private messageParser: MessageParserService
   ) {
-    // console.log('🎬 StreamingModule creado');
   }
 
   // ============ API PÚBLICA SIMPLIFICADA ============
@@ -63,11 +62,6 @@ export class StreamingModule implements OnDestroy {
    * Inicia un nuevo stream
    */
   startStream(question?: string, questionType?: 'user' | 'predefined', ignorePlaceholder: boolean = false): ChatMessage {
-    // console.log('🚀 STREAMING: startStream() - pregunta:', {
-    //   content: question?.substring(0, 50),
-    //   type: questionType
-    // });
-    
     this.cleanupCurrentStream();
     
     this.streamStartTime = Date.now();
@@ -102,8 +96,6 @@ export class StreamingModule implements OnDestroy {
       _originalQuestionType: questionType,
       showFeedbackBox: false
     };
-    
-    // console.log('📝 STREAMING: Creando mensaje con ID:', messageId, 'Tipo pregunta:', questionType);
     
     // Agregar al estado
     this.state.addMessage(message);
@@ -203,10 +195,7 @@ export class StreamingModule implements OnDestroy {
    * Cancela el stream actual
    */
   cancelStream(reason: 'user_request' | 'timeout' | 'error' | 'system' = 'user_request'): void {
-    // console.log('⏹️ STREAMING: cancelStream() llamado - Razón:', reason);
-    
     if (this.wasCancelled) {
-      // console.log('ℹ️ Stream ya cancelado previamente');
       return;
     }
     
@@ -228,7 +217,6 @@ export class StreamingModule implements OnDestroy {
     const isAnimating = this.typewriter.isAnimating(this.currentStreamId || '');
     
     if (isAnimating) {
-      // console.log('⏳ Hay animación activa, esperando para limpiar...');
       setTimeout(() => {
         this.completeCancellation();
       }, 300);
@@ -264,7 +252,7 @@ export class StreamingModule implements OnDestroy {
     };
   }
 
-  // ============ NUEVOS MÉTODOS PARA SISTEMA UNIFICADO DE STOP ============
+  // ============ SISTEMA UNIFICADO DE STOP ============
 
   /**
    * Obtiene información completa de la cancelación actual
@@ -301,7 +289,6 @@ export class StreamingModule implements OnDestroy {
    * Para uso del sistema unificado de STOP
    */
   silentCleanup(): void {
-    // console.log('🔇 STREAMING: silentCleanup() - Limpieza silenciosa');
     this.cleanupCurrentStream();
   }
 
@@ -318,21 +305,12 @@ export class StreamingModule implements OnDestroy {
       streamDuration: streamDuration
     };
     
-    // console.log('📤 STREAMING: Emitiendo evento de cancelación:', {
-    //   reason: cancellationData.reason,
-    //   questionType: cancellationData.questionType,
-    //   textLength: cancellationData.accumulatedText.length,
-    //   duration: cancellationData.streamDuration
-    // });
-    
     this.ngZone.run(() => {
       this.onStreamCancelled.next(cancellationData);
     });
   }
 
   private completeCancellation(): void {
-    // console.log('✅ STREAMING: Completando cancelación');
-    
     const streamDuration = this.streamStartTime ? Date.now() - this.streamStartTime : 0;
     
     // Emitir evento de cancelación completa
@@ -350,13 +328,7 @@ export class StreamingModule implements OnDestroy {
     this.ngZone.run(() => {
       this.onStreamComplete.next(completionData);
     });
-    
-    // console.log('📤 STREAMING: Evento onStreamComplete emitido (cancelado):', {
-    //   wasCancelled: true,
-    //   reason: this.cancellationReason,
-    //   questionType: this.lastQuestionType
-    // });
-    
+
     // Limpiar TODO
     this.cleanupCurrentStream();
   }
@@ -498,8 +470,6 @@ export class StreamingModule implements OnDestroy {
   }
 
   private cleanupCurrentStream(): void {
-    // console.log('🧹 STREAMING: Limpiando stream actual');
-    
     // Limpiar timeout de cancelación automática
     this.clearAutoCancellation();
     
@@ -554,7 +524,6 @@ export class StreamingModule implements OnDestroy {
     // Configurar nuevo timeout
     this.cancellationTimeout = setTimeout(() => {
       if (this.currentStreamId && !this.wasCancelled) {
-        // console.log('⏰ STREAMING: Timeout automático alcanzado, cancelando stream');
         this.cancelStream('timeout');
       }
     }, this.STREAM_TIMEOUT);
@@ -582,7 +551,6 @@ export class StreamingModule implements OnDestroy {
 
   setQuestionType(questionType: 'user' | 'predefined'): void {
     this.lastQuestionType = questionType;
-    // console.log('🏷️ STREAMING: Tipo de pregunta establecido:', questionType);
   }
 
   getIsAnimating(): boolean {
@@ -635,7 +603,6 @@ export class StreamingModule implements OnDestroy {
 
   
   ngOnDestroy(): void {
-    // console.log('🧹 STREAMING: ngOnDestroy() llamado');
     this.cancelStream('system');
     this.onStreamComplete.complete();
     this.onStreamCancelled.complete();

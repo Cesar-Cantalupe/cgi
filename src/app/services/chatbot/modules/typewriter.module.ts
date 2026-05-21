@@ -30,8 +30,6 @@ export class TypewriterModule implements OnDestroy {
     initialDelay: number = this.DEFAULT_INITIAL_DELAY
   ): BehaviorSubject<string> {
     
-    // console.log('🎬 TYPEWRITER: startAnimation - ID:', messageId, 'texto:', fullText?.length, 'caracteres');
-    
     this.stopAnimation(messageId);
     
     const subject = new BehaviorSubject<string>('');
@@ -94,8 +92,6 @@ export class TypewriterModule implements OnDestroy {
   }
 
   accelerateAnimation(messageId: string, immediate: boolean = false): void {
-    // console.log('⚡ TYPEWRITER: accelerateAnimation - ID:', messageId, 'immediate:', immediate);
-    
     const animation = this.animations.get(messageId);
     
     if (!animation || animation.isComplete) {

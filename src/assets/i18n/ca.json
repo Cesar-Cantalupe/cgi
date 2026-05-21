@@ -45,6 +45,7 @@
     "TYPE_YOUR_QUESTION": "Escriu la teva pregunta aquí...",
     "SEND_MESSAGE": "Envia missatge"
   },
+  "LOADING_TRANSLATIONS": "Carregant traduccions...",
   "FOOTER": {
     "TERMS": "Termes",
     "PRIVACY": "Privadesa",
@@ -94,6 +95,7 @@
     "CLEAR_HISTORY": "Esborrar historial",
     "HEALTH_PROFILE": "El meu perfil de salut",
     "HEALTH_PROFILE_TOOLTIP": "Veure el teu perfil de salut",
+    "TOGGLE_SIDEBAR": "Alternar menú",
     "KNOW_MORE": "Saber més",
     "ABOUT_US": "Sobre nosaltres",
     "FAQS": "PMF",
@@ -107,7 +109,8 @@
     "HEALTH_PROFILE_TOGGLE_TOOLTIP": "Incloure o excloure el perfil de salut al xat",
     "HEALTH_PARAM_TUMOR_TYPE": "Tipus de tumor",
     "HEALTH_PARAM_TUMOR_ALTERATION": "Alteració del tumor",
-    "HEALTH_PARAM_TREATMENT": "Tractament"
+    "HEALTH_PARAM_TREATMENT": "Tractament",
+    "NO_HEALTH_PARAMS": "No hi ha informació sobre el teu perfil de salut"
   },
   "WELCOME": {
     "HELLO": "Hola",
@@ -243,6 +246,14 @@
     "STOP_TOOLTIP": "Aturar la generació de resposta actual",
     "REGENERATING": "Regenerant...",
     "STOPPING": "Aturant..."
+  },
+  "TIME": {
+    "JUST_NOW": "Ara mateix",
+    "MIN_AGO": "Fa {n} min",
+    "HOUR_AGO": "Fa {n} hora",
+    "HOURS_AGO": "Fa {n} hores",
+    "DAY_AGO": "Fa {n} dia",
+    "DAYS_AGO": "Fa {n} dies"
   },
   "LEGAL": {
     "TERMS_TITLE": "Termes i Condicions",
