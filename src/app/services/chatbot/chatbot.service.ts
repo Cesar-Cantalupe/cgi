@@ -503,13 +503,24 @@ export class ChatbotService implements OnDestroy {
 
   private sendResetForActiveConversation(): void {
     const activeConv = this.conversationService.getActiveConversation();
-    if (!activeConv) return;
 
-    const savedFilters = activeConv.filters && activeConv.filters.length > 0
-      ? activeConv.filters[0]
-      : {};
+    let savedFilters: any = {};
+    if (activeConv?.filters && activeConv.filters.length > 0) {
+      savedFilters = activeConv.filters[0];
+    } else {
+      //Si esto es un reset sin conversación, aplicarán los filtros de URL si el toggle de MHP está ON
+      const healthProfileEnabled = this.websocketModule.getHealthProfileEnabled();
+      const urlFilters = this.getCurrentUrlFilters();
+      const hasUrlParams = Object.keys(urlFilters).length > 0;
+      if (healthProfileEnabled && hasUrlParams) {
+        savedFilters = urlFilters;
+      }
+    }
 
-    const history = this.conversationService.formatMessagesForHistory(activeConv.messages);
+    const history = activeConv
+      ? this.conversationService.formatMessagesForHistory(activeConv.messages)
+      : [];
+
     this.sendResetWithFilters(savedFilters, history);
   }
 
@@ -772,6 +783,7 @@ export class ChatbotService implements OnDestroy {
     this.processingMessageId = null;
     this.lastProcessingStartTime = 0;
     this.lastUserQuestion = null;
+    this.sendResetWithFilters({}, []);
   }
 
   getMessages(): ChatMessage[] {
