@@ -19,7 +19,11 @@ export class SupabaseService {
       );
     }
     if (!this.client) {
-      this.client = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
+      this.client = createClient(environment.supabaseUrl, environment.supabaseAnonKey, {
+        auth: {
+          lock: async (_name, _acquireTimeout, fn) => await fn(),
+        },
+      });
     }
     return this.client;
   }
