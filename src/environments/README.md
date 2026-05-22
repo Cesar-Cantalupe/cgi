@@ -1,22 +1,24 @@
-# Variables de entorno (Angular vs Next.js)
+# Variables de entorno
 
-## Diferencia clave
+## Diferencia con Next.js
 
 | Next.js | Este proyecto (Angular) |
 |---------|-------------------------|
-| `.env.local` se carga solo al arrancar | `.env.local` lo lee **`scripts/sync-env.js`** antes de `ng serve` / `ng build` |
+| `.env.local` se carga al arrancar | **`scripts/sync-env.js`** lo lee antes de `ng serve` / `ng build` |
 | `process.env.NEXT_PUBLIC_*` en código | `import { environment } from './environment'` |
-| Variables disponibles en runtime del servidor | Todo en `environment` va al **bundle del navegador** (público) |
-| Cambias `.env` y reinicias `next dev` | Cambias `.env.local` y reinicias `npm start` (o `npm run sync-env`) |
+| Variables en runtime del servidor | Todo va al **bundle del navegador** (público) |
+| Cambias `.env` y reinicias `next dev` | Cambias `.env.local` y reinicias `npm start` |
 
-Angular **no tiene** `process.env` en el cliente. Los valores se **incrustan al compilar** en `environment.ts`.
+Angular **no tiene** `process.env` en cliente. Los valores se **incrustan al compilar** en `environment.ts`.
 
-## Qué archivo usar
+## Archivos de configuración
 
-1. **`.env.local`** (recomendado, como en Next) — tus secretos locales, **no se commitea**.
-2. **`.env`** — valores por defecto del equipo (opcional).
-3. **`environment.example.ts`** — plantilla documentada, **sí se commitea** (sin secretos reales).
-4. **`environment.ts`** — generado automáticamente, **gitignored**.
+| Archivo | ¿Se commitea? | Uso |
+|---------|:------------:|-----|
+| `.env.local` | No | Secretos locales (recomendado) |
+| `.env` | Opcional | Valores por defecto del equipo |
+| `environment.example.ts` | Sí | Plantilla documentada (sin secretos) |
+| `environment.ts` | No | Generado automáticamente
 
 ## Variables soportadas
 
@@ -49,7 +51,7 @@ npm run build             # sync-env --prod + build de producción
 
 ## Producción
 
-En CI/CD define las mismas variables de entorno y ejecuta el build:
+En CI/CD define las mismas variables y ejecuta el build:
 
 ```bash
 export API_KEY=...
@@ -58,7 +60,7 @@ export SUPABASE_ANON_KEY=...
 npm run build
 ```
 
-Eso genera `environment.prod.ts` con valores reales y luego `restore-env.js` deja el repo sin el `API_KEY` escrito en el fichero commiteado.
+El script `scripts/restore-env.js` restaura `API_KEY_PLACEHOLDER` tras el build para no dejar la clave escrita en el repositorio.
 
 ## Uso en código
 

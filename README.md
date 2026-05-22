@@ -19,44 +19,29 @@ npm install
 
 ---
 
-## Configuración
+## Configuración de entorno
 
-### Desarrollo
+El proyecto usa un flujo similar a Next.js con `.env.local`. Consulta [`src/environments/README.md`](src/environments/README.md) para todos los detalles.
 
-Copiar `src/environments/environment.example.ts` a `src/environments/environment.ts` y editar con los valores reales del entorno de desarrollo:
-
-```ts
-export const environment = {
-  production: false,
-  websocketUrl: 'wss://BACKEND-CHATBOT-DEV.net/ws/query', // Ingresar URL del backend para el chatbot DEV
-  apiKey: 'TU_API_KEY_DEV' // Ingresar apiKey del backend para el chatbot DEV
-};
+```bash
+cp .env.example .env.local
+# Editar .env.local con los valores reales
+npm start   # genera environment.ts e inicia el servidor
 ```
 
-### Producción
+---
 
-Editar `src/environments/environment.prod.ts` con los valores reales del entorno de producción manteniendo el placeholder para `apiKey`, ya que este es reemplazado por la variable de entorno `API_KEY`:
+## Supabase (traducciones i18n)
 
-```ts
-export const environment = {
-  production: true,
-  websocketUrl: 'wss://BACKEND-CHATBOT-PRODUCTIVO.net/ws/query', // Ingresar URL del backend para el chatbot PRODUCTIVO
-  apiKey: 'API_KEY_PLACEHOLDER' // ¡No modificar! Se reemplazará automáticamente por la variable de entorno `API_KEY`
-};
-```
+La app almacena traducciones en Supabase. Consulta [`supabase/README.md`](supabase/README.md) para configuración, seed de datos y panel admin.
 
-Al momento de compilar la versión productiva con `npm run build`:
-- Se leerá la variable de entorno `API_KEY` definida en la configuración del entorno de AWS (ej: variables de entorno en EC2, ECS, Elastic Beanstalk o Systems Manager Parameter Store)
-- Se escribirá en `src/environments/environment.prod.ts`
-- Se compilará
-- Se restaurará el `API_KEY_PLACEHOLDER` en `src/environments/environment.prod.ts` para futuros builds.
-
-**El placeholder no se reemplaza automáticamente en DEV**.
+---
 
 ## Servidor de desarrollo
 
 ```bash
-ng serve
+npm start
+# o bien: ng serve
 ```
 
 Navega a `http://localhost:4200/`. La aplicación se recargará automáticamente al cambiar ficheros fuente.
@@ -74,10 +59,24 @@ ng build
 ### Producción
 
 ```bash
-ng build --configuration production
+npm run build
 ```
 
 Los artefactos se generan en el directorio `dist/`.
+
+---
+
+## Comandos útiles
+
+| Comando                 | Descripción                                     |
+|-------------------------|-------------------------------------------------|
+| `npm start`             | Sincroniza `.env.local` + inicia servidor dev   |
+| `npm run sync-env`      | Regenera `environment.ts` desde `.env.local`    |
+| `npm run build`         | Build de producción (reemplaza `API_KEY`)       |
+| `npm run build:dev`     | Build de dev                                    |
+| `npm run i18n:push`     | Sube traducciones a Supabase                    |
+| `npm run i18n:seed`     | Regenera `seed.sql` desde los JSON              |
+| `npm run test:supabase` | Verifica conexión y datos en Supabase           |
 
 ---
 

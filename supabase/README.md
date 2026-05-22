@@ -38,7 +38,7 @@ npx supabase login
 npx supabase link --project-ref TU_PROJECT_REF
 ```
 
-5. Aplicar migración y datos en la nube:
+7. Aplicar migración y datos en la nube:
 
 ```bash
 npx supabase db push
