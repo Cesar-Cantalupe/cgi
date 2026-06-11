@@ -25,8 +25,10 @@ Angular **no tiene** `process.env` en cliente. Los valores se **incrustan al com
 Copia `.env.example` → `.env.local`:
 
 ```env
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_ANON_KEY=eyJ...
+FIREBASE_API_KEY=AIza...
+FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
+FIREBASE_PROJECT_ID=tu-proyecto
+FIREBASE_APP_ID=1:...
 
 WEBSOCKET_URL=wss://tu-backend/ws/query
 API_KEY=tu_api_key_dev
@@ -34,12 +36,16 @@ API_KEY=tu_api_key_dev
 
 | Variable en `.env.local` | Propiedad en `environment` | ¿Va al navegador? |
 |--------------------------|----------------------------|------------------|
-| `SUPABASE_URL` | `supabaseUrl` | Sí (como `NEXT_PUBLIC_`) |
-| `SUPABASE_ANON_KEY` | `supabaseAnonKey` | Sí (clave anon, diseñada para eso) |
+| `FIREBASE_API_KEY` | `firebaseApiKey` | Sí |
+| `FIREBASE_AUTH_DOMAIN` | `firebaseAuthDomain` | Sí |
+| `FIREBASE_PROJECT_ID` | `firebaseProjectId` | Sí |
+| `FIREBASE_APP_ID` | `firebaseAppId` | Sí |
+| `FIREBASE_STORAGE_BUCKET` | `firebaseStorageBucket` | Sí (opcional) |
+| `FIREBASE_MESSAGING_SENDER_ID` | `firebaseMessagingSenderId` | Sí (opcional) |
 | `WEBSOCKET_URL` | `websocketUrl` | Sí |
 | `API_KEY` | `apiKey` | Sí |
 
-**Nunca** pongas `SUPABASE_SERVICE_ROLE_KEY` aquí: solo en `.env.local` para scripts Node (`npm run i18n:push`), no se sincroniza a Angular.
+**Nunca** pongas `FIREBASE_SERVICE_ACCOUNT_PATH` ni el JSON de cuenta de servicio en el bundle de Angular: solo en `.env.local` para scripts Node (`npm run i18n:push`).
 
 ## Comandos
 
@@ -55,8 +61,10 @@ En CI/CD define las mismas variables y ejecuta el build:
 
 ```bash
 export API_KEY=...
-export SUPABASE_URL=...
-export SUPABASE_ANON_KEY=...
+export FIREBASE_API_KEY=...
+export FIREBASE_AUTH_DOMAIN=...
+export FIREBASE_PROJECT_ID=...
+export FIREBASE_APP_ID=...
 npm run build
 ```
 
@@ -67,8 +75,7 @@ El script `scripts/restore-env.js` restaura `API_KEY_PLACEHOLDER` tras el build 
 ```typescript
 import { environment } from '../../environments/environment';
 
-// Equivalente a process.env.NEXT_PUBLIC_SUPABASE_URL en Next
-const url = environment.supabaseUrl;
+const projectId = environment.firebaseProjectId;
 ```
 
 No uses `process.env` en componentes Angular de este proyecto.

@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { BehaviorSubject, Observable, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { SupabaseService } from './supabase.service';
+import { I18N_TRANSLATIONS_COLLECTION } from '../utils/i18n-firestore.util';
+import { FirebaseService } from './firebase.service';
 
 export interface TranslationDictionary {
   [key: string]: string | TranslationDictionary;
@@ -28,7 +30,7 @@ export class TranslationService {
 
   constructor(
     private http: HttpClient,
-    private supabaseService: SupabaseService
+    private firebaseService: FirebaseService
   ) {
     this.initializeLanguage();
   }
@@ -61,7 +63,7 @@ export class TranslationService {
 
     try {
       let translations = await this.loadFromJson(lang);
-      const remote = await this.loadFromSupabase(lang);
+      const remote = await this.loadFromFirestore(lang);
       if (remote) {
         translations = this.mergeTranslations(translations, remote);
       }
@@ -94,29 +96,38 @@ export class TranslationService {
     }
   }
 
-  private async loadFromSupabase(lang: string): Promise<TranslationDictionary | null> {
-    if (!this.supabaseService.isConfigured) {
+  private async loadFromFirestore(lang: string): Promise<TranslationDictionary | null> {
+    if (!this.firebaseService.isConfigured) {
       return null;
     }
 
     try {
-      const { data, error } = await this.supabaseService.supabase
-        .from('i18n_translations')
-        .select('namespace, key, value')
-        .eq('locale', lang);
+      const q = query(
+        collection(this.firebaseService.firestore, I18N_TRANSLATIONS_COLLECTION),
+        where('locale', '==', lang)
+      );
+      const snapshot = await getDocs(q);
 
-      if (error) {
-        console.warn('[i18n] Supabase no disponible, usando solo JSON local:', error.message);
+      if (snapshot.empty) {
         return null;
       }
 
-      if (!data?.length) {
-        return null;
+      const rows: I18nRow[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        if (!data['namespace'] || !data['key'] || typeof data['value'] !== 'string') {
+          continue;
+        }
+        rows.push({
+          namespace: data['namespace'],
+          key: data['key'],
+          value: data['value'],
+        });
       }
 
-      return this.rowsToDictionary(data as I18nRow[]);
+      return rows.length ? this.rowsToDictionary(rows) : null;
     } catch (err) {
-      console.warn('[i18n] Error al cargar desde Supabase:', err);
+      console.warn('[i18n] Error al cargar desde Firestore:', err);
       return null;
     }
   }

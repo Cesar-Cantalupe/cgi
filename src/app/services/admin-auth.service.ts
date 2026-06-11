@@ -1,58 +1,51 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Session } from '@supabase/supabase-js';
-import { SupabaseService } from './supabase.service';
+import { User, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { BehaviorSubject } from 'rxjs';
+import { FirebaseService } from './firebase.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminAuthService {
-  private sessionSubject = new BehaviorSubject<Session | null>(null);
-  public session$ = this.sessionSubject.asObservable();
+  private userSubject = new BehaviorSubject<User | null>(null);
+  public user$ = this.userSubject.asObservable();
 
-  constructor(private supabaseService: SupabaseService) {
-    if (this.supabaseService.isConfigured) {
-      this.supabaseService.supabase.auth.onAuthStateChange((_event, session) => {
-        this.sessionSubject.next(session);
+  constructor(private firebaseService: FirebaseService) {
+    if (this.firebaseService.isConfigured) {
+      onAuthStateChanged(this.firebaseService.auth, (user) => {
+        this.userSubject.next(user);
       });
-      this.refreshSession();
     }
   }
 
   get isConfigured(): boolean {
-    return this.supabaseService.isConfigured;
+    return this.firebaseService.isConfigured;
   }
 
-  async refreshSession(): Promise<Session | null> {
+  async refreshSession(): Promise<User | null> {
     if (!this.isConfigured) {
       return null;
     }
-    const { data } = await this.supabaseService.supabase.auth.getSession();
-    this.sessionSubject.next(data.session);
-    return data.session;
+    const user = this.firebaseService.auth.currentUser;
+    this.userSubject.next(user);
+    return user;
   }
 
   async signIn(email: string, password: string): Promise<void> {
-    const { error } = await this.supabaseService.supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      throw error;
-    }
+    await signInWithEmailAndPassword(this.firebaseService.auth, email, password);
     await this.refreshSession();
   }
 
   async signOut(): Promise<void> {
-    await this.supabaseService.supabase.auth.signOut();
-    this.sessionSubject.next(null);
+    await signOut(this.firebaseService.auth);
+    this.userSubject.next(null);
   }
 
   isLoggedIn(): boolean {
-    return !!this.sessionSubject.value;
+    return !!this.userSubject.value;
   }
 
-  getSession(): Session | null {
-    return this.sessionSubject.value;
+  getUser(): User | null {
+    return this.userSubject.value;
   }
 }

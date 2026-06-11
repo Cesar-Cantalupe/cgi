@@ -12,8 +12,12 @@ try {
   }
 
   content = content.replace(/apiKey:\s*'[^']*'/, `apiKey: '${placeholder}'`);
-  content = content.replace(/supabaseUrl:\s*'[^']*'/, `supabaseUrl: ''`);
-  content = content.replace(/supabaseAnonKey:\s*'[^']*'/, `supabaseAnonKey: ''`);
+  content = content.replace(/firebaseApiKey:\s*'[^']*'/, `firebaseApiKey: ''`);
+  content = content.replace(/firebaseAuthDomain:\s*'[^']*'/, `firebaseAuthDomain: ''`);
+  content = content.replace(/firebaseProjectId:\s*'[^']*'/, `firebaseProjectId: ''`);
+  content = content.replace(/firebaseAppId:\s*'[^']*'/, `firebaseAppId: ''`);
+  content = content.replace(/firebaseStorageBucket:\s*'[^']*'/, `firebaseStorageBucket: ''`);
+  content = content.replace(/firebaseMessagingSenderId:\s*'[^']*'/, `firebaseMessagingSenderId: ''`);
 
   fs.writeFileSync(envPath, content, 'utf8');
 } catch (error) {

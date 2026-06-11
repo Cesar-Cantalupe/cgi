@@ -21,7 +21,7 @@ export class AdminLoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.configError = !this.adminAuth.isConfigured;
-    if (this.route.snapshot.queryParams['error'] === 'supabase') {
+    if (this.route.snapshot.queryParams['error'] === 'firebase') {
       this.configError = true;
     }
     if (this.adminAuth.isLoggedIn()) {

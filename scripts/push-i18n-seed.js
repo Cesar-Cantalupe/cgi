@@ -1,31 +1,43 @@
 /**
- * Sube traducciones a Supabase desde src/assets/i18n/*.json
- * Requiere SUPABASE_SERVICE_ROLE_KEY en .env.local (Settings → API → service_role)
- * No usar la service role en Angular — solo en este script local.
+ * Sube traducciones a Firestore desde src/assets/i18n/*.json
+ * Requiere FIREBASE_SERVICE_ACCOUNT_PATH en .env.local
+ * No usar la cuenta de servicio en Angular — solo en este script local.
  */
 
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
-const { createClient } = require('@supabase/supabase-js');
+const admin = require('firebase-admin');
+const {
+  I18N_TRANSLATIONS_COLLECTION,
+  translationDocId,
+} = require('./i18n-firestore-util');
 
 const root = path.join(__dirname, '..');
 dotenv.config({ path: path.join(root, '.env.local') });
 dotenv.config({ path: path.join(root, '.env') });
 
-const url = process.env.SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
 const PRIORITY_NAMESPACES = [
   'HEADER', 'FOOTER', 'SUGGESTIONS', 'SOURCES', 'FEEDBACK',
   'SIDEBAR', 'WELCOME', 'HOME', 'LEGAL',
 ];
 const LOCALES = ['en', 'es', 'fr', 'de', 'ca', 'el'];
-const BATCH = 100;
+const BATCH = 400;
 
-if (!url || !serviceKey) {
-  console.error('❌ Define SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en .env.local');
-  console.error('   (Dashboard → Settings → API → service_role — solo para scripts locales)');
+if (!serviceAccountPath) {
+  console.error('❌ Define FIREBASE_SERVICE_ACCOUNT_PATH en .env.local');
+  console.error('   (Firebase Console → Project settings → Service accounts → Generate new private key)');
+  process.exit(1);
+}
+
+const resolvedPath = path.isAbsolute(serviceAccountPath)
+  ? serviceAccountPath
+  : path.join(root, serviceAccountPath);
+
+if (!fs.existsSync(resolvedPath)) {
+  console.error(`❌ No se encontró el archivo de cuenta de servicio: ${resolvedPath}`);
   process.exit(1);
 }
 
@@ -54,26 +66,37 @@ function loadAllRows() {
   return rows;
 }
 
-const supabase = createClient(url, serviceKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
+const serviceAccount = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
 });
+
+const db = admin.firestore();
 
 (async () => {
   const rows = loadAllRows();
-  console.log(`Subiendo ${rows.length} traducciones...`);
+  console.log(`Subiendo ${rows.length} traducciones a Firestore...`);
 
   for (let i = 0; i < rows.length; i += BATCH) {
     const chunk = rows.slice(i, i + BATCH);
-    const { error } = await supabase
-      .from('i18n_translations')
-      .upsert(chunk, { onConflict: 'namespace,key,locale' });
+    const batch = db.batch();
 
-    if (error) {
-      console.error('❌ Error en lote', i, error.message);
-      process.exit(1);
+    for (const row of chunk) {
+      const id = translationDocId(row.namespace, row.key, row.locale);
+      const ref = db.collection(I18N_TRANSLATIONS_COLLECTION).doc(id);
+      batch.set(ref, {
+        namespace: row.namespace,
+        key: row.key,
+        locale: row.locale,
+        value: row.value,
+        updatedAt: new Date().toISOString(),
+      });
     }
+
+    await batch.commit();
     process.stdout.write(`  ${Math.min(i + BATCH, rows.length)} / ${rows.length}\r`);
   }
 
-  console.log(`\n✓ ${rows.length} filas insertadas/actualizadas`);
+  console.log(`\n✓ ${rows.length} documentos insertados/actualizados`);
 })();

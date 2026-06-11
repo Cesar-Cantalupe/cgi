@@ -50,5 +50,7 @@ proxy.conf.json
 .env.local
 src/environments/environment.ts
 
-# Supabase local temp (CLI)
-supabase/.temp/
+# Firebase (cuenta de servicio — solo scripts locales)
+firebase-service-account.json
+**/firebase-service-account*.json
+*firebase-adminsdk*.json

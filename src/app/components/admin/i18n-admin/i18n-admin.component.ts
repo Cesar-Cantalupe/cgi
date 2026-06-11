@@ -84,9 +84,9 @@ export class I18nAdminComponent implements OnInit, OnDestroy {
     try {
       this.entries = await this.i18nAdmin.loadEntriesForLocale(locale);
       this.applyFilter();
-      const fromSupabase = this.entries.filter((e) => e.storedInSupabase).length;
+      const fromRemote = this.entries.filter((e) => e.storedRemotely).length;
       this.setStatus(
-        `Cargados ${this.entries.length} textos desde assets/i18n (${fromSupabase} ya en Supabase).`,
+        `Cargados ${this.entries.length} textos desde assets/i18n (${fromRemote} ya en Firebase).`,
         'info'
       );
     } catch (err: unknown) {
@@ -143,11 +143,11 @@ export class I18nAdminComponent implements OnInit, OnDestroy {
         if (e.dirty) {
           e.originalValue = e.value;
           e.dirty = false;
-          e.storedInSupabase = true;
+          e.storedRemotely = true;
         }
       });
       this.setStatus(
-        `Guardado en Supabase: ${saved} texto(s). La app usará estos valores al recargar.`,
+        `Guardado en Firebase: ${saved} texto(s). La app usará estos valores al recargar.`,
         'success'
       );
     } catch (err: unknown) {

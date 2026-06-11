@@ -31,9 +31,13 @@ npm start   # genera environment.ts e inicia el servidor
 
 ---
 
-## Supabase (traducciones i18n)
+## Firebase (traducciones i18n)
 
-La app almacena traducciones en Supabase. Consulta [`supabase/README.md`](supabase/README.md) para configuración, seed de datos y panel admin.
+La app almacena traducciones en Firestore. Guía paso a paso para el cliente:
+
+**[`docs/CONFIGURACION_FIREBASE.md`](docs/CONFIGURACION_FIREBASE.md)**
+
+Referencia técnica: [`firebase/README.md`](firebase/README.md) · Panel de edición: [`docs/ADMIN_PANEL_TUTORIAL.md`](docs/ADMIN_PANEL_TUTORIAL.md)
 
 ---
 
@@ -74,9 +78,8 @@ Los artefactos se generan en el directorio `dist/`.
 | `npm run sync-env`      | Regenera `environment.ts` desde `.env.local`    |
 | `npm run build`         | Build de producción (reemplaza `API_KEY`)       |
 | `npm run build:dev`     | Build de dev                                    |
-| `npm run i18n:push`     | Sube traducciones a Supabase                    |
-| `npm run i18n:seed`     | Regenera `seed.sql` desde los JSON              |
-| `npm run test:supabase` | Verifica conexión y datos en Supabase           |
+| `npm run i18n:push`     | Sube traducciones a Firestore                   |
+| `npm run test:firebase` | Verifica conexión y datos en Firestore          |
 
 ---
 

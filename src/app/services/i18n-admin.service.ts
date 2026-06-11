@@ -1,12 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { collection, doc, getDocs, query, where, writeBatch } from 'firebase/firestore';
 import { firstValueFrom } from 'rxjs';
 import {
   I18N_NAMESPACES,
   I18nLocale,
   I18nNamespace,
 } from '../constants/i18n-admin.constants';
-import { SupabaseService } from './supabase.service';
+import {
+  I18N_TRANSLATIONS_COLLECTION,
+  translationDocId,
+} from '../utils/i18n-firestore.util';
+import { FirebaseService } from './firebase.service';
 import { TranslationDictionary } from './translation.service';
 
 export interface I18nTranslationRow {
@@ -20,12 +25,12 @@ export interface I18nTranslationRow {
 export interface EditableTranslation extends I18nTranslationRow {
   originalValue: string;
   dirty: boolean;
-  /** true si el valor mostrado viene ya de Supabase */
-  storedInSupabase: boolean;
+  /** true si el valor mostrado viene ya de Firestore */
+  storedRemotely: boolean;
 }
 
-interface SupabaseEntry {
-  id?: string;
+interface RemoteEntry {
+  id: string;
   value: string;
 }
 
@@ -33,25 +38,25 @@ interface SupabaseEntry {
   providedIn: 'root'
 })
 export class I18nAdminService {
-  private readonly BATCH_SIZE = 100;
+  private readonly BATCH_SIZE = 400;
   private templateCache: TranslationDictionary | null = null;
 
   constructor(
-    private supabaseService: SupabaseService,
+    private firebaseService: FirebaseService,
     private http: HttpClient
   ) {}
 
   /**
    * Carga textos para editar: base desde assets/i18n/{locale}.json,
-   * sobrescrito por lo guardado en Supabase (si existe).
+   * sobrescrito por lo guardado en Firestore (si existe).
    */
   async loadEntriesForLocale(locale: I18nLocale): Promise<EditableTranslation[]> {
     const localEntries = await this.loadLocalEntries(locale);
-    const supabaseMap = await this.fetchSupabaseMap(locale);
+    const remoteMap = await this.fetchRemoteMap(locale);
 
     const entries: EditableTranslation[] = localEntries.map((local) => {
       const mapKey = `${local.namespace}.${local.key}`;
-      const remote = supabaseMap.get(mapKey);
+      const remote = remoteMap.get(mapKey);
       const value = remote?.value ?? local.value;
 
       return {
@@ -62,12 +67,11 @@ export class I18nAdminService {
         value,
         originalValue: value,
         dirty: false,
-        storedInSupabase: !!remote,
+        storedRemotely: !!remote,
       };
     });
 
-    // Claves solo en Supabase (p. ej. editadas antes)
-    for (const [mapKey, remote] of supabaseMap) {
+    for (const [mapKey, remote] of remoteMap) {
       if (localEntries.some((l) => `${l.namespace}.${l.key}` === mapKey)) {
         continue;
       }
@@ -82,7 +86,7 @@ export class I18nAdminService {
         value: remote.value,
         originalValue: remote.value,
         dirty: false,
-        storedInSupabase: true,
+        storedRemotely: true,
       });
     }
 
@@ -98,50 +102,58 @@ export class I18nAdminService {
       return 0;
     }
 
-    const payload = dirty.map(({ namespace, key, locale, value }) => ({
-      namespace,
-      key,
-      locale,
-      value,
-    }));
-
+    const db = this.firebaseService.firestore;
     let saved = 0;
-    for (let i = 0; i < payload.length; i += this.BATCH_SIZE) {
-      const chunk = payload.slice(i, i + this.BATCH_SIZE);
-      const { error } = await this.supabaseService.supabase
-        .from('i18n_translations')
-        .upsert(chunk, { onConflict: 'namespace,key,locale' });
 
-      if (error) {
-        throw error;
+    for (let i = 0; i < dirty.length; i += this.BATCH_SIZE) {
+      const chunk = dirty.slice(i, i + this.BATCH_SIZE);
+      const batch = writeBatch(db);
+
+      for (const entry of chunk) {
+        const id = translationDocId(entry.namespace, entry.key, entry.locale);
+        const ref = doc(db, I18N_TRANSLATIONS_COLLECTION, id);
+        batch.set(ref, {
+          namespace: entry.namespace,
+          key: entry.key,
+          locale: entry.locale,
+          value: entry.value,
+          updatedAt: new Date().toISOString(),
+        });
       }
+
+      await batch.commit();
       saved += chunk.length;
     }
 
     return saved;
   }
 
-  private async fetchSupabaseMap(
-    locale: I18nLocale
-  ): Promise<Map<string, SupabaseEntry>> {
-    const map = new Map<string, SupabaseEntry>();
+  private async fetchRemoteMap(locale: I18nLocale): Promise<Map<string, RemoteEntry>> {
+    const map = new Map<string, RemoteEntry>();
+
+    if (!this.firebaseService.isConfigured) {
+      return map;
+    }
 
     try {
-      const { data, error } = await this.supabaseService.supabase
-        .from('i18n_translations')
-        .select('id, namespace, key, value')
-        .eq('locale', locale);
+      const q = query(
+        collection(this.firebaseService.firestore, I18N_TRANSLATIONS_COLLECTION),
+        where('locale', '==', locale)
+      );
+      const snapshot = await getDocs(q);
 
-      if (error) {
-        console.warn('[i18n-admin] Supabase no disponible, solo JSON local:', error.message);
-        return map;
-      }
-
-      for (const row of data ?? []) {
-        map.set(`${row.namespace}.${row.key}`, { id: row.id, value: row.value });
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        if (!data['namespace'] || !data['key'] || typeof data['value'] !== 'string') {
+          continue;
+        }
+        map.set(`${data['namespace']}.${data['key']}`, {
+          id: docSnap.id,
+          value: data['value'],
+        });
       }
     } catch (err) {
-      console.warn('[i18n-admin] Error leyendo Supabase:', err);
+      console.warn('[i18n-admin] Error leyendo Firestore:', err);
     }
 
     return map;

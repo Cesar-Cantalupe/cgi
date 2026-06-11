@@ -23,8 +23,12 @@ dotenv.config({ path: path.join(root, '.env.local'), override: true });
 const ENV_MAP = {
   WEBSOCKET_URL: 'websocketUrl',
   API_KEY: 'apiKey',
-  SUPABASE_URL: 'supabaseUrl',
-  SUPABASE_ANON_KEY: 'supabaseAnonKey',
+  FIREBASE_API_KEY: 'firebaseApiKey',
+  FIREBASE_AUTH_DOMAIN: 'firebaseAuthDomain',
+  FIREBASE_PROJECT_ID: 'firebaseProjectId',
+  FIREBASE_APP_ID: 'firebaseAppId',
+  FIREBASE_STORAGE_BUCKET: 'firebaseStorageBucket',
+  FIREBASE_MESSAGING_SENDER_ID: 'firebaseMessagingSenderId',
 };
 
 const DEFAULTS = {
@@ -32,15 +36,23 @@ const DEFAULTS = {
     production: false,
     websocketUrl: 'wss://d2nrwi7jko6xiv.cloudfront.net/ws/query',
     apiKey: 'API_KEY_DEV',
-    supabaseUrl: '',
-    supabaseAnonKey: '',
+    firebaseApiKey: '',
+    firebaseAuthDomain: '',
+    firebaseProjectId: '',
+    firebaseAppId: '',
+    firebaseStorageBucket: '',
+    firebaseMessagingSenderId: '',
   },
   prod: {
     production: true,
     websocketUrl: 'wss://d16smhly3894zz.cloudfront.net/ws/query',
     apiKey: 'API_KEY_PLACEHOLDER',
-    supabaseUrl: '',
-    supabaseAnonKey: '',
+    firebaseApiKey: '',
+    firebaseAuthDomain: '',
+    firebaseProjectId: '',
+    firebaseAppId: '',
+    firebaseStorageBucket: '',
+    firebaseMessagingSenderId: '',
   },
 };
 
@@ -70,8 +82,12 @@ export const environment = {
   production: ${config.production},
   websocketUrl: '${escapeTsString(config.websocketUrl)}',
   apiKey: '${escapeTsString(config.apiKey)}',
-  supabaseUrl: '${escapeTsString(config.supabaseUrl)}',
-  supabaseAnonKey: '${escapeTsString(config.supabaseAnonKey)}',
+  firebaseApiKey: '${escapeTsString(config.firebaseApiKey)}',
+  firebaseAuthDomain: '${escapeTsString(config.firebaseAuthDomain)}',
+  firebaseProjectId: '${escapeTsString(config.firebaseProjectId)}',
+  firebaseAppId: '${escapeTsString(config.firebaseAppId)}',
+  firebaseStorageBucket: '${escapeTsString(config.firebaseStorageBucket)}',
+  firebaseMessagingSenderId: '${escapeTsString(config.firebaseMessagingSenderId)}',
 };
 `;
 }
@@ -88,10 +104,16 @@ if (isProd && requireApiKey && config.apiKey === 'API_KEY_PLACEHOLDER') {
 fs.writeFileSync(targetPath, formatEnvironmentFile(config), 'utf8');
 
 const label = isProd ? 'environment.prod.ts' : 'environment.ts';
-if (config.supabaseUrl && config.supabaseAnonKey) {
+const firebaseReady =
+  config.firebaseApiKey &&
+  config.firebaseAuthDomain &&
+  config.firebaseProjectId &&
+  config.firebaseAppId;
+
+if (firebaseReady) {
   console.log(`✓ ${label} generado desde .env.local`);
 } else if (!isProd) {
-  console.log(`✓ ${label} generado (Supabase vacío — añade SUPABASE_* en .env.local)`);
+  console.log(`✓ ${label} generado (Firebase vacío — añade FIREBASE_* en .env.local)`);
 } else {
   console.log(`✓ ${label} generado`);
 }

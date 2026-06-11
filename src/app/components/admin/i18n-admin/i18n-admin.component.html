@@ -4,7 +4,7 @@
       <h1 class="text-lg font-bold text-slate-900">Traducciones eduCGI</h1>
       <p class="text-xs text-slate-500">
         Valores desde <code class="text-[11px] bg-slate-100 px-1 rounded">assets/i18n</code> —
-        al guardar pasan a Supabase y la app los usa desde allí
+        al guardar pasan a Firebase y la app los usa desde allí
       </p>
     </div>
     <div class="flex flex-wrap items-center gap-2">
@@ -16,7 +16,7 @@
         (click)="saveAll()"
         [disabled]="isSaving || dirtyCount === 0"
         class="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:bg-slate-400">
-        {{ isSaving ? 'Guardando…' : 'Guardar en Supabase' }}
+        {{ isSaving ? 'Guardando…' : 'Guardar en Firebase' }}
       </button>
       <button
         type="button"
@@ -109,14 +109,14 @@
             <div class="flex flex-wrap items-center gap-2 min-w-0">
               <label class="text-xs font-mono font-semibold text-slate-500">{{ fieldKey(entry) }}</label>
               <span
-                *ngIf="!entry.storedInSupabase"
+                *ngIf="!entry.storedRemotely"
                 class="text-[10px] uppercase tracking-wide text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                 JSON local
               </span>
               <span
-                *ngIf="entry.storedInSupabase && !entry.dirty"
+                *ngIf="entry.storedRemotely && !entry.dirty"
                 class="text-[10px] uppercase tracking-wide text-green-700 bg-green-50 px-1.5 py-0.5 rounded">
-                Supabase
+                Firebase
               </span>
             </div>
             <button

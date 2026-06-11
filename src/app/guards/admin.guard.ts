@@ -14,7 +14,7 @@ export class AdminGuard implements CanActivate {
   async canActivate(): Promise<boolean> {
     if (!this.adminAuth.isConfigured) {
       this.router.navigate(['/admin/login'], {
-        queryParams: { error: 'supabase' },
+        queryParams: { error: 'firebase' },
       });
       return false;
     }

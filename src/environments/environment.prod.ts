@@ -1,7 +1,14 @@
+// Generado por scripts/sync-env.js — no editar a mano
+// Valores desde .env.local / .env (ver src/environments/README.md)
+
 export const environment = {
   production: true,
-  websocketUrl: 'wss://d16smhly3894zz.cloudfront.net/ws/query', // Ingresar URL del backend para el chatbot PRODUCTIVO
-  apiKey: 'API_KEY_PLACEHOLDER', // ¡No modificar! Se reemplazará automáticamente por la variable de entorno `API_KEY`
-  supabaseUrl: '',
-  supabaseAnonKey: '',
+  websocketUrl: 'wss://d16smhly3894zz.cloudfront.net/ws/query',
+  apiKey: 'API_KEY_PLACEHOLDER',
+  firebaseApiKey: '',
+  firebaseAuthDomain: '',
+  firebaseProjectId: '',
+  firebaseAppId: '',
+  firebaseStorageBucket: '',
+  firebaseMessagingSenderId: '',
 };
