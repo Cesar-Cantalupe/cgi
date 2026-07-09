@@ -13,9 +13,4 @@ body.chat-route {
   overflow: hidden;
 }
 
-/* sidebar should sit below header and stretch to bottom when page is locked */
-body.chat-route .sidebar-container {
-  top: 4rem; /* header height approximation */
-  bottom: 0;
-  height: auto;
-}
+

@@ -1,9 +1,9 @@
-<div class="flex bg-gray-50 relative h-full min-h-0 overflow-hidden">  
+<div class="flex bg-gray-50 h-full w-full">
   <!-- Overlay móvil -->
   <div class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40" 
        *ngIf="sidebarExpanded" 
        (click)="toggleSidebar()"></div>  
-  
+   
   <!-- Sidebar -->
   <app-chatbot-sidebar
     [sidebarExpanded]="sidebarExpanded"
@@ -17,14 +17,14 @@
   </app-chatbot-sidebar>
 
   <!-- Contenido principal -->
-  <div class="flex-1 flex flex-col relative w-full mt-0 md:mt-4 min-h-0">
+  <div class="flex-1 flex flex-col relative min-w-0">
     <!-- Fondo -->
     <div class="fixed inset-0 bg-cover bg-center bg-no-repeat z-0" 
          style="background-image: url('assets/home/background.png')"></div>
     <div class="fixed inset-0 bg-white bg-opacity-40 -z-40"></div>
 
-    <!-- Botones toggle sidebar -->
-    <button (click)="toggleSidebar()" class="toggle-sidebar md:hidden w-7 h-7 bg-white border border-gray-300 rounded-lg flex items-center justify-center shadow-md hover:bg-gray-50 cursor-pointer transition-colors fixed top-3 left-3 z-30"
+    <!-- Botón toggle sidebar (mobile) -->
+    <button (click)="toggleSidebar()" class="toggle-sidebar md:hidden w-7 h-7 bg-white border border-gray-300 rounded-lg flex items-center justify-center shadow-md hover:bg-gray-50 cursor-pointer transition-colors fixed top-[5.5rem] left-3 z-30"
             *ngIf="!sidebarExpanded">
       <svg class="w-4 h-4 text-[#37AAC4]" [class.-scale-x-100]="sidebarExpanded" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
         <rect x="3" y="5" width="18" height="14" rx="3"></rect>
@@ -33,15 +33,28 @@
     </button>
 
     <!-- Contenedor del chat -->
-    <div class="flex flex-col h-full relative z-10 min-h-0">
+    <div class="flex flex-col flex-1 relative z-10 min-h-0">
       <!-- Área de mensajes -->
-      <div #messagesArea class="flex-1 overflow-y-auto bg-transparent pb-16 min-h-0">
+      <div #messagesArea class="flex-1 overflow-y-auto bg-transparent min-h-0">
         <!-- Pantalla de bienvenida -->
-        <div class="h-full flex items-center justify-center px-4" 
-             *ngIf="shouldShowPredefinedQuestions()">  <!-- ACTUALIZADO -->
-          <app-chatbot-welcome
-            (suggestedQuestion)="onSuggestedQuestionClick($event)">
-          </app-chatbot-welcome>
+        <div class="min-h-full flex flex-col" 
+             *ngIf="shouldShowPredefinedQuestions()">
+          <div class="flex-1 flex items-center justify-center px-4">
+            <app-chatbot-welcome
+              [(newMessage)]="newMessage"
+              (sendMessage)="send()"
+              (suggestedQuestion)="onSuggestedQuestionClick($event)">
+            </app-chatbot-welcome>
+          </div>
+          <div class="bg-white border-t border-gray-100 text-center py-3 px-4 flex-shrink-0">
+            <p class="text-xs text-gray-500 mb-1">{{ 'CHAT.DISCLAIMER' | translate }}</p>
+            <p class="text-xs" style="color: #46A8C6;">
+              <a routerLink="/legal/terms" class="hover:text-[#CE3262] transition-colors">{{ 'FOOTER.TERMS' | translate }}</a>, 
+              <a routerLink="/legal/privacy" class="hover:text-[#CE3262] transition-colors">{{ 'FOOTER.PRIVACY' | translate }}</a>, 
+              <a routerLink="/legal/cookies" class="hover:text-[#CE3262] transition-colors">{{ 'FOOTER.COOKIES' | translate }}</a> {{ 'FOOTER.AND' | translate }} 
+              <a routerLink="/legal/legal-notice" class="hover:text-[#CE3262] transition-colors">{{ 'FOOTER.LEGAL_NOTICE' | translate }}</a>
+            </p>
+          </div>
         </div>
         
         <!-- Mensajes -->
@@ -69,11 +82,11 @@
         </div>
       </div>
       
-      <!-- Input del chat -->
-      <div class="bg-white/80 backdrop-blur-sm border-t border-gray-200">
+      <!-- Input del chat (oculto en pantalla de bienvenida) -->
+      <div class="bg-white/80 backdrop-blur-sm border-t border-gray-200 flex-shrink-0" *ngIf="!shouldShowPredefinedQuestions()">
         <app-chatbot-input
           [(newMessage)]="newMessage"
-          [showQuickSuggestions]="!shouldShowPredefinedQuestions()"
+          [showQuickSuggestions]="false"
           [followUpQuestions]="followUpQuestions"
           (sendMessage)="send()"
           (quickSuggestion)="onQuickSuggestionClick($event)"

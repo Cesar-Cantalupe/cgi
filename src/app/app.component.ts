@@ -82,10 +82,6 @@ export class AppComponent implements OnInit {
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
         this.updateBodyClass();
-
-        setTimeout(() => {
-          this.forceLayoutUpdate();
-        }, 100);
       });
   }
 
@@ -111,9 +107,4 @@ export class AppComponent implements OnInit {
     return 'flex-grow flex flex-col justify-center items-center px-4';
   }
 
-  private forceLayoutUpdate() {
-    if (document && document.body) {
-      document.body.offsetHeight;
-    }
-  }
 }

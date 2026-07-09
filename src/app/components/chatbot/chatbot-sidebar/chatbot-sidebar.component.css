@@ -18,10 +18,6 @@
 }
 
 @media (min-width: 768px) {
-  .sidebar-container {
-    width: 320px;
-  }
-  
   .sidebar-container.sidebar-closed {
     width: 80px;
   }
