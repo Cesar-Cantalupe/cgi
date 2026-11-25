@@ -1,1 +1,227 @@
-/* Legal page styles */
+.legal-page {
+  background:
+    linear-gradient(180deg, #e8f4f6 0%, #f3f7f8 35%, #f9fafb 100%);
+}
+
+.legal-shell {
+  background: #fff;
+  border: 1px solid #d7ebee;
+  border-radius: 1rem;
+  box-shadow: 0 12px 40px rgba(55, 170, 196, 0.08);
+  overflow: hidden;
+}
+
+.legal-shell__header {
+  padding: 1.75rem 1.5rem 1.25rem;
+  border-bottom: 1px solid #e5eef1;
+  background: linear-gradient(135deg, #f7fbfc 0%, #fff 70%);
+}
+
+@media (min-width: 768px) {
+  .legal-shell__header {
+    padding: 2rem 2.25rem 1.5rem;
+  }
+}
+
+.legal-shell__eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #37aac4;
+}
+
+.legal-shell__title {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #1f2937;
+}
+
+.legal-shell__meta {
+  margin: 0.65rem 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.legal-content {
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .legal-content {
+    padding: 2rem 2.25rem 0.75rem;
+  }
+}
+
+.legal-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #6b7280;
+  padding: 1rem 0 2rem;
+}
+
+.legal-loading__dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: #37aac4;
+  animation: legal-pulse 1s ease-in-out infinite;
+}
+
+@keyframes legal-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.legal-error {
+  color: #6b7280;
+  font-style: italic;
+  padding-bottom: 1.5rem;
+}
+
+.legal-body h2 {
+  margin: 2rem 0 0.85rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2px solid #d9eef3;
+  font-size: 1.2rem;
+  font-weight: 750;
+  color: #0f766e;
+  letter-spacing: 0.01em;
+}
+
+.legal-body h2:first-child {
+  margin-top: 0.25rem;
+}
+
+.legal-body h3 {
+  margin: 1.55rem 0 0.55rem;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.legal-body h3:first-child {
+  margin-top: 0.25rem;
+}
+
+.legal-body p {
+  margin: 0 0 0.9rem;
+  color: #4b5563;
+  line-height: 1.7;
+  font-size: 0.98rem;
+}
+
+.legal-body ul {
+  margin: 0.35rem 0 1.1rem;
+  padding-left: 1.15rem;
+  list-style: none;
+}
+
+.legal-body li {
+  position: relative;
+  margin-bottom: 0.45rem;
+  padding-left: 0.85rem;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+.legal-body li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: #ce3262;
+}
+
+.legal-body a {
+  color: #37aac4;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legal-body a:hover {
+  color: #ce3262;
+}
+
+.legal-body .legal-updated {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  background: #eef7f9;
+  border-left: 4px solid #37aac4;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.84rem;
+  color: #374151;
+  border: 1px solid #d7ebee;
+  border-radius: 0.65rem;
+  overflow: hidden;
+}
+
+.legal-table th,
+.legal-table td {
+  padding: 0.7rem 0.8rem;
+  vertical-align: top;
+  text-align: left;
+  border-bottom: 1px solid #e5eef1;
+}
+
+.legal-table th {
+  background: #e8f4f6;
+  color: #0f5868;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.legal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.legal-table tbody tr:nth-child(even) td {
+  background: #fafcfd;
+}
+
+.legal-table--compact th,
+.legal-table--compact td {
+  white-space: normal;
+}
+
+.legal-shell__footer {
+  padding: 1.25rem 1.5rem 1.5rem;
+  border-top: 1px solid #e5eef1;
+}
+
+@media (min-width: 768px) {
+  .legal-shell__footer {
+    padding: 1.35rem 2.25rem 1.75rem;
+  }
+}
+
+.legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #37aac4;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.legal-back:hover {
+  color: #ce3262;
+}

@@ -261,6 +261,9 @@
     "COOKIES_TITLE": "Cookie-Richtlinie",
     "LEGAL_NOTICE_TITLE": "Rechtlicher Hinweis",
     "DEFAULT_TITLE": "Rechtliche Informationen",
+    "LOADING": "Laden…",
+    "DOCUMENT_LABEL": "Rechtsdokument",
+    "ENGLISH_ONLY": "Dieses Dokument ist auf Englisch verfügbar.",
     "UNDER_REVISION": "Text in Überprüfung",
     "PLACEHOLDER_TEXT": "Dieser Inhalt wird derzeit überprüft und wird in Kürze verfügbar sein.",
     "BACK_HOME": "Zurück zur Startseite"

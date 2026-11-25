@@ -261,6 +261,9 @@
     "COOKIES_TITLE": "Cookies Policy",
     "LEGAL_NOTICE_TITLE": "Legal Notice",
     "DEFAULT_TITLE": "Legal Information",
+    "LOADING": "Loading…",
+    "DOCUMENT_LABEL": "Legal document",
+    "ENGLISH_ONLY": "This document is available in English.",
     "UNDER_REVISION": "Text under revision",
     "PLACEHOLDER_TEXT": "This content is currently being reviewed and will be available soon.",
     "BACK_HOME": "Back to Home"
